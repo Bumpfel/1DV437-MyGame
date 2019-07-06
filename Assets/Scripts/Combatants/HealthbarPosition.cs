@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class HealthbarPosition : MonoBehaviour {
 
+    public float m_VerticalOffset = 2.5f;
     private Quaternion m_RelativeRotation;
 
     private void Start() {
-        m_RelativeRotation = transform.parent.localRotation;
+        m_RelativeRotation = transform.localRotation;
     }
 
-    void Update() { //TODO creating a lot of objects here...
-        Vector3 playerPosition = transform.parent.parent.position;
-        Vector3 offsetPosition = new Vector3(playerPosition.x, transform.position.y, playerPosition.z + 2f);
-        transform.position = offsetPosition;
+    void Update() {
+        Vector3 playerPosition = transform.parent.position;
+        transform.position = new Vector3(playerPosition.x, transform.position.y, playerPosition.z + m_VerticalOffset);
         transform.rotation = m_RelativeRotation;
     }
 }

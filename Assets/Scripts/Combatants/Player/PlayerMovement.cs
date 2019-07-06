@@ -5,21 +5,21 @@ using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour {
     
-    public int playerNumber = 1; // TODO temp
-    public float m_Speed = 5;
+    public enum MovementControl { CameraRelativeMovement, CharacterRelativeMovement };
+    
+    public MovementControl m_MovementControl = MovementControl.CameraRelativeMovement;
+    public int m_PlayerNumber = 1; // TODO temp
+    public float m_MovementSpeed = 5;
     public float m_StrafeSpeed = 4;
-    public int m_RotationSpeed = 150;
-    private float m_RunModifier = 2f;
-    // public Text debugText;
-    public GameObject m_FocusObject;
+    public int m_RotationSpeed = 200;
+    public float m_RunModifier = 2f;
 
-    // public Camera camera;
+    private Vector3 m_MoveTo;
+    
+    private Camera m_ViewCamera;
 
-    // private float rotation;
-    // private float directionY;
     private Rigidbody m_Body;
     private Animator m_Animator;
-
 
     //TODO tanke - hämta tiden på animationen istället för booleans
     private bool m_IsRunning = false;
@@ -29,58 +29,62 @@ public class PlayerMovement : MonoBehaviour {
     private readonly float m_TURN_WAIT = 0.2f;
     private float m_TurnTimestamp;
 
-    private string m_MoveAxis;
+    private string m_VerticalAxis;
     private string m_TurnAxis;
-    private string m_StrafeAxis;
+    private string m_HorizontalAxis;
     private string m_SprintKey;
     
-    // private float prevPrint;
-    // private float printInterval = 2;
-
     void Start() {
+        m_ViewCamera = Camera.main;
+
         m_Animator = GetComponent<Animator>();
         m_Animator.Play("Idle_Shoot");
         m_Body = GetComponent<Rigidbody>();
 
 
-        m_MoveAxis = "Move_Player" + playerNumber; //TODO temp if only 1 player
-        m_TurnAxis = "Turn_Player" + playerNumber;
-        m_StrafeAxis = "Strafe_Player" + playerNumber;
-        m_SprintKey = "Sprint_Player" + playerNumber;
+        m_VerticalAxis = "Vertical_Player" + m_PlayerNumber; //TODO temp if only 1 player
+        // m_TurnAxis = "Turn_Player" + playerNumber;
+        m_HorizontalAxis = "Horizontal_Player" + m_PlayerNumber;
+        m_SprintKey = "Sprint_Player" + m_PlayerNumber;
     }
 
     //FixedUpdate is called in fixed intervals (by default every 0.02 secs - 50 times/second)
     void FixedUpdate() {
-        MoveAndStrafe();
+        m_Body.MovePosition(m_Body.position + m_MoveTo * Time.fixedDeltaTime);
         // Move();
-        KBTurn();
+        // KBTurn();
         // SharpTurn();
     }
 
 
     // Update is called once per frame
     void Update() {
-        
+        MouseTurn();
+
+        if(m_MovementControl == MovementControl.CharacterRelativeMovement)
+            CharacterRelativeMovement();
+        else
+            CameraRelativeMovement();
+
     }
 
-    private void Move() {
-        float movementInput = Input.GetAxis(m_MoveAxis);
-        // Vector3 movementDirection = new Vector3(directionY * move, 0, directionY * move);
+    private void CharacterRelativeMovement() {
+        float movementInput = Input.GetAxisRaw(m_VerticalAxis);
 
-        if(movementInput != 0) {
-            // GetComponent<Rigidbody>().velocity = movementDirection * speed * Time.deltaTime;
-            
-            Vector3 movement;
-            if(Input.GetAxis(m_SprintKey) > 0) {
-                movement = transform.forward * movementInput * m_Speed * m_RunModifier * Time.deltaTime;
+        Vector3 forwardMovement = transform.forward * movementInput * m_MovementSpeed;
+        if(Input.GetAxisRaw(m_SprintKey) > 0)
+            forwardMovement *= m_RunModifier;
 
-                if(!m_IsRunning && movementInput > 0) { // TODO harcoded run modifier
+
+        if(movementInput != 0) {           
+            if(Input.GetAxisRaw(m_SprintKey) > 0) {
+                if(!m_IsRunning && movementInput > 0) {
                     m_Animator.Play("Run_Guard");
                     m_IsRunning = true;
                 }
             }
             else {
-                movement = transform.forward * movementInput * m_Speed * Time.deltaTime;
+                forwardMovement = transform.forward * movementInput * m_MovementSpeed;
 
                 if(!m_IsWalking) {
                     m_Animator.Play("WalkForward_Shoot");
@@ -88,7 +92,8 @@ public class PlayerMovement : MonoBehaviour {
                 }
             }
            
-            m_Body.MovePosition(m_Body.position + movement);
+        //    m_MoveTo = m_Body.position + movement;
+            // m_Body.MovePosition(m_Body.position + movement);
                 
         }
         else if(m_IsRunning || m_IsWalking) {
@@ -96,32 +101,14 @@ public class PlayerMovement : MonoBehaviour {
             m_IsRunning = false;            
             m_IsWalking = false;
         }
-    }
-
-    private void KBTurn() {
-        float turn = Input.GetAxis(m_TurnAxis);
-
-        if(turn != 0) {
-            Quaternion turnRotation = Quaternion.Euler(0, turn * m_RotationSpeed * Time.deltaTime, 0);
-            m_Body.MoveRotation(m_Body.rotation * turnRotation);
-        }
-    }
 
 
+        //strafe
+        float strafe = Input.GetAxisRaw(m_HorizontalAxis);
 
-
-    //unused right now
-
-    private void MoveAndStrafe() {
-        Move();
-
-        float strafe = Input.GetAxis(m_StrafeAxis);
-
+        Vector3 strafeMovement = transform.right * strafe * m_StrafeSpeed;
         if(strafe != 0) {
-            Vector3 movement = transform.right * strafe * m_StrafeSpeed * Time.deltaTime;
-
-            // Rigidbody body = GetComponent<Rigidbody>();
-            m_Body.MovePosition(m_Body.position + movement);
+            // m_Body.MovePosition(m_Body.position + strafeMovement);
 
             if(strafe < 0 && !m_IsStrafingLeft) {
                 m_Animator.Play("WalkLeft_Shoot");
@@ -136,6 +123,34 @@ public class PlayerMovement : MonoBehaviour {
             m_Animator.Play("Idle_Shoot");
             m_IsStrafingLeft = false;
             m_IsStrafingRight = false;
+        }
+        m_MoveTo = forwardMovement + strafeMovement;
+    }
+
+
+    private void CameraRelativeMovement() {
+        Vector3 mousePos = m_ViewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y));
+		transform.LookAt(mousePos + Vector3.up * transform.position.y);
+		m_MoveTo = new Vector3 (Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized * m_MovementSpeed;
+    }
+
+
+    private void MouseTurn() {
+        Vector3 mousePos = m_ViewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y));
+        transform.LookAt(mousePos + Vector3.up * transform.position.y);
+    }
+
+
+
+
+
+    //unused right now
+    private void KBTurn() {
+        float turn = Input.GetAxisRaw(m_TurnAxis);
+
+        if(turn != 0) {
+            Quaternion turnRotation = Quaternion.Euler(0, turn * m_RotationSpeed * Time.deltaTime, 0);
+            m_Body.MoveRotation(m_Body.rotation * turnRotation);
         }
     }
 
@@ -152,34 +167,7 @@ public class PlayerMovement : MonoBehaviour {
             }
             m_TurnTimestamp = Time.time;
         }
-    }
-
-
-   
-
-
-
-
-
-
-
-    private void MouseTurn() {
-        // focusObject.GetComponent<Rigidbody>().MovePosition(Input.mousePosition);
-        // focusObject.transform.position = Input.mousePosition;
-        
-        float scale = 10;
-
-        Vector3 v = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-
-        m_FocusObject.transform.position = new Vector3(v.x * scale, 0, v.y * scale);
-
-        // debugText.text = "Monster transform.position:" + transform.position;
-        // debugText.text += "\nMouse position:" + Input.mousePosition;
-        // debugText.text += "\nCamera position:" + v;
-        // debugText.text += "\nBall position:" + focusObject.transform.position;
-
-        transform.LookAt(m_FocusObject.transform);
-    }
+    } 
 
 
 }
