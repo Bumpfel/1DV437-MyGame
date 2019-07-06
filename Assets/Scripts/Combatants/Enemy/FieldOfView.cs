@@ -4,31 +4,41 @@ using UnityEngine;
 
 public class FieldOfView : MonoBehaviour {
 
-    public float viewRadius;
+    [Range(0, 100)]
+    public float m_ViewRadius = 15f;
+
     [Range(0, 360)]
-    public float viewAngle;
+    public float m_ViewAngle = 110f;
 
-    public LayerMask targetMask;
-    public LayerMask obstableMask;
+    private LayerMask m_TargetMask;
+    private LayerMask m_ObstacleMask;
+
     [HideInInspector]
-    public List<Transform> visibleTargets = new List<Transform>();
+    public List<Transform> m_VisibleTargets = new List<Transform>();
 
-    public float timeToFocusLastSpottedTarget = 2f;
-    private float lastSpottedTarget;
-    private Quaternion prevRotation;
+    private Coroutine searchLight;
 
-    public float meshResolution;
-    public int edgeResolveIterations;
-    public float edgeDistanceTreshold;
-    public MeshFilter viewMeshFilter;
-    private Mesh viewMesh;
+    public float m_MeshResolution = 5;
+    public int m_EdgeResolveIterations = 3;
+    public float m_EdgeDistanceTreshold = .5f;
+
+    private Mesh m_ViewMesh;
+
+    private Health m_Health;
+
 
     void Start() {
-        viewMesh = new Mesh();
-        viewMesh.name = "View Mesh";
-        viewMeshFilter.mesh = viewMesh;
+        m_TargetMask = LayerMask.GetMask("Players");
+        m_ObstacleMask = LayerMask.GetMask("Obstacles");
 
-        StartCoroutine("FindTargetsWithDelay", .2f);
+        MeshFilter viewMeshFilter = GetComponentInChildren<MeshFilter>();
+        m_ViewMesh = new Mesh();
+        m_ViewMesh.name = "View Mesh";
+        viewMeshFilter.mesh = m_ViewMesh;
+        
+        searchLight = StartCoroutine("FindTargetsWithDelay", .2f);
+
+        m_Health = GetComponent<Health>();
     }
 
     IEnumerator FindTargetsWithDelay(float delay) {
@@ -39,45 +49,44 @@ public class FieldOfView : MonoBehaviour {
     }
 
     void LateUpdate() {
-        DrawFieldOfView();
+        if(!m_Health.IsDead()) {
+            DrawFieldOfView();
+        }
+        else {
+            StopCoroutine(searchLight);
+            m_ViewMesh.Clear();
+        }
     }
     void FindVisibleTarget() {
-        visibleTargets.Clear();
+        m_VisibleTargets.Clear();
         
-        Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, viewRadius, targetMask);
+        Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, m_ViewRadius, m_TargetMask);
 
         foreach(Collider targetInView in targetsInViewRadius) {
             Transform target = targetInView.transform;
             Vector3 dirToTarget = ( targetInView.transform.position - transform.position).normalized;
-            if(Vector3.Angle(transform.forward, dirToTarget) < viewAngle / 2) {
+            if(Vector3.Angle(transform.forward, dirToTarget) < m_ViewAngle / 2) {
                 float distToTarget = Vector3.Distance(transform.position, target.position);
                 
-                // Seen player
-                if(!Physics.Raycast(transform.position, dirToTarget, distToTarget, obstableMask)) {
-                    transform.LookAt(target);
-                    visibleTargets.Add(target);
-                    lastSpottedTarget = Time.time;
+                // Player was in search fov with no obstacles in between
+                if(!Physics.Raycast(transform.position, dirToTarget, distToTarget, m_ObstacleMask)) {
+                    m_VisibleTargets.Add(target);
                 }
-                else
-                    prevRotation = transform.rotation;
             }
-        }
-        if(Time.time > lastSpottedTarget + timeToFocusLastSpottedTarget) {
-            transform.rotation = prevRotation;
         }
     }
 
     void DrawFieldOfView() {
-        int stepCount = Mathf.RoundToInt(viewAngle * meshResolution);
-        float stepAngleSize = viewAngle / stepCount;
+        int stepCount = Mathf.RoundToInt(m_ViewAngle * m_MeshResolution);
+        float stepAngleSize = m_ViewAngle / stepCount;
         List<Vector3> viewPoints = new List<Vector3>();
         ViewCastInfo oldViewCast = new ViewCastInfo();
         for(int i = 0; i <= stepCount; i ++) {
-            float angle = transform.eulerAngles.y - viewAngle / 2 + stepAngleSize * i;
+            float angle = transform.eulerAngles.y - m_ViewAngle / 2 + stepAngleSize * i;
             // Debug.DrawLine(transform.position, transform.position + DirFromAngle(angle, true) * viewRadius, Color.red);
             ViewCastInfo newViewCast = ViewCast(angle);
             if(i > 0) {
-                bool edgeDistanceThresholdExceeded = Mathf.Abs(oldViewCast.distance - newViewCast.distance) > edgeDistanceTreshold;
+                bool edgeDistanceThresholdExceeded = Mathf.Abs(oldViewCast.distance - newViewCast.distance) > m_EdgeDistanceTreshold;
                 if(oldViewCast.hit != newViewCast.hit || (oldViewCast.hit && newViewCast.hit && edgeDistanceThresholdExceeded)) {
                     EdgeInfo edge = FindEdge(oldViewCast, newViewCast);
                     if(edge.pointA != Vector3.zero) {
@@ -109,10 +118,10 @@ public class FieldOfView : MonoBehaviour {
             }
         }
 
-        viewMesh.Clear();
-        viewMesh.vertices = vertices;
-        viewMesh.triangles = triangles;
-        viewMesh.RecalculateNormals();
+        m_ViewMesh.Clear();
+        m_ViewMesh.vertices = vertices;
+        m_ViewMesh.triangles = triangles;
+        m_ViewMesh.RecalculateNormals();
     }
 
     EdgeInfo FindEdge(ViewCastInfo minViewCast, ViewCastInfo maxViewCast) {
@@ -121,11 +130,11 @@ public class FieldOfView : MonoBehaviour {
         Vector3 minPoint = Vector3.zero;
         Vector3 maxPoint = Vector3.zero;
 
-        for(int i = 0; i < edgeResolveIterations; i ++) {
+        for(int i = 0; i < m_EdgeResolveIterations; i ++) {
             float angle = (minAngle + maxAngle) / 2;
             ViewCastInfo newViewCast = ViewCast (angle);
 
-            bool edgeDistanceThresholdExceeded = Mathf.Abs(minViewCast.distance - newViewCast.distance) > edgeDistanceTreshold;
+            bool edgeDistanceThresholdExceeded = Mathf.Abs(minViewCast.distance - newViewCast.distance) > m_EdgeDistanceTreshold;
             if(newViewCast.hit == minViewCast.hit && !edgeDistanceThresholdExceeded) {
                 minAngle = angle;
                 minPoint = newViewCast.point;
@@ -145,15 +154,15 @@ public class FieldOfView : MonoBehaviour {
         return new Vector3(Mathf.Sin(angle * Mathf.Deg2Rad), 0, Mathf.Cos(angle * Mathf.Deg2Rad));
     }
 
-    ViewCastInfo ViewCast(float globalAngle) {
+    private ViewCastInfo ViewCast(float globalAngle) {
         Vector3 dir = DirFromAngle(globalAngle, true);
         RaycastHit hit;
 
-        if(Physics.Raycast(transform.position, dir, out hit, viewRadius, obstableMask)) {
+        if(Physics.Raycast(transform.position, dir, out hit, m_ViewRadius, m_ObstacleMask)) {
             return new ViewCastInfo(true, hit.point, hit.distance, globalAngle);
         }
         else {
-            return new ViewCastInfo(false, transform.position + dir * viewRadius, viewRadius, globalAngle);
+            return new ViewCastInfo(false, transform.position + dir * m_ViewRadius, m_ViewRadius, globalAngle);
         }
     }
 

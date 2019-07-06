@@ -59,12 +59,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 2906047228535413197}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd2661b5b3fd31f4fbd2e6b3e539f0f7, type: 3}
+  m_Script: {fileID: 11500000, guid: a10fb5c125573164e865905694c902dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_CombatantsMask:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
+  dmg: 25
 --- !u!108 &2291202810005982239
 Light:
   m_ObjectHideFlags: 0
