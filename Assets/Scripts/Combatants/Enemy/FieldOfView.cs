@@ -5,7 +5,7 @@ using UnityEngine;
 public class FieldOfView : MonoBehaviour {
 
     [Range(0, 100)]
-    public float m_ViewRadius = 15f;
+    public float m_ViewRadius = 20f;
 
     [Range(0, 360)]
     public float m_ViewAngle = 110f;
@@ -16,15 +16,15 @@ public class FieldOfView : MonoBehaviour {
     [HideInInspector]
     public List<Transform> m_VisibleTargets = new List<Transform>();
 
-    private Coroutine searchLight;
-
     public float m_MeshResolution = 5;
     public int m_EdgeResolveIterations = 3;
     public float m_EdgeDistanceTreshold = .5f;
 
     private Mesh m_ViewMesh;
-
     private Health m_Health;
+
+    private float m_LastSearched;
+    private float m_SearchInterval;
 
 
     void Start() {
@@ -36,29 +36,22 @@ public class FieldOfView : MonoBehaviour {
         m_ViewMesh.name = "View Mesh";
         viewMeshFilter.mesh = m_ViewMesh;
         
-        searchLight = StartCoroutine("FindTargetsWithDelay", .2f);
-
         m_Health = GetComponent<Health>();
-    }
-
-    IEnumerator FindTargetsWithDelay(float delay) {
-        while(true) {
-            yield return new WaitForSeconds(delay);
-            FindVisibleTarget();
-        }
     }
 
     void LateUpdate() {
         if(!m_Health.IsDead()) {
             DrawFieldOfView();
+            if(Time.time > m_LastSearched + m_SearchInterval)
+            FindVisibleTarget();
         }
         else {
-            StopCoroutine(searchLight);
             m_ViewMesh.Clear();
         }
     }
     void FindVisibleTarget() {
         m_VisibleTargets.Clear();
+        m_LastSearched = Time.time;
         
         Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, m_ViewRadius, m_TargetMask);
 

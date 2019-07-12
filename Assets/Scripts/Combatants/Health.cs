@@ -25,6 +25,13 @@ public class Health : MonoBehaviour {
             }
         }
     }
+
+    public void Heal(float amount) {
+        if(!m_IsDead) {
+            m_Health = Mathf.Min(100, m_Health + amount);
+            UpdateHealthBar();
+        }
+    }
     
     private void Die() {
         //Debug
@@ -52,6 +59,10 @@ public class Health : MonoBehaviour {
 
     private void UpdateHealthBar() {
         m_Healthbar.value = m_Health;
+    }
+
+    public float GetHealth() {
+        return m_Health;
     }
 
 

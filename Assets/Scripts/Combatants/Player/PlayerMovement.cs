@@ -20,7 +20,7 @@ public class PlayerMovement : MonoBehaviour {
     private Camera m_ViewCamera;
 
     public Canvas m_AimReticle;
-    private Rigidbody m_Body;
+    // private Rigidbody m_Body;
     private Animator m_Animator;
 
     //TODO tanke - hämta tiden på animationen istället för booleans
@@ -47,7 +47,7 @@ public class PlayerMovement : MonoBehaviour {
 
         m_Animator = GetComponent<Animator>();
         m_Animator.Play("Idle_Shoot");
-        m_Body = GetComponent<Rigidbody>();
+        // m_Body = GetComponent<Rigidbody>();
 
 
         m_VerticalAxis = "Vertical_Player" + m_PlayerNumber; //TODO temp if only 1 player
@@ -57,6 +57,8 @@ public class PlayerMovement : MonoBehaviour {
         Cursor.visible = false;
 
         m_Health = GetComponent<Health>();
+
+        // print(m_AimReticle.GetComponentInChildren<Image>().transform.localScale);
 
         // if(m_MovementControl == MovementControl.CharacterRelativeMovement) {
         //     m_AllowMovement = AllowCharacterRelativeMovement;
@@ -69,7 +71,8 @@ public class PlayerMovement : MonoBehaviour {
     //FixedUpdate is called in fixed intervals (by default every 0.02 secs - 50 times/second)
     void FixedUpdate() {
         if(!m_Health.IsDead()) {
-            m_Body.MovePosition(m_Body.position + m_MoveTo * Time.fixedDeltaTime);
+            // m_Body.MovePosition(m_Body.position + m_MoveTo * Time.fixedDeltaTime);
+            transform.position = transform.position + m_MoveTo * Time.fixedDeltaTime;
         }
     }
 
@@ -157,7 +160,9 @@ public class PlayerMovement : MonoBehaviour {
         Vector3 mousePosInWorld = new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y);
         Vector3 mousePosRelativeToCamera = m_ViewCamera.ScreenToWorldPoint(mousePosInWorld);
         transform.LookAt(mousePosRelativeToCamera + Vector3.up * transform.position.y);
-        m_AimReticle.transform.position = mousePosRelativeToCamera + Vector3.up * 5;
+        
+        //placing reticle on top (5 units up), compensating for aim reticle size, so the bullet is fire at the center of the reticle
+        m_AimReticle.transform.position = mousePosRelativeToCamera + Vector3.up * 5 + Vector3.forward * .25f;
     }
 
 
