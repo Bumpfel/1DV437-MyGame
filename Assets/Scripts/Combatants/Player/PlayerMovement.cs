@@ -80,17 +80,16 @@ public class PlayerMovement : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         if(!m_Health.IsDead()) {
-            AllowLook();
+            Look();
 
-            // m_AllowMovement();
             if(m_MovementControl == MovementControl.CharacterRelativeMovement)
-                AllowCharacterRelativeMovement();
+                CharacterRelativeMovement();
             else
-                AllowCameraRelativeMovement();
+                CameraRelativeMovement();
         }
     }
 
-    private void AllowCharacterRelativeMovement() {
+    private void CharacterRelativeMovement() {
         float movementInput = Input.GetAxisRaw(m_VerticalAxis);
 
         Vector3 forwardMovement = transform.forward * movementInput * m_WalkSpeed;
@@ -146,7 +145,7 @@ public class PlayerMovement : MonoBehaviour {
     }
 
 
-    private void AllowCameraRelativeMovement() {
+    private void CameraRelativeMovement() {
         Vector3 mousePos = m_ViewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y));
 		transform.LookAt(mousePos + Vector3.up * transform.position.y);
         float moveSpeed = m_WalkSpeed;
@@ -156,7 +155,7 @@ public class PlayerMovement : MonoBehaviour {
     }
 
 
-    private void AllowLook() {
+    private void Look() {
         Vector3 mousePosInWorld = new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y);
         Vector3 mousePosRelativeToCamera = m_ViewCamera.ScreenToWorldPoint(mousePosInWorld);
         transform.LookAt(mousePosRelativeToCamera + Vector3.up * transform.position.y);

@@ -42,14 +42,15 @@ public class FieldOfView : MonoBehaviour {
     void LateUpdate() {
         if(!m_Health.IsDead()) {
             DrawFieldOfView();
-            if(Time.time > m_LastSearched + m_SearchInterval)
-            FindVisibleTarget();
+            // if(Time.time > m_LastSearched + m_SearchInterval)
+                FindVisibleTarget();
         }
         else {
             m_ViewMesh.Clear();
         }
     }
     void FindVisibleTarget() {
+        new WaitForEndOfFrame();
         m_VisibleTargets.Clear();
         m_LastSearched = Time.time;
         
@@ -57,11 +58,11 @@ public class FieldOfView : MonoBehaviour {
 
         foreach(Collider targetInView in targetsInViewRadius) {
             Transform target = targetInView.transform;
-            Vector3 dirToTarget = ( targetInView.transform.position - transform.position).normalized;
+            Vector3 dirToTarget = (targetInView.transform.position - transform.position).normalized;
             if(Vector3.Angle(transform.forward, dirToTarget) < m_ViewAngle / 2) {
                 float distToTarget = Vector3.Distance(transform.position, target.position);
                 
-                // Player was in search fov with no obstacles in between
+                // Player was in search fov. Check if sight is obstructed
                 if(!Physics.Raycast(transform.position, dirToTarget, distToTarget, m_ObstacleMask)) {
                     m_VisibleTargets.Add(target);
                 }

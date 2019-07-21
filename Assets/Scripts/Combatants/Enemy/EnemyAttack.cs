@@ -5,10 +5,10 @@ using UnityEngine;
 public class EnemyAttack : MonoBehaviour {
 
     private FieldOfView m_FOV;
-    private Transform target;
-    private Attack attack;
-    public float fireRate = .3f;
-    private float fireTimestamp;
+    private Transform m_Target;
+    private Attack m_Attack;
+    public float m_FireRate = .3f;
+    private float m_FireTimestamp;
     private Health m_Health;
     private float m_LastSpottedTargetTime;
     private float m_TimeToLingerOnTarget = 3f; // how long to keep looking in the direction a target was spotted
@@ -18,32 +18,32 @@ public class EnemyAttack : MonoBehaviour {
 
     void Start() {
         m_FOV = GetComponent<FieldOfView>();
-        attack = GetComponent<Attack>();
+        m_Attack = GetComponent<Attack>();
         m_Health = GetComponent<Health>();
 
         m_StartRotation = transform.rotation;
     }
 
-    void Update() {
+    void FixedUpdate() {
         if(!m_Health.IsDead()) {
-            TurnTowardsDetectedTarget();
-            ShootAtDetectedTarget();
+            // TurnTowardsDetectedTarget(); // temp disabled
+            // ShootAtDetectedTarget();
         }
     }
 
     private void ShootAtDetectedTarget() {
         if(m_FOV.m_VisibleTargets.Count > 0) {
-            if(Time.time > fireTimestamp + fireRate) {
-                attack.Fire();
-                fireTimestamp = Time.time;
+            if(Time.time > m_FireTimestamp + m_FireRate) {
+                m_Attack.Fire();
+                m_FireTimestamp = Time.time;
             }
         }
     }
 
     private void TurnTowardsDetectedTarget() {
         if(m_FOV.m_VisibleTargets.Count > 0) {
-            target = m_FOV.m_VisibleTargets[0];
-            transform.LookAt(target);
+            m_Target = m_FOV.m_VisibleTargets[0];
+            transform.LookAt(m_Target);
             m_LastSpottedTargetTime = Time.time;
         }
         else {
