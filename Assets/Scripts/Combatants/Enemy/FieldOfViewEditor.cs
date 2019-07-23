@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 
 [CustomEditor (typeof (FieldOfView))]
-public class FieldOfViewEditor :Editor {
+public class FieldOfViewEditor : Editor {
 
     void OnSceneGUI() {
         FieldOfView fov = (FieldOfView) target;
@@ -19,6 +19,9 @@ public class FieldOfViewEditor :Editor {
         Handles.color = Color.red;
         foreach(Transform visibleTargets in  fov.m_VisibleTargets) {
             Handles.DrawLine(fov.transform.position, visibleTargets.position);
+
+            Handles.color = Color.green;
+            Handles.DrawLine(fov.m_RayCastOrigin, fov.m_DebugDirToTarget);
         }
     }
 

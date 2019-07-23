@@ -8,7 +8,7 @@ public class FieldOfView : MonoBehaviour {
     public float m_ViewRadius = 20f;
 
     [Range(0, 360)]
-    public float m_ViewAngle = 110f;
+    public float m_ViewAngle = 120f;
 
     private LayerMask m_TargetMask;
     private LayerMask m_ObstacleMask;
@@ -24,7 +24,14 @@ public class FieldOfView : MonoBehaviour {
     private Health m_Health;
 
     private float m_LastSearched;
-    private float m_SearchInterval;
+    private float m_SearchInterval = .2f;
+    public Vector3 m_RayCastOrigin; // TODO public for debug
+
+    private float m_EyePosition = 1.7f; // TODO not sure if I'll use
+
+    public Vector3 m_DebugDirToTarget; // TODO debug
+
+    public bool m_DrawDebugLine = true; // TODO debug
 
 
     void Start() {
@@ -42,11 +49,12 @@ public class FieldOfView : MonoBehaviour {
     void LateUpdate() {
         if(!m_Health.IsDead()) {
             DrawFieldOfView();
-            // if(Time.time > m_LastSearched + m_SearchInterval)
+            if(Time.time > m_LastSearched + m_SearchInterval)
                 FindVisibleTarget();
         }
         else {
             m_ViewMesh.Clear();
+            m_VisibleTargets.Clear();
         }
     }
     void FindVisibleTarget() {
@@ -58,14 +66,32 @@ public class FieldOfView : MonoBehaviour {
 
         foreach(Collider targetInView in targetsInViewRadius) {
             Transform target = targetInView.transform;
-            Vector3 dirToTarget = (targetInView.transform.position - transform.position).normalized;
+            Vector3 dirToTarget = (target.position - transform.position).normalized;
+            
+            m_DebugDirToTarget = target.position; // TODO debug
+
             if(Vector3.Angle(transform.forward, dirToTarget) < m_ViewAngle / 2) {
                 float distToTarget = Vector3.Distance(transform.position, target.position);
                 
-                // Player was in search fov. Check if sight is obstructed
-                if(!Physics.Raycast(transform.position, dirToTarget, distToTarget, m_ObstacleMask)) {
+                m_RayCastOrigin = transform.position + Vector3.up * m_EyePosition;
+
+                // Player located within search arc. Check if sight is obstructed
+                if(!Physics.Raycast(m_RayCastOrigin, dirToTarget, distToTarget, m_ObstacleMask)) {
                     m_VisibleTargets.Add(target);
                 }
+                // RaycastHit hitinfo;
+                // if(Physics.Raycast(m_RayCastOrigin, dirToTarget, out hitinfo)) {
+                    
+                //     if(hitinfo.collider && hitinfo.collider.tag == "Player") {
+                //         m_DrawDebugLine =  true;
+                //         m_VisibleTargets.Add(target);
+                //     }
+                //     else 
+                //         m_DrawDebugLine = false;
+
+                //     if(hitinfo.collider)
+                //         print(name + " detected " + hitinfo.collider.name);
+                // }
             }
         }
     }
@@ -77,7 +103,7 @@ public class FieldOfView : MonoBehaviour {
         ViewCastInfo oldViewCast = new ViewCastInfo();
         for(int i = 0; i <= stepCount; i ++) {
             float angle = transform.eulerAngles.y - m_ViewAngle / 2 + stepAngleSize * i;
-            // Debug.DrawLine(transform.position, transform.position + DirFromAngle(angle, true) * viewRadius, Color.red);
+            // Debug.DrawLine(transform.position, transform.position + DirFromAngle(angle, true) * m_ViewRadius, Color.red); // debug
             ViewCastInfo newViewCast = ViewCast(angle);
             if(i > 0) {
                 bool edgeDistanceThresholdExceeded = Mathf.Abs(oldViewCast.distance - newViewCast.distance) > m_EdgeDistanceTreshold;

@@ -22,8 +22,6 @@ public class PlayerMovement : MonoBehaviour {
     public Canvas m_AimReticle;
     // private Rigidbody m_Body;
     private Animator m_Animator;
-
-    //TODO tanke - hämta tiden på animationen istället för booleans
     private bool m_IsRunning = false;
     private bool m_IsWalking = false;
     private bool m_IsStrafingLeft = false;
@@ -39,6 +37,9 @@ public class PlayerMovement : MonoBehaviour {
     private string m_SprintKey;
     
     private Health m_Health;
+
+    [HideInInspector]
+    public bool m_GamePaused = false;
 
     // private Action m_AllowMovement;
 
@@ -70,7 +71,7 @@ public class PlayerMovement : MonoBehaviour {
 
     //FixedUpdate is called in fixed intervals (by default every 0.02 secs - 50 times/second)
     void FixedUpdate() {
-        if(!m_Health.IsDead()) {
+        if(!m_Health.IsDead() && !m_GamePaused) {
             // m_Body.MovePosition(m_Body.position + m_MoveTo * Time.fixedDeltaTime);
             transform.position = transform.position + m_MoveTo * Time.fixedDeltaTime;
         }
@@ -79,7 +80,7 @@ public class PlayerMovement : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        if(!m_Health.IsDead()) {
+        if(!m_Health.IsDead() && !m_GamePaused) {
             Look();
 
             if(m_MovementControl == MovementControl.CharacterRelativeMovement)

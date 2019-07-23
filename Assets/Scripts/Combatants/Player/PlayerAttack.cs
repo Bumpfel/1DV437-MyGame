@@ -2,29 +2,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerAttack : MonoBehaviour {
+public class PlayerAttack : Attack {
     
     public int m_PlayerNumber = 1; // TODO temp
     private string m_FireButton;
     private Input m_Fire;
-    private Attack attack;
     private Health m_Health;
+    
+    [HideInInspector]
+    public bool m_GamePaused = false;
  
-    protected void Start() {
-        attack = GetComponent<Attack>();
+    new void Start() {
+        base.Start();
         m_FireButton = "Fire1_Player" + m_PlayerNumber;
         m_Health = GetComponent<Health>();
     }
 
     void Update() {
-        if(!m_Health.IsDead()) {
+        if(!m_Health.IsDead() && !m_GamePaused) {
             AllowShoot();
         }
     }
 
     private void AllowShoot() {
         if(Input.GetButtonDown(m_FireButton)) {
-            attack.Fire();
+            Fire();
         }
     }
 

@@ -2,56 +2,101 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyAttack : MonoBehaviour {
-
-    private FieldOfView m_FOV;
-    private Transform m_Target;
-    private Attack m_Attack;
-    public float m_FireRate = .3f;
-    private float m_FireTimestamp;
-    private Health m_Health;
-    private float m_LastSpottedTargetTime;
-    private float m_TimeToLingerOnTarget = 3f; // how long to keep looking in the direction a target was spotted
-    private Quaternion m_StartRotation;
-
-    private readonly float m_TURN_SPEED = 0.2f;
-
-    void Start() {
-        m_FOV = GetComponent<FieldOfView>();
-        m_Attack = GetComponent<Attack>();
-        m_Health = GetComponent<Health>();
-
-        m_StartRotation = transform.rotation;
+// namespace ObserverPattern {
+    public interface Observer {
+        void Update();
     }
+    
+    public class EnemyAttack : Attack, Observer {
 
-    void FixedUpdate() {
-        if(!m_Health.IsDead()) {
-            // TurnTowardsDetectedTarget(); // temp disabled
-            // ShootAtDetectedTarget();
+        public void Update() {
+            // turn towards enemy
+            // m_Target = 
         }
-    }
 
-    private void ShootAtDetectedTarget() {
-        if(m_FOV.m_VisibleTargets.Count > 0) {
-            if(Time.time > m_FireTimestamp + m_FireRate) {
-                m_Attack.Fire();
-                m_FireTimestamp = Time.time;
+        private FieldOfView m_FOV;
+        private Transform m_Target;
+        private Health m_Health;
+        private EnemyMovement m_Movement;
+        private float m_LastDetectedTargetTime;
+        private const float m_TimeToLingerOnTarget = 5f; // how long to keep looking in the direction a target was detected. during this time the enemy is alert and turns faster towards the target
+        private Quaternion m_StartRotation;
+
+        private bool m_RecentlyDetectedPlayer = false;
+
+        private readonly float m_TURN_SPEED = 0.1f;
+
+        private float m_AngleDifferenceToTarget;
+        private readonly float m_AngleDifferenceToTargetBeforeShooting = 15;
+
+
+        new void Start() {
+            base.Start();
+            m_FOV = GetComponent<FieldOfView>();
+            m_Health = GetComponent<Health>();
+            m_Movement = GetComponent<EnemyMovement>();
+
+            m_StartRotation = transform.rotation;
+
+            // m_Health.AddObserver(this);
+        }
+
+        void FixedUpdate() {
+            if(!m_Health.IsDead()) {
+                SearchForTargets();
+                ShootAtDetectedTarget();
+                
+                
             }
         }
-    }
 
-    private void TurnTowardsDetectedTarget() {
-        if(m_FOV.m_VisibleTargets.Count > 0) {
-            m_Target = m_FOV.m_VisibleTargets[0];
-            transform.LookAt(m_Target);
-            m_LastSpottedTargetTime = Time.time;
+        private void ShootAtDetectedTarget() {
+            if(m_FOV.m_VisibleTargets.Count > 0 && CloseEnoughToShoot())
+                ContinuousFire();
+            else if(m_RecentlyDetectedPlayer)
+                StopContinuousFire(); // just to stop firing animation
         }
-        else {
-            if(Time.time > m_LastSpottedTargetTime + m_TimeToLingerOnTarget) {
-                // transform.rotation = m_StartRotation;
-                transform.rotation = Quaternion.Slerp(transform.rotation, m_StartRotation, m_TURN_SPEED);
-                //TODO go back to previous routine
+
+        private void SearchForTargets() { // TODO (liten) något missledande namn
+            if(m_FOV.m_VisibleTargets.Count > 0) {
+                m_Target = m_FOV.m_VisibleTargets[0];
+
+                if(!m_RecentlyDetectedPlayer) {
+                    m_Movement.StopPatrol();
+                    print(name + " detected " + m_Target.name); // debug
+                }
+                TurnTowardsTarget();
+
+                m_RecentlyDetectedPlayer = true;
+                m_LastDetectedTargetTime = Time.time;
+            }
+            else if(m_RecentlyDetectedPlayer && Time.time > m_LastDetectedTargetTime + m_TimeToLingerOnTarget) {
+                m_RecentlyDetectedPlayer = false;
+
+                StartCoroutine(m_Movement.ReturnToPatrol());
+                print(name + " is returning to patrol");
             }
         }
+
+        private void TurnTowardsTarget() {
+            Quaternion orgRotation = transform.rotation;
+            transform.LookAt(m_Target); // TODO ugly solution
+            Quaternion targetRotation = transform.rotation;
+            transform.rotation = orgRotation;
+            m_AngleDifferenceToTarget = Mathf.Abs(targetRotation.eulerAngles.y - transform.rotation.eulerAngles.y);
+
+            // Vector3 targetDir = m_Target.position - transform.position;
+            // Quaternion smt = Quaternion.LookRotation(targetDir);
+            // m_AngleDifferenceToTarget = Mathf.Abs(Vector3.Angle(targetDir, transform.forward));
+            // Quaternion targetRotation = smt * Quaternion.Euler(0, m_AngleDifferenceToTarget, 0);
+
+            // print("difference: " + m_AngleDifferenceToTarget);
+
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, m_TURN_SPEED); // TODO try using Time.fixedDeltaTime here 
+        }
+
+        private bool CloseEnoughToShoot() {
+            return m_AngleDifferenceToTarget < m_AngleDifferenceToTargetBeforeShooting;
+        }
     }
-}
+// }

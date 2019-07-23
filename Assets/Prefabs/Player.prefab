@@ -2380,7 +2380,6 @@ GameObject:
   - component: {fileID: 7245321833105693675}
   - component: {fileID: 2078180915}
   - component: {fileID: 4665366817207089168}
-  - component: {fileID: 2078180912}
   - component: {fileID: 2078180916}
   m_Layer: 10
   m_Name: Player
@@ -2591,21 +2590,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Healthbar: {fileID: 4938592848304071152}
   m_DeathSound: {fileID: 8300000, guid: ce5196f2f3d0344c19fd98e1033a1f46, type: 3}
---- !u!114 &2078180912
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4225024356588960008}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e6d4ca62ffab6145916f1a02ce3c459, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Bullet: {fileID: -3895706290591916329, guid: 32d48b2e9a41a3c45aca8997aca18c96,
-    type: 3}
-  m_GunSound: {fileID: 8300000, guid: 0c59ae651206345a486bbc53091b5e45, type: 3}
 --- !u!114 &2078180916
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2618,6 +2602,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73b7e087bdc2a8147a7853a8ef6820b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Bullet: {fileID: -3895706290591916329, guid: 32d48b2e9a41a3c45aca8997aca18c96,
+    type: 3}
+  m_FireRate: 0.3
+  m_GunSound: {fileID: 8300000, guid: 0c59ae651206345a486bbc53091b5e45, type: 3}
   m_PlayerNumber: 1
 --- !u!1 &4225024356605985910
 GameObject:
