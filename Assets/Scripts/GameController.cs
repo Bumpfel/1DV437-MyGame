@@ -31,15 +31,17 @@ public class GameController : ObservableComponent {
 
     void EndLevel() {
         m_PlayerStats.SetLevelEnded();
-        SaveSystem.SavePlayerData(m_PlayerStats);
-        // SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        SaveSystem.SaveHighScoreData(m_PlayerStats);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1); // TODO if exists
     }
     
     private void debugSavePlayerData() { // TODO temp
         if(m_Paused) {
-            print("this game stats: " + m_PlayerStats);
-            List<PlayerStats> stats = SaveSystem.LoadPlayerData();
-            SaveSystem.SavePlayerData(m_PlayerStats);
+            print("------------------------------");
+            // List<PlayerStats> stats = SaveSystem.LoadHighScoreData();
+            m_PlayerStats.SetLevelEnded();
+            // print("this game stats: " + m_PlayerStats);
+            SaveSystem.SaveHighScoreData(m_PlayerStats);
             // print(stats.ToString());
         }
     }

@@ -1,35 +1,65 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
 public class HighScore : MonoBehaviour {
 
+    private List<PlayerStats> m_StatsList;
+    private List<GameObject> m_Rows = new List<GameObject>();
+
     void Start() {
     }
 
     void OnEnable() {
-        RefreshScore();
+        GetHighScoreList();
     }
 
     void OnDisable() {
+        m_StatsList.Clear();
+        m_Rows.ForEach(obj => Destroy(obj));
+        m_Rows.Clear();
     }
 
-    public void RefreshScore() {
-        List<PlayerStats> statsList = SaveSystem.LoadPlayerData();
-        string stats = "";
-        foreach(PlayerStats playerStats in statsList) {
-            stats += playerStats.ToString() + "\n";
-        }
+    public void GetHighScoreList() {
+        m_StatsList = SaveSystem.LoadHighScoreData();
+        if(m_StatsList == null)
+            return;
+        
+        m_StatsList.Sort((ps1, ps2) => ps1.LevelIndex.CompareTo(ps2.LevelIndex));
 
-        TextMeshProUGUI[] texts = GetComponentsInChildren<TextMeshProUGUI>();
-        // GetComponentInChildren<Scroll
-        
-        
-        // foreach(TextMeshProUGUI text in texts) {
-        //     if(text.name == "HS (TMP)") {
-        //         text.SetText(stats);
-        //     }
+        Transform dataRow = Array.Find<Transform>(GetComponentsInChildren<Transform>(true), obj => obj.name == "Data");
+        // Transform dataRow = headerCells[0].transform.parent;
+
+        // foreach(TextMeshProUGUI text in headerCells) {
+        //     text.SetText("");
         // }
+
+        foreach(PlayerStats playerStats in m_StatsList) {
+            List<object> stat = new List<object>();
+            stat.Add(playerStats.LevelIndex);
+            stat.Add(playerStats.PlayerName);
+            stat.Add(playerStats.Kills);
+            stat.Add(playerStats.PlayerDeaths);
+            string formattedTime = (int) (playerStats.TimeTaken / 60) + ":" + Mathf.Round(playerStats.TimeTaken % 60);
+            stat.Add(formattedTime);
+            
+            Transform row = Instantiate(dataRow, dataRow.parent);
+            row.gameObject.SetActive(true);
+            m_Rows.Add(row.gameObject);
+            
+            TextMeshProUGUI[] dataCells = row.GetComponentsInChildren<TextMeshProUGUI>();
+            for(int i = 0; i < dataCells.Length; i ++) {
+                row.gameObject.name = "Row " + playerStats.LevelIndex;
+                dataCells[i].SetText("" + stat[i]);
+            }
+
+            // for(int i = 0; i < dataTexts.Length; i ++) {
+            //     string newText = dataTexts[i].text + "\n" + stat[i]; //TODO kanske inte snyggaste metoden. kolla upp om det går att kopiera en rad istället
+            //     dataTexts[i].SetText(newText);
+            // }
+        }
+        dataRow.gameObject.SetActive(false);
     }
 }
