@@ -3,16 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // namespace ObserverPattern {
-    public interface Observer {
-        void Update();
-    }
     
-    public class EnemyAttack : Attack, Observer {
+    public class EnemyAttack : Attack {//, Observer {
 
-        public void Update() {
-            // turn towards enemy
-            // m_Target = 
-        }
+        // public void ObserverUpdate() {
+        //     // turn towards enemy
+        // }
 
         private FieldOfView m_FOV;
         private Transform m_Target;

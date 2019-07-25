@@ -11,7 +11,7 @@ public class BulletScript : MonoBehaviour {
     private float m_CalculatedHitTimeStamp;
 
     void FixedUpdate() {
-        //for every frame cast a raycast forwards with a distance equal to the distance the bullet travels per frame (and see if there is a collision)
+        //for every fixed update cast a raycast forwards with a distance equal to the distance the bullet travels per frame (and see if there is a collision)
         Physics.Raycast(transform.position, transform.forward, out m_Hitinfo, m_BULLET_VELOCITY * Time.fixedDeltaTime);
         
         if(m_Hitinfo.collider && m_Hitinfo.collider.tag != "Ignored") {
