@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Enemy
   - Ignored
+  - GameOverMenu
+  - PauseMenu
+  - Background
   layers:
   - Default
   - TransparentFX

@@ -2,25 +2,36 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameController : ObservableComponent {
+public class GameController : MonoBehaviour {
 
-    private GameObject m_Player;
+    public GameObject PlayerModel;
+    public CameraController m_CameraController;
 
     [HideInInspector]
     public PlayerStats m_PlayerStats;
+
+    private GameObject m_Player;
+    private Transform m_PlayerSpawn;
     private Menu m_Menu;
     private bool m_Paused = false;
+    private int m_CurrentSceneIndex;
+
+    private bool m_GameOver = false;
 
     void Start() {
-        m_PlayerStats = new PlayerStats("Player", SceneManager.GetActiveScene().buildIndex);
-        NotifySubscribers(); // TODO prova med Awake här istället för att se om det garanterar att denna körs före subscribern (Health tror jag det var) ?
-        m_Menu = GetComponentInChildren<Menu>(true);
-        m_Menu.gameObject.SetActive(false);
+        Initialize();
+    }
 
-        for(int i = 0; i < transform.childCount; i ++) {
-            if(transform.GetChild(i).tag == "Player")
-                m_Player = transform.GetChild(i).gameObject;
-        }
+    private void Initialize() {
+        m_PlayerStats = new PlayerStats("Player", SceneManager.GetActiveScene().buildIndex);
+        
+        m_Menu = GetComponentInChildren<Menu>(true);
+        m_Menu.Initialize();
+
+        m_PlayerSpawn = GetComponentInChildren<Transform>().Find("PlayerSpawn");
+        m_Player = Instantiate(PlayerModel, m_PlayerSpawn.position, m_PlayerSpawn.rotation, transform);
+        m_CameraController.SetPlayer(m_Player.transform);
+        Time.timeScale = 1;
     }
 
     void Update() {
@@ -29,10 +40,46 @@ public class GameController : ObservableComponent {
         }
     }
 
-    void EndLevel() {
+    public void StartGame() {
+        SceneManager.LoadScene(1);
+    }
+
+    public void RestartLevel() { //Respawn() {
+        Destroy(m_Player);
+        Initialize();
+        m_GameOver = false;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    // public void RestartLevel() {
+    //     Respawn();
+    // }
+
+    public void QuitGame() {
+        Application.Quit();
+    }
+
+    public void SetGameOver() {
+        // TODO display GameOver UI. GameOver UI has a Respawn button
+        
+        m_GameOver = true;
+        m_Menu.ShowGameOverMenu();
+        // StartCoroutine(m_Menu.ShowGameOverMenu());
+
+    }
+
+    public void EndLevel() {
         m_PlayerStats.SetLevelEnded();
         SaveSystem.SaveHighScoreData(m_PlayerStats);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1); // TODO if exists
+        int nrOfScenes = SceneManager.sceneCount;
+        int currentScene = SceneManager.GetActiveScene().buildIndex;
+        if(currentScene < nrOfScenes) {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        }
+        else {
+            // TODO present game over UI
+            print("Game Over!");
+        }
     }
     
     private void debugSavePlayerData() { // TODO temp
@@ -47,14 +94,18 @@ public class GameController : ObservableComponent {
     }
 
     public void TogglePause() {
-        if(m_Menu.ToggleMenu()) {
+        if(!m_GameOver && m_Menu.ToggleMenu()) {
+            // Cursor.visible = !Cursor.visible;
             m_Paused = !m_Paused;
             m_Player.GetComponent<PlayerMovement>().m_GamePaused = m_Paused;
             m_Player.GetComponent<PlayerAttack>().m_GamePaused = m_Paused;
             Time.timeScale = m_Paused ? 0 : 1;
         }
-        // m_Menu.SetActive(m_Paused);
-        
+
+        if(!m_Paused) {
+            // print("hiding cursor");
+            Cursor.visible = false; // TODO not working if you press esc to hide menu
+        }
         // debugSavePlayerData();
     }
 

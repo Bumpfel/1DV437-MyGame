@@ -150,8 +150,9 @@ public class PlayerMovement : MonoBehaviour {
         Vector3 mousePos = m_ViewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y));
 		transform.LookAt(mousePos + Vector3.up * transform.position.y);
         float moveSpeed = m_WalkSpeed;
-        if(Input.GetButton(m_SprintKey))
+        if(Input.GetButton(m_SprintKey)) {
             moveSpeed *= m_RunModifier;
+        }
 		m_MoveTo = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized * moveSpeed;
     }
 

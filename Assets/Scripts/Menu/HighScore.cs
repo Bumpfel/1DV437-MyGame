@@ -42,7 +42,9 @@ public class HighScore : MonoBehaviour {
             stat.Add(playerStats.PlayerName);
             stat.Add(playerStats.Kills);
             stat.Add(playerStats.PlayerDeaths);
-            string formattedTime = (int) (playerStats.TimeTaken / 60) + ":" + Mathf.Round(playerStats.TimeTaken % 60);
+
+            float seconds = Mathf.Round(playerStats.TimeTaken % 60);
+            string formattedTime = (int) (playerStats.TimeTaken / 60) + ":" + (seconds < 10f ? "0" : "") + seconds;
             stat.Add(formattedTime);
             
             Transform row = Instantiate(dataRow, dataRow.parent);

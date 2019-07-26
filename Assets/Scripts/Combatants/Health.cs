@@ -3,24 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Health : MonoBehaviour, Observer {
+public class Health : MonoBehaviour { // TODO döpa om till något annat? Combatant / CombatantStatus?
 
     public Slider m_Healthbar;
     public AudioClip m_DeathSound;
     private float m_Health = 100;
     private Animator animator;
     private bool m_IsDead = false;
-
     private List<Observer> observers = new List<Observer>();
-
-    private PlayerStats m_PlayerStats;
-
-    public void ObserverUpdate() {
-        m_PlayerStats = GetComponentInParent<GameController>().m_PlayerStats; // needed because this script might be loaded before the playerstats script in gamecontroller
-    }
+    private GameController m_GameController;
 
     void Start() {
-        GetComponentInParent<GameController>().AddObserver(this);
+        m_GameController = GetComponentInParent<GameController>();
         animator = GetComponent<Animator>();
     }
 
@@ -43,17 +37,6 @@ public class Health : MonoBehaviour, Observer {
     }
     
     private void Die() {
-        if(tag == "Player") {
-            m_PlayerStats.AddPlayerDeath();
-
-            //Debug
-            m_Health = 100;                
-            UpdateHealthBar();
-            return;
-        }
-        else {
-            m_PlayerStats.AddKill();
-        }
         m_IsDead = true;
         animator.Play("Die");
         AudioSource audio = GetComponent<AudioSource>();
@@ -62,6 +45,19 @@ public class Health : MonoBehaviour, Observer {
 
         Destroy(m_Healthbar.gameObject);
         GetComponent<CapsuleCollider>().enabled = false;
+        
+        if(tag == "Player") {
+            m_GameController.m_PlayerStats.AddPlayerDeath();
+
+            m_GameController.SetGameOver();
+            //Debug
+            // m_Health = 100;                
+            // UpdateHealthBar();
+            // return;
+        }
+        else {
+            m_GameController.m_PlayerStats.AddKill();
+        }
     }
 
     public bool IsDead() {

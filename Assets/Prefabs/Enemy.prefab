@@ -1644,7 +1644,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Bullet: {fileID: -3895706290591916329, guid: 32d48b2e9a41a3c45aca8997aca18c96,
     type: 3}
-  m_FireRate: 0.3
+  m_FireRate: 0.2
   m_GunSound: {fileID: 8300000, guid: 19d69c28094cc45c7b810d8da7ad71c0, type: 3}
 --- !u!114 &7812999535778217427
 MonoBehaviour:
