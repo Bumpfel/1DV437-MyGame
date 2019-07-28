@@ -41,17 +41,17 @@ public class PlayerMovement : MonoBehaviour {
     [HideInInspector]
     public bool m_GamePaused = false;
 
-    // private Action m_AllowMovement;
+
+    private float speedSmoothTime = .1f;
+    private float speedSmoothVelocity;
+    private float currentSpeed;
 
     void Start() {
         m_ViewCamera = Camera.main;
 
         m_Animator = GetComponent<Animator>();
-        m_Animator.Play("Idle_Shoot");
-        // m_Body = GetComponent<Rigidbody>();
 
-
-        m_VerticalAxis = "Vertical_Player" + m_PlayerNumber; //TODO temp if only 1 player
+        m_VerticalAxis = "Vertical_Player" + m_PlayerNumber;
         m_HorizontalAxis = "Horizontal_Player" + m_PlayerNumber;
         m_SprintKey = "Sprint_Player" + m_PlayerNumber;
 
@@ -69,16 +69,13 @@ public class PlayerMovement : MonoBehaviour {
         // }
     }
 
-    //FixedUpdate is called in fixed intervals (by default every 0.02 secs - 50 times/second)
     void FixedUpdate() {
         if(!m_Health.IsDead() && !m_GamePaused) {
-            // m_Body.MovePosition(m_Body.position + m_MoveTo * Time.fixedDeltaTime);
             transform.position = transform.position + m_MoveTo * Time.fixedDeltaTime;
         }
     }
 
 
-    // Update is called once per frame
     void Update() {
         if(!m_Health.IsDead() && !m_GamePaused) {
             Look();
@@ -86,9 +83,91 @@ public class PlayerMovement : MonoBehaviour {
             if(m_MovementControl == MovementControl.CharacterRelativeMovement)
                 CharacterRelativeMovement();
             else
-                CameraRelativeMovement();
+                SmoothCameraRelativeMovement();
+                // SmoothCharacterRelativeMovement();
+                // CameraRelativeMovement();
         }
     }
+
+    private void CameraRelativeMovement() { // not currently used
+        Vector3 mousePos = m_ViewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y));
+		transform.LookAt(mousePos + Vector3.up * transform.position.y);
+        float moveSpeed = m_WalkSpeed;
+
+        Vector3 movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
+        float speedPercent = (IsRunning() ? 1 : 0.5f) * movementInput.magnitude;
+        m_Animator.SetFloat("speedPercent", speedPercent);
+ 
+        if(Input.GetButton(m_SprintKey)) {
+            moveSpeed *= m_RunModifier;
+        }
+		m_MoveTo = movementInput * moveSpeed;
+    }
+
+   private void SmoothCameraRelativeMovement() { // has smooth animations
+        Vector3 mousePos = m_ViewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y));
+		transform.LookAt(mousePos + Vector3.up * transform.position.y);
+        float moveSpeed = m_WalkSpeed;
+
+        Vector3 movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
+
+        float targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunModifier : m_WalkSpeed) * movementInput.magnitude;
+        currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
+        // transform.Translate(transform.forward * currentSpeed * Time.fixedDeltaTime);
+        
+        float animationSpeedPercent = (IsRunning() ? 1 : 0.5f) * movementInput.magnitude;
+        m_Animator.SetFloat("speedPercent", animationSpeedPercent, speedSmoothTime, Time.fixedDeltaTime);
+
+        if(Input.GetButton(m_SprintKey)) {
+            moveSpeed *= m_RunModifier;
+        }
+		m_MoveTo = movementInput * moveSpeed;
+    }
+
+       private void SmoothCharacterRelativeMovement() {
+        Vector3 mousePos = m_ViewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y));
+		transform.LookAt(mousePos + Vector3.up * transform.position.y);
+        // float moveSpeed = m_WalkSpeed;
+
+        Vector3 movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
+
+        float targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunModifier : m_WalkSpeed) * movementInput.magnitude;
+        currentSpeed = Mathf.SmoothDamp(Input.GetAxisRaw(m_VerticalAxis), targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
+        //----
+
+        float animationSpeedPercent = (IsRunning() ? 1 : 0.5f) * movementInput.magnitude;
+        m_Animator.SetFloat("speedPercent", animationSpeedPercent, speedSmoothTime, Time.fixedDeltaTime);
+
+
+        transform.Translate(transform.forward * currentSpeed * Time.fixedDeltaTime);
+        // if(Input.GetButton(m_SprintKey)) {
+        //     moveSpeed *= m_RunModifier;
+        // }
+		// m_MoveTo = movementInput * moveSpeed;
+    }
+
+    private void Look() {
+        Vector3 mousePosInWorld = new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y);
+        Vector3 mousePosRelativeToCamera = m_ViewCamera.ScreenToWorldPoint(mousePosInWorld);
+        transform.LookAt(mousePosRelativeToCamera + Vector3.up * transform.position.y);
+        
+        //placing reticle on top (5 units up), compensating for aim reticle size, so the bullet is fire at the center of the reticle
+        m_AimReticle.transform.position = mousePosRelativeToCamera + Vector3.up * 5 + Vector3.forward * .25f;
+    }
+
+
+    public bool IsRunning() {
+        return Input.GetButton(m_SprintKey) && (Input.GetAxisRaw(m_VerticalAxis) != 0 || Input.GetAxisRaw(m_HorizontalAxis) != 0);
+    }
+
+
+
+
+
+
+
+
+
 
     private void CharacterRelativeMovement() {
         float movementInput = Input.GetAxisRaw(m_VerticalAxis);
@@ -144,29 +223,6 @@ public class PlayerMovement : MonoBehaviour {
         }
         m_MoveTo = forwardMovement + strafeMovement;
     }
-
-
-    private void CameraRelativeMovement() {
-        Vector3 mousePos = m_ViewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y));
-		transform.LookAt(mousePos + Vector3.up * transform.position.y);
-        float moveSpeed = m_WalkSpeed;
-        if(Input.GetButton(m_SprintKey)) {
-            moveSpeed *= m_RunModifier;
-        }
-		m_MoveTo = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized * moveSpeed;
-    }
-
-
-    private void Look() {
-        Vector3 mousePosInWorld = new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y);
-        Vector3 mousePosRelativeToCamera = m_ViewCamera.ScreenToWorldPoint(mousePosInWorld);
-        transform.LookAt(mousePosRelativeToCamera + Vector3.up * transform.position.y);
-        
-        //placing reticle on top (5 units up), compensating for aim reticle size, so the bullet is fire at the center of the reticle
-        m_AimReticle.transform.position = mousePosRelativeToCamera + Vector3.up * 5 + Vector3.forward * .25f;
-    }
-
-
 
 
 

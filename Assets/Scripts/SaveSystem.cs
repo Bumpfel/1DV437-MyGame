@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 public static class SaveSystem {
-    private static string savePath = Application.persistentDataPath + "/playerData";
+    private static string savePath = Application.persistentDataPath + "/HighScoreData.sav";
     private static BinaryFormatter formatter = new BinaryFormatter();
     
     public static void SaveHighScoreData(PlayerStats playerStats) {

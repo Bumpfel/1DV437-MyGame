@@ -11,11 +11,14 @@ public class PlayerAttack : Attack {
     
     [HideInInspector]
     public bool m_GamePaused = false;
+
+    private PlayerMovement m_PlayerMovement;
  
     new void Start() {
         base.Start();
         m_FireButton = "Fire1_Player" + m_PlayerNumber;
         m_Health = GetComponent<Health>();
+        m_PlayerMovement = GetComponent<PlayerMovement>();
     }
 
     void Update() {
@@ -25,9 +28,10 @@ public class PlayerAttack : Attack {
     }
 
     private void AllowShoot() {
-        if(Input.GetButtonDown(m_FireButton)) {
+        if(Input.GetButtonDown(m_FireButton) && !m_PlayerMovement.IsRunning()) {
             Fire();
         }
     }
+
 
 }

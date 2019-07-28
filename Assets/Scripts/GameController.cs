@@ -60,12 +60,8 @@ public class GameController : MonoBehaviour {
     }
 
     public void SetGameOver() {
-        // TODO display GameOver UI. GameOver UI has a Respawn button
-        
         m_GameOver = true;
         m_Menu.ShowGameOverMenu();
-        // StartCoroutine(m_Menu.ShowGameOverMenu());
-
     }
 
     public void EndLevel() {
@@ -82,7 +78,7 @@ public class GameController : MonoBehaviour {
         }
     }
     
-    private void debugSavePlayerData() { // TODO temp
+    private void debugSavePlayerData() { // TODO debug
         if(m_Paused) {
             print("------------------------------");
             // List<PlayerStats> stats = SaveSystem.LoadHighScoreData();

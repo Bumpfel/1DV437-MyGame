@@ -20,8 +20,11 @@ public class Attack : MonoBehaviour {
 
     public void Fire() {
         Rigidbody bullet = Instantiate(m_Bullet, m_BulletSpawn.position, m_BulletSpawn.rotation);
-        // m_Animator.Play("Shoot_single");
-        m_Animator.PlayInFixedTime("Shoot_single", 0, m_FireRate);
+        if(tag == "Player") {
+            m_Animator.Play("Shoot_single");
+        }
+        else
+            m_Animator.PlayInFixedTime("Shoot_single", 0, m_FireRate);
         // m_Animator.ResetTrigger("Relax");
         // m_Animator.SetTrigger("Attack");
         AudioSource audio = GetComponent<AudioSource>();

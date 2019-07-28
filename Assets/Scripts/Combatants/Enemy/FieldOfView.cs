@@ -25,15 +25,10 @@ public class FieldOfView : MonoBehaviour {
 
     private float m_LastSearched;
     private float m_SearchInterval = .2f;
-    public Vector3 m_RayCastOrigin; // TODO public for debug
-
-    private float m_EyePosition = 1.7f; // TODO not sure if I'll use
-
-    public Vector3 m_DebugDirToTarget; // TODO debug
-
-    public bool m_DrawDebugLine = true; // TODO debug
-
-
+    [HideInInspector]
+    public Vector3 m_RaycastOrigin; // TODO public for editor
+    private float m_EyePosition = 1.7f;
+    
     void Start() {
         m_TargetMask = LayerMask.GetMask("Players");
         m_ObstacleMask = LayerMask.GetMask("Obstacles");
@@ -47,7 +42,7 @@ public class FieldOfView : MonoBehaviour {
     }
 
     void LateUpdate() {
-        if(!m_Health.IsDead()) {
+        if(!m_Health.IsDead()) { 
             DrawFieldOfView();
             if(Time.time > m_LastSearched + m_SearchInterval)
                 FindVisibleTarget();
@@ -55,10 +50,12 @@ public class FieldOfView : MonoBehaviour {
         else {
             m_ViewMesh.Clear();
             m_VisibleTargets.Clear();
+            Destroy(this);
         }
+        
     }
-    void FindVisibleTarget() {
-        new WaitForEndOfFrame();
+    private void FindVisibleTarget() {
+        // new WaitForEndOfFrame();
         m_VisibleTargets.Clear();
         m_LastSearched = Time.time;
         
@@ -67,36 +64,35 @@ public class FieldOfView : MonoBehaviour {
         foreach(Collider targetInView in targetsInViewRadius) {
             Transform target = targetInView.transform;
             Vector3 dirToTarget = (target.position - transform.position).normalized;
-            
-            m_DebugDirToTarget = target.position; // TODO debug
+
+            // print("angle to target: " + Vector3.Angle(transform.forward, dirToTarget));
+            // print("set treshold angle: " + m_ViewAngle / 2);
+            // if(name == "Enemy (2)")
+                // Debug.DrawLine(m_RaycastOrigin, transform.position * m_ViewAngle, Color.yellow);
 
             if(Vector3.Angle(transform.forward, dirToTarget) < m_ViewAngle / 2) {
+                // print("target in cone");
                 float distToTarget = Vector3.Distance(transform.position, target.position);
                 
-                m_RayCastOrigin = transform.position + Vector3.up * m_EyePosition;
+                m_RaycastOrigin = transform.position + Vector3.up * m_EyePosition;
 
                 // Player located within search arc. Check if sight is obstructed
-                if(!Physics.Raycast(m_RayCastOrigin, dirToTarget, distToTarget, m_ObstacleMask)) {
-                    m_VisibleTargets.Add(target);
-                }
-                // RaycastHit hitinfo;
-                // if(Physics.Raycast(m_RayCastOrigin, dirToTarget, out hitinfo)) {
-                    
-                //     if(hitinfo.collider && hitinfo.collider.tag == "Player") {
-                //         m_DrawDebugLine =  true;
-                //         m_VisibleTargets.Add(target);
-                //     }
-                //     else 
-                //         m_DrawDebugLine = false;
-
-                //     if(hitinfo.collider)
-                //         print(name + " detected " + hitinfo.collider.name);
+                // if(!Physics.Raycast(m_RayCastOrigin, dirToTarget, distToTarget, m_ObstacleMask)) {
+                //     m_VisibleTargets.Add(target);
                 // }
+
+                // Alternative method. See if the ray hits the player instead
+                RaycastHit hitinfo;
+                if(Physics.Raycast(m_RaycastOrigin, dirToTarget, out hitinfo)) {
+                    // Debug.DrawLine(m_RayCastOrigin, m_RayCastOrigin + dirToTarget * distToTarget, Color.green);
+                    if(hitinfo.collider.tag == "Player")
+                        m_VisibleTargets.Add(target);
+                }
             }
         }
     }
 
-    void DrawFieldOfView() {
+    private void DrawFieldOfView() {
         int stepCount = Mathf.RoundToInt(m_ViewAngle * m_MeshResolution);
         float stepAngleSize = m_ViewAngle / stepCount;
         List<Vector3> viewPoints = new List<Vector3>();
@@ -144,7 +140,7 @@ public class FieldOfView : MonoBehaviour {
         m_ViewMesh.RecalculateNormals();
     }
 
-    EdgeInfo FindEdge(ViewCastInfo minViewCast, ViewCastInfo maxViewCast) {
+    private EdgeInfo FindEdge(ViewCastInfo minViewCast, ViewCastInfo maxViewCast) {
         float minAngle = minViewCast.angle;
         float maxAngle = maxViewCast.angle;
         Vector3 minPoint = Vector3.zero;
@@ -186,7 +182,7 @@ public class FieldOfView : MonoBehaviour {
         }
     }
 
-    public struct ViewCastInfo {
+    private struct ViewCastInfo {
         public bool hit;
         public Vector3 point;
         public float distance;
@@ -200,7 +196,7 @@ public class FieldOfView : MonoBehaviour {
         }
     }
 
-    public struct EdgeInfo {
+    private struct EdgeInfo {
         public Vector3 pointA;
         public Vector3 pointB;
 

@@ -68,12 +68,31 @@ public class Menu : MonoBehaviour {
         Cursor.visible = true;
 
         GameObject restartButton = m_GameOverMenu.transform.Find("RespawnButton").gameObject;
-        restartButton.SetActive(false);
-        // yield return new WaitForSeconds(2f);
-        // float timestamp = Time.time;
-        // float delay = 2f;
-        // while(Time.time < timestamp + delay);
-        restartButton.SetActive(true);
+
+        StartCoroutine(FadeInButton(restartButton));
+        // StartCoroutine(FadeInButton(restartButton.GetComponent<Button>()));
+    }
+
+    private IEnumerator FadeInButton(GameObject button) {
+        button.SetActive(false);
+        yield return new WaitForSeconds(1.5f);
+        button.SetActive(true);
+
+
+    //     button.interactable = false;
+    //     TextMeshProUGUI buttonText = button.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+    //     buttonText.alpha = 0;
+    //     print("fading button...");
+    //     while(buttonText.alpha < 1) {
+    //         buttonText.CrossFadeAlpha(1, 2f, false);
+    //         yield return new WaitForEndOfFrame();
+    //     }
+    //     button.interactable = true;
+    //     print("done!");
+
+    //     // button.colors = Color.Lerp(Color.);
+    //     yield break;
+
     }
 
     public void PlayButton() {

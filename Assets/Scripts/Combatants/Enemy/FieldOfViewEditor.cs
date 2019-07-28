@@ -20,8 +20,8 @@ public class FieldOfViewEditor : Editor {
         foreach(Transform visibleTargets in  fov.m_VisibleTargets) {
             Handles.DrawLine(fov.transform.position, visibleTargets.position);
 
-            Handles.color = Color.green;
-            Handles.DrawLine(fov.m_RayCastOrigin, fov.m_DebugDirToTarget);
+            // Handles.color = Color.green;
+            // Handles.DrawLine(fov.m_RayCastOrigin, fov.m_DebugDirToTarget);
         }
     }
 

@@ -5,7 +5,7 @@ using UnityEngine;
 public class BulletScript : MonoBehaviour {
     
     public LayerMask m_CombatantsMask;
-    public float dmg = 25f;
+    public float dmg = 25;
     public readonly float m_BULLET_VELOCITY = 100;
     private RaycastHit m_Hitinfo;
     private float m_CalculatedHitTimeStamp;

@@ -5,26 +5,31 @@ using UnityEngine.UI;
 
 public class Health : MonoBehaviour { // TODO döpa om till något annat? Combatant / CombatantStatus?
 
-    public Slider m_Healthbar;
+    private GameObject m_CharacterGUI;
+    private Slider m_HealthBar;
     public AudioClip m_DeathSound;
     private float m_Health = 100;
     private Animator animator;
     private bool m_IsDead = false;
-    private List<Observer> observers = new List<Observer>();
     private GameController m_GameController;
 
     void Start() {
         m_GameController = GetComponentInParent<GameController>();
         animator = GetComponent<Animator>();
+
+        m_CharacterGUI = transform.Find("CharacterGUI").gameObject;
+        m_HealthBar = m_CharacterGUI.GetComponentInChildren<Slider>();
     }
 
     public void TakeDamage(float amount) {
         if(!m_IsDead) {
             m_Health -= amount;
             UpdateHealthBar();
-            // NotifySubscribers(); // TODO my thought here was for this to enable the enemy turning and shooting in the direction it took dmg
             if(m_Health <= 0) {
                 Die();
+            }
+            else if(tag == "Enemy") {
+                GetComponent<EnemyMovement>().ReactToTakingDamage();
             }
         }
     }
@@ -43,7 +48,7 @@ public class Health : MonoBehaviour { // TODO döpa om till något annat? Combat
         audio.clip = m_DeathSound;
         audio.Play();
 
-        Destroy(m_Healthbar.gameObject);
+        Destroy(m_CharacterGUI.gameObject);
         GetComponent<CapsuleCollider>().enabled = false;
         
         if(tag == "Player") {
@@ -51,9 +56,8 @@ public class Health : MonoBehaviour { // TODO döpa om till något annat? Combat
 
             m_GameController.SetGameOver();
             //Debug
-            // m_Health = 100;                
+            // m_Health = 100;
             // UpdateHealthBar();
-            // return;
         }
         else {
             m_GameController.m_PlayerStats.AddKill();
@@ -64,9 +68,8 @@ public class Health : MonoBehaviour { // TODO döpa om till något annat? Combat
         return m_IsDead;
     }
 
-
     private void UpdateHealthBar() {
-        m_Healthbar.value = m_Health;
+        m_HealthBar.value = m_Health;
     }
 
     public float GetHealth() {
