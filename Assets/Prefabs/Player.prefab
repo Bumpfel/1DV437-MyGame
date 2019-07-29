@@ -2589,6 +2589,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68c7c97857dbff469bdddc43bc52a79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_TakeDamageSound: {fileID: 0}
   m_DeathSound: {fileID: 8300000, guid: ce5196f2f3d0344c19fd98e1033a1f46, type: 3}
 --- !u!114 &2078180916
 MonoBehaviour:
@@ -2606,6 +2607,7 @@ MonoBehaviour:
     type: 3}
   m_FireRate: 0.3
   m_GunSound: {fileID: 8300000, guid: 0c59ae651206345a486bbc53091b5e45, type: 3}
+  m_MeleeAttackSound: {fileID: 8300000, guid: 58748f782368640aa8b64609a22ea9ba, type: 3}
   m_PlayerNumber: 1
   m_GamePaused: 0
 --- !u!1 &4225024356605985910

@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class PickupObject : MonoBehaviour {
     
-    public enum Type { Heal, Armour };
+    public enum Type { Heal = 50, Armour = 25 };
     public Type m_Type = Type.Heal;
     private float m_RotationSpeed = 0.5f;
-    private float m_HealAmount = 50;
 
     void Update() {
         Spin();
@@ -22,10 +21,10 @@ public class PickupObject : MonoBehaviour {
             if(m_Type == Type.Heal) {
                 Health player = other.GetComponent<Health>();
                 if(player.GetHealth() < 100) {
-                    player.Heal(m_HealAmount);
+                    player.Heal((float) m_Type);
                     AudioSource audio = GetComponent<AudioSource>();
                     audio.Play();
-                    Destroy(GetComponent<MeshRenderer>()); // need to destroy this first to hide the object on trigger
+                    Destroy(GetComponent<MeshRenderer>()); // need to destroy this first to hide the object on trigger without stopping the audio clip
                     Destroy(gameObject, 1f);
                 }
             }
