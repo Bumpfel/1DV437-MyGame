@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class SlidingDoor : MonoBehaviour {
 
-    public bool m_IsOpen = false;
-    public bool m_AutoClose = false;
+    public bool m_Locked = false;
+    // public bool m_AutoClose = false;
+    private bool m_IsOpen = false;
 
     private float m_OpenTimestamp;
     private float m_OpenDelay = .2f;
