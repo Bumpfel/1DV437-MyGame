@@ -1,24 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEditor;
 public class Attack : MonoBehaviour {
     
     public Rigidbody m_Bullet;
-    public float m_FireRate = .3f;
+    public float m_FireRate = .3f; // for automic firing mode
     public AudioClip m_GunSound;
     public AudioClip m_MeleeAttackSound;
 
     protected Animator m_Animator;
     private float m_FireTimestamp;
     private AudioSource m_AudioSource;
-    private float m_DestroyBulletAfterSeconds = 3f;
     private Transform m_BulletSpawn;
     
     private float m_MeleeDamage = 100;
     private float m_MeleeRange = 2.5f;
     private float m_MeleeTimestamp;
-    private float m_MeleeDelay = .35f;
+    private float m_MeleeTime = .35f;
+    private float m_MaxMeleeAngle = 60;
+    private bool m_PlayingMeleeAnimation = false;
 
 
     protected void Start() {
@@ -37,8 +38,6 @@ public class Attack : MonoBehaviour {
             m_Animator.PlayInFixedTime("Shoot_single", 0, m_FireRate);
         m_AudioSource.clip = m_GunSound;
         m_AudioSource.Play();
-        bullet.velocity = bullet.transform.forward * m_Bullet.GetComponent<BulletScript>().m_BULLET_VELOCITY;
-        Destroy(bullet.gameObject, m_DestroyBulletAfterSeconds);
     }
 
 
@@ -56,27 +55,56 @@ public class Attack : MonoBehaviour {
         m_Animator.Play("Idle_Shoot");
     }
 
-    protected void MeleeAttack() {
-        if(Time.time > m_MeleeTimestamp + m_MeleeDelay) {
-            m_MeleeTimestamp = Time.time;
-            m_Animator.PlayInFixedTime("Melee_Attack", 0, .1f);
-            m_AudioSource.clip = m_MeleeAttackSound;
-            m_AudioSource.Play();
-            RaycastHit hitInfo;
+    protected void MeleeAttack() { // external interface. TODO not used. animation didn't look good while sprinting and not calling PerformMeleeAttack immediately made it feel a bit unresponsive
+        if(!m_PlayingMeleeAnimation) {
+            StartCoroutine(PlayMeleeAnimation());
+        }
+    }
 
-            Vector3 origin = transform.position + Vector3.up * 1.5f;
-            Debug.DrawLine(origin, origin + transform.forward * m_MeleeRange, Color.white, .2f);
-            // Debug.DrawLine(origin, origin + transform.right * -1 + transform.forward * m_MeleeRange, Color.white, .2f);
-            // Debug.DrawLine(origin, origin + transform.right * 1 + transform.forward * m_MeleeRange, Color.white, .2f);
+    private IEnumerator PlayMeleeAnimation() { //TODO  not used
+        m_PlayingMeleeAnimation = true;
+        float timeTaken = 0;
+        m_Animator.Play("Melee_Attack");
+        while(timeTaken < m_MeleeTime) {
+            timeTaken += Time.deltaTime;
+            m_Animator.SetFloat("meleeSpeed", timeTaken / m_MeleeTime);
+            if(timeTaken / m_MeleeTime > .85) {
+                PerformMeleeAttack();
+            }
+            yield return new WaitForEndOfFrame();
+        }
+        m_PlayingMeleeAnimation = false;
+    }
 
-            if(Physics.Raycast(origin, transform.forward, out hitInfo, m_MeleeRange) || 
-            Physics.Raycast(origin, transform.right * -.4f + transform.forward, out hitInfo, m_MeleeRange) || 
-            Physics.Raycast(origin, transform.right * .4f + transform.forward, out hitInfo, m_MeleeRange)) {
-                if(hitInfo.collider.tag != tag) {
-                    // print("melee attack hit " + hitInfo.collider.name);
-                    hitInfo.collider.gameObject.GetComponent<Health>().TakeDamage(m_MeleeDamage);
+    protected void PerformMeleeAttack() {
+        m_MeleeTimestamp = Time.time;
+        m_Animator.Play("basic_Melee_Attack", 0, .1f);
+        m_AudioSource.clip = m_MeleeAttackSound;
+        m_AudioSource.Play();
+
+        LayerMask enemyMask = LayerMask.GetMask("Enemies");
+        LayerMask obstacleMask = LayerMask.GetMask("Obstacles");
+
+        // Find all enemy colliders overlapping a sphere around the player
+        Collider[] colliders = Physics.OverlapSphere(transform.position, m_MeleeRange, enemyMask);
+        foreach(Collider collider in colliders) {
+            Vector3 directionToTarget = collider.transform.position - transform.position;
+            
+            // filter colliders by those that are in an arc in front of the combatant (player)
+            float angleToTarget = Vector3.Angle(transform.forward, directionToTarget);
+            if(angleToTarget < m_MaxMeleeAngle / 2) {
+                Debug.DrawRay(transform.position, directionToTarget, Color.white, .1f);
+                // check if an obstacle is in the way
+                if(!Physics.Raycast(transform.position, directionToTarget, m_MeleeRange, obstacleMask)) {
+                    collider.gameObject.GetComponent<Combatant>().TakeDamage(m_MeleeDamage);
                 }
             }
         }
     }
+
 }
+
+
+
+
+

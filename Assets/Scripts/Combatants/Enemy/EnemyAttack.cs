@@ -7,7 +7,7 @@ public class EnemyAttack : Attack {
 
     private FieldOfView m_FOV;
     private Transform m_Target;
-    private Health m_Health;
+    private Combatant m_Combatant;
     private EnemyMovement m_Movement;
     private float m_LastDetectedTargetTime;
     private const float m_TimeToLingerOnTarget = 5f; // how long to keep looking in the direction a target was detected. during this time the enemy is alert and turns faster towards the target
@@ -25,16 +25,16 @@ public class EnemyAttack : Attack {
     new void Start() {
         base.Start();
         m_FOV = GetComponent<FieldOfView>();
-        m_Health = GetComponent<Health>();
+        m_Combatant = GetComponent<Combatant>();
         m_Movement = GetComponent<EnemyMovement>();
 
         m_StartRotation = transform.rotation;
     }
 
-    void FixedUpdate() {
-        if(!m_Health.IsDead()) {
+    void Update() {
+        if(!m_Combatant.IsDead()) {
             SearchForTargets();
-            ShootAtDetectedTarget();
+            // ShootAtDetectedTarget();
         }
     }
 

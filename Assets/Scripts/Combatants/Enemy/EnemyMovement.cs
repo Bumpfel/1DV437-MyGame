@@ -8,30 +8,25 @@ public class EnemyMovement : MonoBehaviour {
     public float m_PatrolEndWaitTime = 3f;
     private float m_TurnEndWaitTime = .5f;
 
-    [HideInInspector]
-    public Vector3 m_StartingPosition;
-
-    [HideInInspector]
-    public Vector3 m_EndPosition;
+    private Vector3 m_StartingPosition;
+    private Vector3 m_EndPosition;
     private Quaternion m_StartingRotation;
     private float m_MovementSpeed = 3;
     private float m_TurnDuration = 1f;
     private float m_StopTime;
     private bool m_HasTurnedOnPatrol = false; // förbättra logik för denna. nu sätts denna till true innan man vänt om fienden patrullerar
-    private Health m_Health;
+    private Combatant m_Combatant;
     private Animator m_Animator;
-    private float m_CheckIfStuckTimestamp = 0;
+    // private float m_CheckIfStuckTimestamp = 0;
     private bool m_RecentlyMadeDiscovery = false;
     private IEnumerator m_ActiveRoutine;
-
-    // private bool m_SpunHalfLapOnDiscoveryTurn = false;
 
 
     // tanke - kunna ange koordinator som karaktären ska gå emellan, istället för bara fram/tillbaka
     // skulle kunna skapa game objects för koordinator, för att få en enklare, visuell justering av dessa koordinater. får dock inte flyttas med fienden (får inte vara barn av fiendemodellen)
 
     void Start() {
-        m_Health = GetComponent<Health>();
+        m_Combatant = GetComponent<Combatant>();
         m_StartingPosition = transform.position;
         m_StartingRotation = transform.rotation;
 
@@ -42,6 +37,15 @@ public class EnemyMovement : MonoBehaviour {
         StartCoroutine(m_ActiveRoutine);
 
         m_EndPosition = transform.position + transform.forward * m_PatrolDistance;
+    }
+
+
+    public Vector3 GetStartingPosition() {
+        return m_StartingPosition;
+    }
+
+    public Vector3 GetEndPosition() {
+        return m_EndPosition;
     }
 
 //   void OnEnable() {
@@ -62,11 +66,10 @@ public class EnemyMovement : MonoBehaviour {
     private IEnumerator Patrol() {
         if(!ShouldPatrol())
             yield break;
+        ConfirmIsAlive();
         m_Animator.Play("WalkForward_Shoot");
 
         while(true) {
-            yield return new WaitForFixedUpdate();
-            
             if((!m_HasTurnedOnPatrol && Vector3.Distance(m_StartingPosition, transform.position) >= m_PatrolDistance) || 
             (m_HasTurnedOnPatrol && (m_HasTurnedOnPatrol && Vector3.Distance(transform.position, m_StartingPosition) < .2f))) {
             //IsStuck()) {
@@ -75,6 +78,7 @@ public class EnemyMovement : MonoBehaviour {
                 m_HasTurnedOnPatrol = !m_HasTurnedOnPatrol;
                 ConfirmIsAlive();
                 yield return Turn(true);
+                // yield return Rotate();
                 ConfirmIsAlive();
                 yield return Wait(m_TurnEndWaitTime);
                 ConfirmIsAlive();
@@ -83,6 +87,7 @@ public class EnemyMovement : MonoBehaviour {
             else {
                 ConfirmIsAlive();
                 Walk();
+                yield return new WaitForFixedUpdate();
             }
         }
     }
@@ -110,7 +115,9 @@ public class EnemyMovement : MonoBehaviour {
     }
 
     private IEnumerator ResetPatrol() {
+        ConfirmIsAlive();
         yield return Turn(true);
+        ConfirmIsAlive();
         yield return Patrol();
     }
 
@@ -124,10 +131,10 @@ public class EnemyMovement : MonoBehaviour {
         // }
     }
 
-    private IEnumerator DiscoverySpin() {
+    private IEnumerator DiscoverySpin() { // Not used
         print(name + " was recently shot. Turning");
         // yield return Turn(false);
-        yield return Rotate(3f);
+        yield return Rotate();
         m_RecentlyMadeDiscovery = false;
         yield return Wait(m_PatrolEndWaitTime);
         ReturnToPatrol();
@@ -140,7 +147,8 @@ public class EnemyMovement : MonoBehaviour {
     public void Halt() {
         m_Animator.Play("Idle_Shoot");
         // print("halting");
-        StopCoroutine(m_ActiveRoutine);
+        if(m_ActiveRoutine != null)
+            StopCoroutine(m_ActiveRoutine);
     }
 
     private IEnumerator Wait(float time) {
@@ -167,50 +175,37 @@ public class EnemyMovement : MonoBehaviour {
 
         while(timeTaken < m_TurnDuration) {
             timeTaken += Time.fixedDeltaTime;
-            ConfirmIsAlive();
             yield return new WaitForFixedUpdate();
-            transform.rotation = Quaternion.Slerp(startRotation, targetRotation, timeTaken / m_TurnDuration);
+            ConfirmIsAlive();
+            transform.rotation = Quaternion.Lerp(startRotation, targetRotation, timeTaken / m_TurnDuration);
         }
         //DEBUG
         // if(name == "Enemy (2)")
         //     print("current rotation: " + transform.rotation.y + ", target rotation: " + targetRotation.y);
         // transform.rotation = targetRotation;
+        transform.position = new Vector3(transform.position.x, 0, transform.position.z); //TODO nödlösning för att en gubbe verkar ibland ändra y-position och därmed ser fov fel ut
         m_Animator.Play("Idle_GunMiddle");
         yield break;
     }
 
-    private IEnumerator Rotate(float duration) {
+    private IEnumerator Rotate() {
         float startRotation = transform.eulerAngles.y;
-        float endRotation = startRotation - 360.0f;
+        float endRotation = startRotation - 180;
         float timeTaken = 0.0f;
-        while(timeTaken < duration) {
+        while(timeTaken < m_TurnDuration) {
             timeTaken += Time.deltaTime;
-            float yRotation = Mathf.Lerp(startRotation, endRotation, timeTaken / duration) % 360.0f;
+            float yRotation = Mathf.Lerp(startRotation, endRotation, timeTaken / m_TurnDuration) % 180;
             transform.eulerAngles = new Vector3(transform.eulerAngles.x, yRotation, transform.eulerAngles.z);
-            yield return null;
+            // yield return null;
+            yield return new WaitForFixedUpdate();
         }
     }
 
     private void ConfirmIsAlive() {
-        if(m_Health.IsDead()) {
+        if(m_Combatant.IsDead()) {
             StopCoroutine(m_ActiveRoutine);
+            StopAllCoroutines();
             Destroy(this);
         }
     }
-}
-
-
-// Gives an indication of patrol path by drawing a cyan line which helps when you place enemies designing levels
-[CustomEditor (typeof (EnemyMovement))]
-public class EnemyMovementEditor : Editor {
-
-    void OnSceneGUI() {
-        EnemyMovement enemy = (EnemyMovement) target;
-        Handles.color = Color.cyan;
-        if(enemy.m_EndPosition == Vector3.zero)
-            Handles.DrawLine(enemy.transform.position, enemy.transform.position + enemy.transform.forward * enemy.m_PatrolDistance);
-        else
-            Handles.DrawLine(enemy.m_StartingPosition, enemy.m_EndPosition);
-    }
-
 }

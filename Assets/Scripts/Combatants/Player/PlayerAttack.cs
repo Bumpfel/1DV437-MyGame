@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerAttack : Attack {
     
@@ -8,7 +6,7 @@ public class PlayerAttack : Attack {
     private string m_FireButton;
     private string m_FireButton2;
     private Input m_Fire;
-    private Health m_Health;
+    private Combatant m_Combatant;
     
     [HideInInspector]
     public bool m_GamePaused = false;
@@ -19,12 +17,12 @@ public class PlayerAttack : Attack {
         base.Start();
         m_FireButton = "Fire1_Player" + m_PlayerNumber;
         m_FireButton2 = "Fire2_Player" + m_PlayerNumber;
-        m_Health = GetComponent<Health>();
+        m_Combatant = GetComponent<Combatant>();
         m_PlayerMovement = GetComponent<PlayerMovement>();
     }
 
     void Update() {
-        if(!m_Health.IsDead() && !m_GamePaused) {
+        if(!m_Combatant.IsDead() && !m_GamePaused) {
             FireIfTriggerPulled();
             AllowMelee();
         }
@@ -38,7 +36,7 @@ public class PlayerAttack : Attack {
 
     private void AllowMelee() {
         if(Input.GetButtonDown(m_FireButton2)) {
-            MeleeAttack();
+            PerformMeleeAttack();
 
         }
     }

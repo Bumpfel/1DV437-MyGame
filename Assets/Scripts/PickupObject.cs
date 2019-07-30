@@ -19,7 +19,7 @@ public class PickupObject : MonoBehaviour {
     void OnTriggerEnter(Collider other) {
         if(other.tag == "Player") {
             if(m_Type == Type.Heal) {
-                Health player = other.GetComponent<Health>();
+                Combatant player = other.GetComponent<Combatant>();
                 if(player.GetHealth() < 100) {
                     player.Heal((float) m_Type);
                     AudioSource audio = GetComponent<AudioSource>();

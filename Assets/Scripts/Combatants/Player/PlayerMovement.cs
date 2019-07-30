@@ -36,7 +36,7 @@ public class PlayerMovement : MonoBehaviour {
     private string m_HorizontalAxis;
     private string m_SprintKey;
     
-    private Health m_Health;
+    private Combatant m_Combatant;
 
     [HideInInspector]
     public bool m_GamePaused = false;
@@ -57,7 +57,7 @@ public class PlayerMovement : MonoBehaviour {
 
         Cursor.visible = false;
 
-        m_Health = GetComponent<Health>();
+        m_Combatant = GetComponent<Combatant>();
 
         // print(m_AimReticle.GetComponentInChildren<Image>().transform.localScale);
 
@@ -70,14 +70,14 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        if(!m_Health.IsDead() && !m_GamePaused) {
+        if(!m_Combatant.IsDead() && !m_GamePaused) {
             transform.position = transform.position + m_MoveTo * Time.fixedDeltaTime;
         }
     }
 
 
     void Update() {
-        if(!m_Health.IsDead() && !m_GamePaused) {
+        if(!m_Combatant.IsDead() && !m_GamePaused) {
             Look();
 
             if(m_MovementControl == MovementControl.CharacterRelativeMovement)

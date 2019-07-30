@@ -21,7 +21,7 @@ public class FieldOfView : MonoBehaviour {
     public float m_EdgeDistanceTreshold = .5f;
 
     private Mesh m_ViewMesh;
-    private Health m_Health;
+    private Combatant m_Combatant;
 
     private float m_LastSearched;
     private float m_SearchInterval = .2f;
@@ -38,11 +38,11 @@ public class FieldOfView : MonoBehaviour {
         m_ViewMesh.name = "View Mesh";
         viewMeshFilter.mesh = m_ViewMesh;
         
-        m_Health = GetComponent<Health>();
+        m_Combatant = GetComponent<Combatant>();
     }
 
     void LateUpdate() {
-        if(!m_Health.IsDead()) { 
+        if(!m_Combatant.IsDead()) { 
             DrawFieldOfView();
             if(Time.time > m_LastSearched + m_SearchInterval)
                 FindVisibleTarget();
@@ -50,12 +50,11 @@ public class FieldOfView : MonoBehaviour {
         else {
             m_ViewMesh.Clear();
             m_VisibleTargets.Clear();
-            Destroy(this);
+            // Destroy(this);
         }
         
     }
     private void FindVisibleTarget() {
-        // new WaitForEndOfFrame();
         m_VisibleTargets.Clear();
         m_LastSearched = Time.time;
         
@@ -65,28 +64,14 @@ public class FieldOfView : MonoBehaviour {
             Transform target = targetInView.transform;
             Vector3 dirToTarget = (target.position - transform.position).normalized;
 
-            // print("angle to target: " + Vector3.Angle(transform.forward, dirToTarget));
-            // print("set treshold angle: " + m_ViewAngle / 2);
-            // if(name == "Enemy (2)")
-                // Debug.DrawLine(m_RaycastOrigin, transform.position * m_ViewAngle, Color.yellow);
-
             if(Vector3.Angle(transform.forward, dirToTarget) < m_ViewAngle / 2) {
-                // print("target in cone");
                 float distToTarget = Vector3.Distance(transform.position, target.position);
                 
                 m_RaycastOrigin = transform.position + Vector3.up * m_EyePosition;
 
                 // Player located within search arc. Check if sight is obstructed
-                // if(!Physics.Raycast(m_RayCastOrigin, dirToTarget, distToTarget, m_ObstacleMask)) {
-                //     m_VisibleTargets.Add(target);
-                // }
-
-                // Alternative method. See if the ray hits the player instead
-                RaycastHit hitinfo;
-                if(Physics.Raycast(m_RaycastOrigin, dirToTarget, out hitinfo)) {
-                    // Debug.DrawLine(m_RayCastOrigin, m_RayCastOrigin + dirToTarget * distToTarget, Color.green);
-                    if(hitinfo.collider.tag == "Player")
-                        m_VisibleTargets.Add(target);
+                if(!Physics.Raycast(m_RaycastOrigin, dirToTarget, distToTarget, m_ObstacleMask)) {
+                    m_VisibleTargets.Add(target);
                 }
             }
         }

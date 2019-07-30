@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class SlidingDoor : MonoBehaviour {
 
+    public bool m_IsOpen = false;
     public bool m_Locked = false;
+    public bool m_IsExitDoor = false;
+    public GameController m_GameController;
     // public bool m_AutoClose = false;
-    private bool m_IsOpen = false;
 
     private float m_OpenTimestamp;
     private float m_OpenDelay = .2f;
@@ -30,11 +32,20 @@ public class SlidingDoor : MonoBehaviour {
         m_OriginalLeftDoorBladePosition = m_LeftDoorBlade.transform.position;
         m_RightDoorBlade = transform.GetChild(1);
         m_OriginalRightDoorBladePosition = m_RightDoorBlade.transform.position;
+
+        if(m_IsOpen) {
+            // print(name + " starts open");
+            m_RunningCoroutine = StartCoroutine("ToggleOpenDoor");
+        }
     }
 
     void OnTriggerStay(Collider other) {
-        if(Input.GetButtonDown(m_ActionKey) && Time.time > m_OpenTimestamp + m_OpenDelay) {
-            if(m_RunningCoroutine != null) {
+        if(Input.GetButtonDown(m_ActionKey) && Time.time > m_OpenTimestamp + m_OpenDelay && other.tag == "Player") {
+            if(m_IsExitDoor) {
+                m_GameController.EndLevel();
+                // end level if unlocked
+            }
+            else if(m_RunningCoroutine != null) {
                 m_RunningCoroutine = null;
                 m_IsOpen = !m_IsOpen;
                 StopCoroutine("ToggleDoor");
@@ -48,8 +59,8 @@ public class SlidingDoor : MonoBehaviour {
         m_OpenTimestamp = Time.time;
         float estimatedTime = m_SlideTime * Time.fixedDeltaTime;
 
-        m_LeftDoorTargetPosition = m_IsOpen ? m_OriginalLeftDoorBladePosition : m_LeftDoorBlade.position + Vector3.right * (m_LeftDoorBlade.localScale.z - .1f);
-        m_RightDoorTargetPosition = m_IsOpen ? m_OriginalRightDoorBladePosition : m_RightDoorBlade.position + Vector3.left * (m_RightDoorBlade.localScale.z - .1f);
+        m_LeftDoorTargetPosition = m_IsOpen ? m_OriginalLeftDoorBladePosition : m_LeftDoorBlade.position + m_LeftDoorBlade.right * (m_LeftDoorBlade.localScale.x) * .9f;
+        m_RightDoorTargetPosition = m_IsOpen ? m_OriginalRightDoorBladePosition : m_RightDoorBlade.position + m_RightDoorBlade.right * (m_RightDoorBlade.localScale.x) * -.9f;
         while(Time.time < m_OpenTimestamp + estimatedTime) {
             yield return new WaitForFixedUpdate();
             m_LeftDoorBlade.position = Vector3.Lerp(m_LeftDoorBlade.position, m_LeftDoorTargetPosition, m_SlideTime * Time.fixedDeltaTime);
