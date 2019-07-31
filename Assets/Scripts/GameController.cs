@@ -10,6 +10,10 @@ public class GameController : MonoBehaviour {
     [HideInInspector]
     public PlayerStats m_PlayerStats;
 
+    // TODO add all controls here
+    [HideInInspector]
+    public readonly string m_ActionKey = "Action_Player1";
+
     private GameObject m_Player;
     private Transform m_PlayerSpawn;
     private Menu m_Menu;
@@ -44,13 +48,10 @@ public class GameController : MonoBehaviour {
         if(Input.GetKeyDown(KeyCode.Escape)) {
             TogglePause();
         }
-        // else if(Input.GetKeyDown(KeyCode.F10)) { // TODO test
-        //     m_ScreenUI.ShowMessage("Door is locked");
-        // }
     }
 
-    public void ShowMessage(string msg) {
-        m_ScreenUI.ShowMessage(msg);
+    public void DisplayMessage(string msg) {
+        m_ScreenUI.SetScreenMessage(Field.Message, msg, true);
     }
 
     public void StartGame() {
@@ -87,9 +88,20 @@ public class GameController : MonoBehaviour {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         }
         else {
-            // TODO present game finished UI
-            print("Game Finished!");
+            // TODO disable player controls. make sure enemy does not shoot.
+            m_Player.GetComponent<PlayerMovement>().m_GamePaused = true;
+            m_Player.GetComponent<PlayerAttack>().m_GamePaused = true;
+            m_Player.layer = 0; // makes enemies ignore the player
+            // Time.timeScale = 0;
+            m_Menu.ShowCredits();
+            
+            // TODO play cheerful music
+            // UI animation ? balloons and fireworks
         }
+    }
+
+    public void LoadMainMenu() {
+        SceneManager.LoadScene(0);
     }
     
     private void debugSavePlayerData() { // TODO debug

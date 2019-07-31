@@ -9,6 +9,7 @@ TagManager:
   - GameOverMenu
   - PauseMenu
   - Background
+  - Credits
   layers:
   - Default
   - TransparentFX

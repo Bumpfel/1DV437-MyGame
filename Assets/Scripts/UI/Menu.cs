@@ -11,6 +11,7 @@ public class Menu : MonoBehaviour {
     private GameObject m_MainMenu;
     private List<GameObject> m_Submenus = new List<GameObject>();
     private GameObject m_GameOverMenu;
+    private GameObject m_Credits;
 
     public void Initialize() {
         m_GameController = GetComponentInParent<GameController>();
@@ -32,6 +33,8 @@ public class Menu : MonoBehaviour {
             }
             else if(child.tag == "GameOverMenu")
                 m_GameOverMenu = child;
+            else if(child.tag == "Credits")
+                m_Credits = child;
 
         }
         gameObject.SetActive(false);
@@ -72,6 +75,17 @@ public class Menu : MonoBehaviour {
         StartCoroutine(FadeInButton(restartButton));
         // StartCoroutine(FadeInButton(restartButton.GetComponent<Button>()));
     }
+
+    public void ShowCredits() {
+        gameObject.SetActive(true);
+        m_Credits.gameObject.SetActive(true);
+        Cursor.visible = true;
+
+        GameObject mainMenuButton = m_Credits.transform.Find("MainMenuButton").gameObject;
+        StartCoroutine(FadeInButton(mainMenuButton));
+    }
+
+
 
     private IEnumerator FadeInButton(GameObject button) {
         button.SetActive(false);

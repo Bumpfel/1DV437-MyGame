@@ -14,7 +14,7 @@ public class SlidingDoor : MonoBehaviour {
     private float m_OpenTimestamp;
     private float m_OpenDelay = .2f;
     private float m_SlideTime = 10;
-    private string m_ActionKey = "Action_Player1";
+
     private Transform m_LeftDoorBlade;
     private Transform m_RightDoorBlade;
     private Vector3 m_OriginalLeftDoorBladePosition;
@@ -44,32 +44,36 @@ public class SlidingDoor : MonoBehaviour {
     }
 
     void OnTriggerStay(Collider other) {
-        if(other.tag == "Player" && Input.GetButtonDown(m_ActionKey) && Time.time > m_OpenTimestamp + m_OpenDelay) {
-            if(m_IsLocked) {
-                m_GameController.ShowMessage("This door is locked");
-            }
-            else {
-                if(m_IsExitDoor) {
-                    m_GameController.EndLevel();
-                    return;
-                }
-                else if(m_RunningCoroutine != null) {
-                    m_RunningCoroutine = null;
-                    m_IsOpen = !m_IsOpen;
-                    StopCoroutine("ToggleDoor");
-                }
-                m_RunningCoroutine = StartCoroutine("ToggleOpenDoor");
-            }
+        if(other.tag == "Player" && Input.GetButtonDown(m_GameController.m_ActionKey) && Time.time > m_OpenTimestamp + m_OpenDelay) {
+            OpenClose();
+        // if(Input.GetKeyDown(KeyCode.U) && other.tag == "Player") { //TODO for testing
+        //     Unlock();
+            // }
         }
-        if(Input.GetKeyDown(KeyCode.U) && other.tag == "Player") { //TODO for testing
-            UnlockDoor();
-        }
-
     }
 
-    public void UnlockDoor() {
+    public void Unlock() {
+        print(name + " was unlocked");
         m_IsLocked = false;
-        ChangeDoorColor(m_UnlockedDoorColor);
+        if(!m_IsExitDoor)
+            ChangeDoorColor(m_UnlockedDoorColor);
+    }
+
+    public void OpenClose() {// TODO bättre namn
+        if(m_IsLocked) {
+            m_GameController.DisplayMessage("This door is locked");
+        }
+        else {
+            if(m_IsExitDoor) {
+                m_GameController.EndLevel();
+            }
+            else if(m_RunningCoroutine != null) {
+                m_RunningCoroutine = null;
+                m_IsOpen = !m_IsOpen;
+                StopCoroutine("ToggleDoor");
+            }
+            m_RunningCoroutine = StartCoroutine("ToggleOpenDoor");
+        }
     }
 
     private void ChangeDoorColor(Color newColor) {
@@ -79,7 +83,7 @@ public class SlidingDoor : MonoBehaviour {
         }
     }
 
-    private IEnumerator ToggleOpenDoor() {
+    private IEnumerator ToggleOpenDoor() { // TODO bättre namn
         yield return new WaitForFixedUpdate();
         m_OpenTimestamp = Time.time;
         float estimatedTime = m_SlideTime * Time.fixedDeltaTime;

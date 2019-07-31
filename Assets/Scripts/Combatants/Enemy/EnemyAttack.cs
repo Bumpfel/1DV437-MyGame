@@ -21,7 +21,6 @@ public class EnemyAttack : Attack {
     private readonly float m_AngleDifferenceToTargetBeforeShooting = 15;
     private bool m_IsAlerted = false;
 
-
     new void Start() {
         base.Start();
         m_FOV = GetComponent<FieldOfView>();
