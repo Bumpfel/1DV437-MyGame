@@ -4,20 +4,19 @@ using UnityEngine;
 
 public class SlidingDoor : MonoBehaviour {
 
-    public bool m_IsOpen = false;
-    public bool m_Locked = false;
+    private bool m_IsOpen = false;
+    public bool m_IsLocked = false;
     public bool m_IsExitDoor = false;
-    public GameController m_GameController;
     // public bool m_AutoClose = false;
 
+    private GameController m_GameController;
+    private Color m_UnlockedDoorColor = Color.black; // TODO get real color
     private float m_OpenTimestamp;
     private float m_OpenDelay = .2f;
     private float m_SlideTime = 10;
     private string m_ActionKey = "Action_Player1";
-
     private Transform m_LeftDoorBlade;
     private Transform m_RightDoorBlade;
-
     private Vector3 m_OriginalLeftDoorBladePosition;
     private Vector3 m_OriginalRightDoorBladePosition;
 
@@ -28,29 +27,55 @@ public class SlidingDoor : MonoBehaviour {
 
 
     void Start() {
-        m_LeftDoorBlade = transform.GetChild(0);
+        m_LeftDoorBlade = transform.Find("DoorBladeLeft");
         m_OriginalLeftDoorBladePosition = m_LeftDoorBlade.transform.position;
-        m_RightDoorBlade = transform.GetChild(1);
+        m_RightDoorBlade = transform.Find("DoorBladeRight");
         m_OriginalRightDoorBladePosition = m_RightDoorBlade.transform.position;
 
-        if(m_IsOpen) {
-            // print(name + " starts open");
-            m_RunningCoroutine = StartCoroutine("ToggleOpenDoor");
-        }
+        // Material doorMtrl = (Material) Resources.Load("Materials/Door", typeof(Material));
+        // m_UnlockedDoorColor = doorMtrl.color;
+
+        m_GameController = FindObjectOfType<GameController>();
+
+        // if(m_IsOpen) {
+        //     // print(name + " starts open");
+        //     m_RunningCoroutine = StartCoroutine("ToggleOpenDoor");
+        // }
     }
 
     void OnTriggerStay(Collider other) {
-        if(Input.GetButtonDown(m_ActionKey) && Time.time > m_OpenTimestamp + m_OpenDelay && other.tag == "Player") {
-            if(m_IsExitDoor) {
-                m_GameController.EndLevel();
-                // end level if unlocked
+        if(other.tag == "Player" && Input.GetButtonDown(m_ActionKey) && Time.time > m_OpenTimestamp + m_OpenDelay) {
+            if(m_IsLocked) {
+                m_GameController.ShowMessage("This door is locked");
             }
-            else if(m_RunningCoroutine != null) {
-                m_RunningCoroutine = null;
-                m_IsOpen = !m_IsOpen;
-                StopCoroutine("ToggleDoor");
+            else {
+                if(m_IsExitDoor) {
+                    m_GameController.EndLevel();
+                    return;
+                }
+                else if(m_RunningCoroutine != null) {
+                    m_RunningCoroutine = null;
+                    m_IsOpen = !m_IsOpen;
+                    StopCoroutine("ToggleDoor");
+                }
+                m_RunningCoroutine = StartCoroutine("ToggleOpenDoor");
             }
-            m_RunningCoroutine = StartCoroutine("ToggleOpenDoor");
+        }
+        if(Input.GetKeyDown(KeyCode.U) && other.tag == "Player") { //TODO for testing
+            UnlockDoor();
+        }
+
+    }
+
+    public void UnlockDoor() {
+        m_IsLocked = false;
+        ChangeDoorColor(m_UnlockedDoorColor);
+    }
+
+    private void ChangeDoorColor(Color newColor) {
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        foreach(Renderer renderer in renderers) {
+            renderer.material.SetColor("_Color", newColor);
         }
     }
 
@@ -59,8 +84,8 @@ public class SlidingDoor : MonoBehaviour {
         m_OpenTimestamp = Time.time;
         float estimatedTime = m_SlideTime * Time.fixedDeltaTime;
 
-        m_LeftDoorTargetPosition = m_IsOpen ? m_OriginalLeftDoorBladePosition : m_LeftDoorBlade.position + m_LeftDoorBlade.right * (m_LeftDoorBlade.localScale.x) * .9f;
-        m_RightDoorTargetPosition = m_IsOpen ? m_OriginalRightDoorBladePosition : m_RightDoorBlade.position + m_RightDoorBlade.right * (m_RightDoorBlade.localScale.x) * -.9f;
+        m_LeftDoorTargetPosition = m_IsOpen ? m_OriginalLeftDoorBladePosition : m_LeftDoorBlade.position + m_LeftDoorBlade.right * (m_LeftDoorBlade.localScale.x) * -.9f;
+        m_RightDoorTargetPosition = m_IsOpen ? m_OriginalRightDoorBladePosition : m_RightDoorBlade.position + m_RightDoorBlade.right * (m_RightDoorBlade.localScale.x) * .9f;
         while(Time.time < m_OpenTimestamp + estimatedTime) {
             yield return new WaitForFixedUpdate();
             m_LeftDoorBlade.position = Vector3.Lerp(m_LeftDoorBlade.position, m_LeftDoorTargetPosition, m_SlideTime * Time.fixedDeltaTime);
@@ -73,61 +98,5 @@ public class SlidingDoor : MonoBehaviour {
         m_RunningCoroutine = null;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // void Start() {
-    //     m_LeftDoorBlade = transform.GetChild(0);
-    //     m_OriginalLeftDoorPosition = m_LeftDoorBlade.transform.position;
-    //     m_LeftDoorTargetPosition = m_LeftDoorBlade.transform.position;
-    //     m_RightDoorBlade = transform.GetChild(1);
-    //     m_OriginalRightDoorPosition = m_RightDoorBlade.transform.position;
-    //     m_RightDoorTargetPosition = m_RightDoorBlade.transform.position;
-    // }
-
-    // void FixedUpdate() {
-    //      m_LeftDoorBlade.position = Vector3.Slerp(m_LeftDoorBlade.position, m_LeftDoorTargetPosition, estimatedTime * Time.fixedDeltaTime);
-    //     m_RightDoorBlade.position = Vector3.Slerp(m_RightDoorBlade.position, m_RightDoorTargetPosition, estimatedTime * Time.fixedDeltaTime);
-    //     // m_LeftDoorBlade.position = m_LeftDoorTargetPosition;
-    //     // m_RightDoorBlade.position = m_RightDoorTargetPosition;
-    // }
-
-    // void OnTriggerStay(Collider other) {
-    //     if(Input.GetButtonDown(m_ActionKey) && Time.time > m_OpenTimestamp + m_OpenDelay) {
-    //         // StartCoroutine(OpenDoor());
-    //         OpenDoor();
-    //     }
-    // }
-
-    // private void OpenDoor() {
-    //     // leftDoorBlade.position = leftDoorBlade.position * Vector2.up * -.5f;
-    //     // rightDoorBlade.position = rightDoorBlade.position * Vector2.up * .5f;
-    //     float timestamp = Time.time;
-    //     m_LeftDoorTargetPosition = m_IsOpen ? m_LeftDoorBlade.position + Vector3.right * m_LeftDoorBlade.localScale.z : m_OriginalLeftDoorPosition;
-    //     m_RightDoorTargetPosition = m_IsOpen ? m_RightDoorBlade.position + Vector3.left * m_RightDoorBlade.localScale.z : m_OriginalRightDoorPosition;
-    //     // while(Time.time < timestamp + estimatedTime) {
-    //         // yield return new WaitForFixedUpdate();
-    //         // m_LeftDoorBlade.position = Vector3.Slerp(m_LeftDoorBlade.position, m_LeftDoorTargetPosition, estimatedTime * Time.fixedDeltaTime);
-    //         // m_RightDoorBlade.position = Vector3.Slerp(m_RightDoorBlade.position, m_RightDoorTargetPosition, estimatedTime * Time.fixedDeltaTime);
-    //     // }
-    //     // m_LeftDoorBlade.position = m_LeftDoorTargetPosition;
-    //     // m_RightDoorBlade.position = m_RightDoorTargetPosition;
-
-    //     m_OpenTimestamp = Time.time;
-    //     m_IsOpen = !m_IsOpen;
-    //     // yield break;
-    // }
 
 }

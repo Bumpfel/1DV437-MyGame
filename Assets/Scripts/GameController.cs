@@ -13,10 +13,13 @@ public class GameController : MonoBehaviour {
     private GameObject m_Player;
     private Transform m_PlayerSpawn;
     private Menu m_Menu;
+    private ScreenUI m_ScreenUI;
     private bool m_Paused = false;
     private int m_CurrentSceneIndex;
 
     private bool m_GameOver = false;
+
+    // private enum Message { DOOR_LOCKED  };
 
     void Start() {
         Initialize();
@@ -28,6 +31,9 @@ public class GameController : MonoBehaviour {
         m_Menu = GetComponentInChildren<Menu>(true);
         m_Menu.Initialize();
 
+        m_ScreenUI = GetComponentInChildren<ScreenUI>(true);
+        m_ScreenUI.gameObject.SetActive(true);
+
         m_PlayerSpawn = GetComponentInChildren<Transform>().Find("PlayerSpawn");
         m_Player = Instantiate(PlayerModel, m_PlayerSpawn.position, m_PlayerSpawn.rotation, transform);
         m_CameraController.SetPlayer(m_Player.transform);
@@ -38,10 +44,18 @@ public class GameController : MonoBehaviour {
         if(Input.GetKeyDown(KeyCode.Escape)) {
             TogglePause();
         }
+        // else if(Input.GetKeyDown(KeyCode.F10)) { // TODO test
+        //     m_ScreenUI.ShowMessage("Door is locked");
+        // }
+    }
+
+    public void ShowMessage(string msg) {
+        m_ScreenUI.ShowMessage(msg);
     }
 
     public void StartGame() {
         SceneManager.LoadScene(1);
+        m_ScreenUI.ShowLevelText();
     }
 
     public void RestartLevel() { //Respawn() {
@@ -73,8 +87,8 @@ public class GameController : MonoBehaviour {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         }
         else {
-            // TODO present game over UI
-            print("Game Over!");
+            // TODO present game finished UI
+            print("Game Finished!");
         }
     }
     

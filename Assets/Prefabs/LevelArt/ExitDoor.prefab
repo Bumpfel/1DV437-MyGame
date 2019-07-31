@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &360385166001927951
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3173444720789992327, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_Name
+      value: ExitDoor
+      objectReference: {fileID: 0}
+    - target: {fileID: 3173444720789992324, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3173444720789992324, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3173444720789992324, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3173444720789992324, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3173444720789992324, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3173444720789992324, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3173444720789992324, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3173444720789992324, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3173444720789992324, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3173444720789992324, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3173444720789992324, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3173444720789992322, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_IsExitDoor
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7469631377246879041, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5305562845064308395, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 41b6498aca451b344991475ee1caccee, type: 2}
+    - target: {fileID: 766341506671673179, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 9052266437347427229, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4045731119871903884, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 41b6498aca451b344991475ee1caccee, type: 2}
+    - target: {fileID: 6123482934876736418, guid: 2a7fa98098d634e43a6baa7f2adcc51d,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2a7fa98098d634e43a6baa7f2adcc51d, type: 3}
