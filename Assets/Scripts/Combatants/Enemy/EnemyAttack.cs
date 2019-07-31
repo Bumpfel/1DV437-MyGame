@@ -33,7 +33,7 @@ public class EnemyAttack : Attack {
     void Update() {
         if(!m_Combatant.IsDead()) {
             SearchForTargets();
-            // ShootAtDetectedTarget();
+            ShootAtDetectedTarget();
         }
     }
 

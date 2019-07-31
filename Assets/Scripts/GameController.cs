@@ -26,7 +26,9 @@ public class GameController : MonoBehaviour {
     // private enum Message { DOOR_LOCKED  };
 
     void Start() {
-        Initialize();
+        if(SceneManager.GetActiveScene().buildIndex > 0) {
+            Initialize();
+        }
     }
 
     private void Initialize() {
@@ -42,6 +44,7 @@ public class GameController : MonoBehaviour {
         m_Player = Instantiate(PlayerModel, m_PlayerSpawn.position, m_PlayerSpawn.rotation, transform);
         m_CameraController.SetPlayer(m_Player.transform);
         Time.timeScale = 1;
+
     }
 
     void Update() {
@@ -50,13 +53,8 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    public void DisplayMessage(string msg) {
-        m_ScreenUI.SetScreenMessage(Field.Message, msg, true);
-    }
-
     public void StartGame() {
-        SceneManager.LoadScene(1);
-        m_ScreenUI.ShowLevelText();
+        SceneManager.LoadScene(2);
     }
 
     public void RestartLevel() { //Respawn() {
@@ -64,6 +62,10 @@ public class GameController : MonoBehaviour {
         Initialize();
         m_GameOver = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void LoadMainMenu() {
+        SceneManager.LoadScene(0);
     }
 
     // public void RestartLevel() {
@@ -79,12 +81,18 @@ public class GameController : MonoBehaviour {
         m_Menu.ShowGameOverMenu();
     }
 
+    public void DisplayMessage(string msg) {
+        m_ScreenUI.SetScreenMessage(Field.Message, msg, true);
+    }
+
+
     public void EndLevel() {
         m_PlayerStats.SetLevelEnded();
         SaveSystem.SaveHighScoreData(m_PlayerStats);
-        int nrOfScenes = SceneManager.sceneCount;
-        int currentScene = SceneManager.GetActiveScene().buildIndex;
-        if(currentScene < nrOfScenes) {
+
+        int nrOfScenes = SceneManager.sceneCountInBuildSettings - 1; // exclude menu
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        if(currentSceneIndex < nrOfScenes) {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         }
         else {
@@ -92,16 +100,11 @@ public class GameController : MonoBehaviour {
             m_Player.GetComponent<PlayerMovement>().m_GamePaused = true;
             m_Player.GetComponent<PlayerAttack>().m_GamePaused = true;
             m_Player.layer = 0; // makes enemies ignore the player
-            // Time.timeScale = 0;
             m_Menu.ShowCredits();
             
             // TODO play cheerful music
             // UI animation ? balloons and fireworks
         }
-    }
-
-    public void LoadMainMenu() {
-        SceneManager.LoadScene(0);
     }
     
     private void debugSavePlayerData() { // TODO debug

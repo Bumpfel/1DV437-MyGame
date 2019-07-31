@@ -13,7 +13,11 @@ public class Menu : MonoBehaviour {
     private GameObject m_GameOverMenu;
     private GameObject m_Credits;
 
-    public void Initialize() {
+    void Start() {
+        m_GameController = GetComponentInParent<GameController>();
+    }
+
+    public void Initialize() { // Used by GameController to load the script since it won't load automatically as the menu is hidden when loading a level
         m_GameController = GetComponentInParent<GameController>();
 
         // Makes sure all menus are hidden and stores references to them in order to easily manipulate their visibility
@@ -73,7 +77,6 @@ public class Menu : MonoBehaviour {
         GameObject restartButton = m_GameOverMenu.transform.Find("RespawnButton").gameObject;
 
         StartCoroutine(FadeInButton(restartButton));
-        // StartCoroutine(FadeInButton(restartButton.GetComponent<Button>()));
     }
 
     public void ShowCredits() {
@@ -82,31 +85,30 @@ public class Menu : MonoBehaviour {
         Cursor.visible = true;
 
         GameObject mainMenuButton = m_Credits.transform.Find("MainMenuButton").gameObject;
+        mainMenuButton.GetComponent<Button>().onClick.AddListener(() => m_GameController.LoadMainMenu());
         StartCoroutine(FadeInButton(mainMenuButton));
     }
 
 
+    private IEnumerator FadeInButton(GameObject buttonObject) {
+        // buttonObject.SetActive(false);
+        // yield return new WaitForSeconds(1.5f);
+        // buttonObject.SetActive(true);
 
-    private IEnumerator FadeInButton(GameObject button) {
-        button.SetActive(false);
-        yield return new WaitForSeconds(1.5f);
-        button.SetActive(true);
+        Button button = buttonObject.GetComponent<Button>();
+        Image image = buttonObject.GetComponent<Image>();
+        image.enabled = false;
 
+        button.interactable = false;
+        TextMeshProUGUI buttonText = buttonObject.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        buttonText.canvasRenderer.SetAlpha(0);
 
-    //     button.interactable = false;
-    //     TextMeshProUGUI buttonText = button.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-    //     buttonText.alpha = 0;
-    //     print("fading button...");
-    //     while(buttonText.alpha < 1) {
-    //         buttonText.CrossFadeAlpha(1, 2f, false);
-    //         yield return new WaitForEndOfFrame();
-    //     }
-    //     button.interactable = true;
-    //     print("done!");
+        float fadeDuration = 1;
+        buttonText.CrossFadeAlpha(1, fadeDuration, false);
+        yield return new WaitForSeconds(fadeDuration);
 
-    //     // button.colors = Color.Lerp(Color.);
-    //     yield break;
-
+        image.enabled = true;
+        button.interactable = true;
     }
 
     public void PlayButton() {
