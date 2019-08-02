@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Audio;
 
@@ -9,7 +7,7 @@ public class SetVolume : MonoBehaviour {
     public AudioMixer m_Mixer;
 
     void Start() {
-        if(name == "GameController") {
+        if(name == "GameController") { // load saved settings and set volume for all groups on startup
             AudioMixerGroup[] mixerGroups = m_Mixer.FindMatchingGroups("");
             foreach(AudioMixerGroup mixerGroup in mixerGroups) {
                 string exposedParamName = mixerGroup.name + "Volume";
@@ -18,7 +16,7 @@ public class SetVolume : MonoBehaviour {
                     SetMixerGroupVolume(exposedParamName, savedValue);
             }
         }
-        else {
+        else { // attached to a volume group (channel) in the options menu. load saved settings and set slider value
             float savedValue = PlayerPrefs.GetFloat(name, -1);
             if(savedValue > -1) {
                 SetMixerGroupVolume(name, savedValue);
@@ -28,11 +26,7 @@ public class SetVolume : MonoBehaviour {
  
     }
 
-    // void OnDisable() {
-    //     PlayerPrefs.Save();
-    // }
-
-    // helped method for UI sliders
+    // helper method for UI sliders
     public void AdjustVolume(float sliderValue) {
         SetMixerGroupVolume(name, sliderValue);
         PlayerPrefs.SetFloat(name, sliderValue);

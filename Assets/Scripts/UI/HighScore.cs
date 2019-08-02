@@ -30,16 +30,11 @@ public class HighScore : MonoBehaviour {
         m_StatsList.Sort((ps1, ps2) => ps1.LevelIndex.CompareTo(ps2.LevelIndex));
 
         Transform dataRow = Array.Find<Transform>(GetComponentsInChildren<Transform>(true), obj => obj.name == "Data");
-        // Transform dataRow = headerCells[0].transform.parent;
-
-        // foreach(TextMeshProUGUI text in headerCells) {
-        //     text.SetText("");
-        // }
 
         foreach(PlayerStats playerStats in m_StatsList) {
             List<object> stat = new List<object>();
             stat.Add(playerStats.LevelIndex);
-            stat.Add(playerStats.PlayerName);
+            // stat.Add(playerStats.PlayerName);
             stat.Add(playerStats.Kills);
             stat.Add(playerStats.PlayerDeaths);
 
@@ -56,11 +51,6 @@ public class HighScore : MonoBehaviour {
                 row.gameObject.name = "Row " + playerStats.LevelIndex;
                 dataCells[i].SetText("" + stat[i]);
             }
-
-            // for(int i = 0; i < dataTexts.Length; i ++) {
-            //     string newText = dataTexts[i].text + "\n" + stat[i]; //TODO kanske inte snyggaste metoden. kolla upp om det går att kopiera en rad istället
-            //     dataTexts[i].SetText(newText);
-            // }
         }
         dataRow.gameObject.SetActive(false);
     }

@@ -2,11 +2,10 @@
 
 public class PlayerAttack : Attack {
     
-    public int m_PlayerNumber = 1; // TODO temp
+    public int m_PlayerNumber = 1;
     private string m_FireButton;
     private string m_FireButton2;
     private Input m_Fire;
-    private Combatant m_Combatant;
     
     [HideInInspector]
     public bool m_GamePaused = false;
@@ -17,7 +16,6 @@ public class PlayerAttack : Attack {
         base.Start();
         m_FireButton = "Fire1_Player" + m_PlayerNumber;
         m_FireButton2 = "Fire2_Player" + m_PlayerNumber;
-        m_Combatant = GetComponent<Combatant>();
         m_PlayerMovement = GetComponent<PlayerMovement>();
     }
 

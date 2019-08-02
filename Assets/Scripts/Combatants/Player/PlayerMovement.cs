@@ -152,7 +152,7 @@ public class PlayerMovement : MonoBehaviour {
         transform.LookAt(mousePosRelativeToCamera + Vector3.up * transform.position.y);
         
         //placing reticle on top (5 units up), compensating for aim reticle size, so the bullet is fire at the center of the reticle
-        m_AimReticle.transform.position = mousePosRelativeToCamera + Vector3.up * 5 + Vector3.forward * .25f;
+        m_AimReticle.transform.position = mousePosRelativeToCamera + Vector3.up * 5 + transform.right * .23f;//.25f; // .23 for perspective, .25 for ortographic 
     }
 
 

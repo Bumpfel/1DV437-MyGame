@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -13,7 +11,7 @@ public static class SaveSystem {
         List<PlayerStats> existingHighScore = LoadHighScoreData();
         if(existingHighScore != null) {
             foreach(PlayerStats score in existingHighScore) {
-                Debug.Log(score.TimeTaken);
+                // Debug.Log(score.TimeTaken);
             }
         }
 
@@ -33,10 +31,10 @@ public static class SaveSystem {
             newHighScore.Add(playerStats);
 
             SavePlayerData(newHighScore);
-            Debug.LogWarning("new record found. saving");
+            // Debug.LogWarning("new record found. saving");
         }
         else {
-            Debug.Log("old record is better");
+            // Debug.Log("old record is better");
         }
     }
 
@@ -56,11 +54,7 @@ public static class SaveSystem {
         if(File.Exists(savePath)) {
             FileStream stream = new FileStream(savePath, FileMode.Open, FileAccess.Read);
 
-            List<PlayerStats> playerStatsList = new List<PlayerStats>();
-            // while(stream.Position < stream.Length) {
-            //     playerStatsList.Add((PlayerStats) formatter.Deserialize(stream));
-            // }
-            playerStatsList = (List<PlayerStats>) formatter.Deserialize(stream);
+            List<PlayerStats> playerStatsList = (List<PlayerStats>) formatter.Deserialize(stream);
             stream.Close();
             return playerStatsList;
         }

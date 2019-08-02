@@ -10,32 +10,34 @@ public class GameController : MonoBehaviour {
     [HideInInspector]
     public PlayerStats m_PlayerStats;
 
-    // TODO add all controls here
-    [HideInInspector]
-    public readonly string m_ActionKey = "Action_Player1";
-
     private GameObject m_Player;
     private Transform m_PlayerSpawn;
     private Menu m_Menu;
     private ScreenUI m_ScreenUI;
+
+    // TODO add all controls here
+    public readonly string m_ActionKey = "Action_Player1";
+
     private bool m_Paused = false;
     private int m_CurrentSceneIndex;
-
     private bool m_GameOver = false;
 
     // private enum Message { DOOR_LOCKED  };
 
     void Start() {
-        if(SceneManager.GetActiveScene().buildIndex > 0) {
+        // print("GameController Start()");
+        m_Menu = GetComponentInChildren<Menu>(true);
+        if(LevelIsLoaded()) {
             Initialize();
         }
     }
 
     private void Initialize() {
+        // print("GameController Initialize()");
         m_PlayerStats = new PlayerStats("Player", SceneManager.GetActiveScene().buildIndex);
         
-        m_Menu = GetComponentInChildren<Menu>(true);
-        m_Menu.Initialize();
+        // m_Menu = GetComponentInChildren<Menu>(true);
+        m_Menu.Initialize(); //sad
 
         m_ScreenUI = GetComponentInChildren<ScreenUI>(true);
         m_ScreenUI.gameObject.SetActive(true);
@@ -44,17 +46,19 @@ public class GameController : MonoBehaviour {
         m_Player = Instantiate(PlayerModel, m_PlayerSpawn.position, m_PlayerSpawn.rotation, transform);
         m_CameraController.SetPlayer(m_Player.transform);
         Time.timeScale = 1;
-
     }
 
     void Update() {
         if(Input.GetKeyDown(KeyCode.Escape)) {
             TogglePause();
         }
+        if(Input.GetKeyDown(KeyCode.F9)) { // debug
+            EndLevel();
+        }
     }
 
     public void StartGame() {
-        SceneManager.LoadScene(2);
+        SceneManager.LoadScene(1);
     }
 
     public void RestartLevel() { //Respawn() {
@@ -87,6 +91,7 @@ public class GameController : MonoBehaviour {
 
 
     public void EndLevel() {
+        m_GameOver = true;
         m_PlayerStats.SetLevelEnded();
         SaveSystem.SaveHighScoreData(m_PlayerStats);
 
@@ -94,9 +99,9 @@ public class GameController : MonoBehaviour {
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         if(currentSceneIndex < nrOfScenes) {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+            //TODO meny med knapp innan nästa bana laddas
         }
         else {
-            // TODO disable player controls. make sure enemy does not shoot.
             m_Player.GetComponent<PlayerMovement>().m_GamePaused = true;
             m_Player.GetComponent<PlayerAttack>().m_GamePaused = true;
             m_Player.layer = 0; // makes enemies ignore the player
@@ -106,6 +111,14 @@ public class GameController : MonoBehaviour {
             // UI animation ? balloons and fireworks
         }
     }
+
+    public bool LevelIsLoaded() {
+        return SceneManager.GetActiveScene().buildIndex > 0;
+    }
+
+    // public bool IsGameOver() {
+    //     return m_GameOver;
+    // }
     
     private void debugSavePlayerData() { // TODO debug
         if(m_Paused) {
@@ -120,11 +133,13 @@ public class GameController : MonoBehaviour {
 
     public void TogglePause() {
         if(!m_GameOver && m_Menu.ToggleMenu()) {
-            // Cursor.visible = !Cursor.visible;
-            m_Paused = !m_Paused;
-            m_Player.GetComponent<PlayerMovement>().m_GamePaused = m_Paused;
-            m_Player.GetComponent<PlayerAttack>().m_GamePaused = m_Paused;
-            Time.timeScale = m_Paused ? 0 : 1;
+            if(LevelIsLoaded()) {
+                // Cursor.visible = !Cursor.visible;
+                m_Paused = !m_Paused;
+                m_Player.GetComponent<PlayerMovement>().m_GamePaused = m_Paused;
+                m_Player.GetComponent<PlayerAttack>().m_GamePaused = m_Paused;
+                Time.timeScale = m_Paused ? 0 : 1;
+            }
         }
 
         if(!m_Paused) {

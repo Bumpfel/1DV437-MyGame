@@ -7,24 +7,19 @@ public class EnemyAttack : Attack {
 
     private FieldOfView m_FOV;
     private Transform m_Target;
-    private Combatant m_Combatant;
     private EnemyMovement m_Movement;
-    private float m_LastDetectedTargetTime;
-    private const float m_TimeToLingerOnTarget = 5f; // how long to keep looking in the direction a target was detected. during this time the enemy is alert and turns faster towards the target
     private Quaternion m_StartRotation;
-
+    private const float TimeToLingerOnTarget = 5; // how long to keep looking in the direction a target was detected. during this time the enemy is alert and turns faster towards the target
+    private const float FollowTargetSpeed = 0.2f;
+    private const float AngleDifferenceToTargetBeforeShooting = 15;
+    private float m_LastDetectedTargetTime;
     private bool m_RecentlyDetectedPlayer = false;
-
-    private float m_FollowTargetSpeed = 0.2f;
-
     private float m_AngleDifferenceToTarget;
-    private readonly float m_AngleDifferenceToTargetBeforeShooting = 15;
     private bool m_IsAlerted = false;
 
     new void Start() {
         base.Start();
         m_FOV = GetComponent<FieldOfView>();
-        m_Combatant = GetComponent<Combatant>();
         m_Movement = GetComponent<EnemyMovement>();
 
         m_StartRotation = transform.rotation;
@@ -33,7 +28,7 @@ public class EnemyAttack : Attack {
     void Update() {
         if(!m_Combatant.IsDead()) {
             SearchForTargets();
-            ShootAtDetectedTarget();
+            // ShootAtDetectedTarget();
         }
     }
 
@@ -58,7 +53,7 @@ public class EnemyAttack : Attack {
             m_RecentlyDetectedPlayer = true;
             m_LastDetectedTargetTime = Time.time;
         }
-        else if(m_RecentlyDetectedPlayer && Time.time > m_LastDetectedTargetTime + m_TimeToLingerOnTarget) {
+        else if(m_RecentlyDetectedPlayer && Time.time > m_LastDetectedTargetTime + TimeToLingerOnTarget) {
             m_RecentlyDetectedPlayer = false;
 
             m_Movement.ReturnToPatrol();
@@ -85,10 +80,10 @@ public class EnemyAttack : Attack {
 
         // print("difference: " + m_AngleDifferenceToTarget);
 
-        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, m_FollowTargetSpeed);
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, FollowTargetSpeed);
     }
 
     private bool CloseEnoughToShoot() {
-        return m_AngleDifferenceToTarget < m_AngleDifferenceToTargetBeforeShooting;
+        return m_AngleDifferenceToTarget < AngleDifferenceToTargetBeforeShooting;
     }
 }

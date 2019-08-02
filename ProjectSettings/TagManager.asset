@@ -10,6 +10,9 @@ TagManager:
   - PauseMenu
   - Background
   - Credits
+  - BuffUI
+  - ArmourBuff
+  - APRBuff
   layers:
   - Default
   - TransparentFX

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Most of this code is taken from https://github.com/SebLague/Field-of-View
 public class FieldOfView : MonoBehaviour {
 
     [Range(0, 100)]
@@ -25,8 +26,7 @@ public class FieldOfView : MonoBehaviour {
 
     private float m_LastSearched;
     private float m_SearchInterval = .2f;
-    [HideInInspector]
-    public Vector3 m_RaycastOrigin; // TODO public for editor
+    private Vector3 m_RaycastOrigin;
     private float m_EyePosition = 1.7f;
     
     void Start() {
@@ -58,21 +58,28 @@ public class FieldOfView : MonoBehaviour {
         m_VisibleTargets.Clear();
         m_LastSearched = Time.time;
         
+        // Finds all colliders in a sphere with the center at the enemy combatant
         Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, m_ViewRadius, m_TargetMask);
-
         foreach(Collider targetInView in targetsInViewRadius) {
             Transform target = targetInView.transform;
             Vector3 dirToTarget = (target.position - transform.position).normalized;
 
+            // ...check if the collider is in front of the enemy combatant within a specified view angle
             if(Vector3.Angle(transform.forward, dirToTarget) < m_ViewAngle / 2) {
                 float distToTarget = Vector3.Distance(transform.position, target.position);
                 
                 m_RaycastOrigin = transform.position + Vector3.up * m_EyePosition;
 
-                // Player located within search arc. Check if sight is obstructed
-                if(!Physics.Raycast(m_RaycastOrigin, dirToTarget, distToTarget, m_ObstacleMask)) {
-                    m_VisibleTargets.Add(target);
+                // Check if sight is obstructed by obstacles or other enemies
+                RaycastHit hitinfo;
+                if(Physics.Raycast(m_RaycastOrigin, dirToTarget, out hitinfo, distToTarget)) {
+                    if(hitinfo.collider && hitinfo.collider.tag == "Player")
+                        m_VisibleTargets.Add(target);
                 }
+
+                // if(!Physics.Raycast(m_RaycastOrigin, dirToTarget, out hitinfo, distToTarget, m_ObstacleMask)) {
+                //     m_VisibleTargets.Add(target);
+                // }
             }
         }
     }

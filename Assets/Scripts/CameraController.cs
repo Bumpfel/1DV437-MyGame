@@ -7,12 +7,14 @@ public class CameraController : MonoBehaviour {
     public float m_UnitsInFrontOfPlayer = 3;
     private float m_MaxDistanceFromCamera = 12;
 
+    public bool m_FollowPlayer = true;
+
     public void SetPlayer(Transform player) {
         m_Player = player;
     }
 
     void Update() {
-        if(m_Player) {
+        if(m_Player && m_FollowPlayer) {
             // Makes the camera follow the player with focus slighly in front of the player 
             Vector3 inFrontOfPlayer = m_Player.forward * m_UnitsInFrontOfPlayer;
             transform.position = new Vector3(m_Player.position.x + inFrontOfPlayer.x, transform.position.y, m_Player.position.z + inFrontOfPlayer.z);
