@@ -22,6 +22,7 @@ public class SlidingDoor : MonoBehaviour {
     private AudioSource m_AudioSource;
     private GameController m_GameController;
     private Color m_UnlockedDoorColor = Color.black; // TODO get real color
+    private Color m_UnlockedExitDoorColor = Color.green;
     
     private const float OpenDelay = .2f;
     private const float SlideTime = 10;
@@ -73,8 +74,7 @@ public class SlidingDoor : MonoBehaviour {
 
     public void Unlock() {
         m_IsLocked = false;
-        if(!m_IsExitDoor)
-            ChangeDoorColor(m_UnlockedDoorColor);
+        ChangeDoorColor(m_IsExitDoor ? m_UnlockedExitDoorColor : m_UnlockedDoorColor);
     }
 
 

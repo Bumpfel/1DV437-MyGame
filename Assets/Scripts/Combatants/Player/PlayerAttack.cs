@@ -21,18 +21,18 @@ public class PlayerAttack : Attack {
 
     void Update() {
         if(!m_Combatant.IsDead() && !m_GamePaused) {
-            FireIfTriggerPulled();
-            AllowMelee();
+            FireIfTriggered();
+            MeleeIfTriggered();
         }
     }
 
-    private void FireIfTriggerPulled() {
+    private void FireIfTriggered() {
         if(Input.GetButtonDown(m_FireButton) && !m_PlayerMovement.IsRunning()) {
             Fire();
         }
     }
 
-    private void AllowMelee() {
+    private void MeleeIfTriggered() {
         if(Input.GetButtonDown(m_FireButton2)) {
             PerformMeleeAttack();
 

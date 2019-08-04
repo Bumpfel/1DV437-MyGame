@@ -6,19 +6,20 @@ using TMPro;
 
 public class Combatant : MonoBehaviour {
     public AudioClip m_DeathSound;
-    // public AudioClip m_TakeDamageSound;
+    public bool m_IsAsleep = false;
 
     private AudioSource m_AudioSource;
     private GameObject m_CharacterGUI;
     private Slider m_HealthBar;
     private GameObject m_ArmourBuffUI;
     private GameObject m_APRoundsBuffUI;
+    private GameObject m_AsleepIndicator;
     private Animator m_Animator;
     private GameController m_GameController;
     private const float m_ArmourResistanceMultiplier = 2;
     private float m_Health = 100;
-    private float m_Armour = 0;
-    private int m_ArmourPiercingRounds = 0;
+    public float m_Armour = 0;
+    public int m_ArmourPiercingRounds = 0;
 
     void Start() {
         m_GameController = GetComponentInParent<GameController>();
@@ -27,8 +28,8 @@ public class Combatant : MonoBehaviour {
         m_CharacterGUI = transform.Find("CharacterGUI").gameObject;
         m_HealthBar = m_CharacterGUI.GetComponentInChildren<Slider>();
 
-        if(tag == "Player") {
-            GameObject buffBar = m_CharacterGUI.transform.Find("Buffs").gameObject;
+        // if(tag == "Player") {
+            GameObject buffBar = m_CharacterGUI.transform.Find("BuffBar").gameObject;
             for(int i = 0; i < buffBar.transform.childCount; i ++) {
                 GameObject child = buffBar.transform.GetChild(i).gameObject;
                 if(child.tag == "ArmourBuff")
@@ -39,22 +40,25 @@ public class Combatant : MonoBehaviour {
 
             UpdateAPRBuff();
             UpdateHealthBar();
+        // }
+        // else {
+        if(tag == "Enemy") {
+            m_AsleepIndicator = m_CharacterGUI.transform.Find("Asleep").gameObject;
+            if(m_IsAsleep)
+                m_AsleepIndicator.SetActive(true);
         }
         
         m_AudioSource = GetComponent<AudioSource>();
     }
 
-
     public void TakeDamage(float amount) {
-        if(!IsDead()) {
-            // float incomingDamage = amount / m_ResistanceMultiplier; // old calc
+        // if(!IsDead()) {
+            WakeUp();
+
             float unmitigatedDmg = Mathf.Max(0, amount - m_Armour);
             float mitigatedDmg = amount - unmitigatedDmg;
             float incomingDamage = unmitigatedDmg + mitigatedDmg / m_ArmourResistanceMultiplier;
-                    float previousArmour = m_Armour; // TODO debug
             m_Armour = Mathf.Max(0, m_Armour - incomingDamage);
-
-            // print(name + " took " + incomingDamage + " damage and his armour was reduced from " + previousArmour + " to " + m_Armour);
 
             m_Health = Mathf.Max(m_Health - incomingDamage, 0);
             UpdateHealthBar();
@@ -65,9 +69,13 @@ public class Combatant : MonoBehaviour {
             else if(tag == "Enemy") {
                 GetComponent<EnemyMovement>().ReactToTakingDamage();
             }
-            // m_AudioSource.clip = m_TakeDamageSound;
-            // m_AudioSource.Play();
-        }
+        // }
+    }
+
+    private void WakeUp() {
+        m_IsAsleep = false;
+        if(tag == "Enemy")
+            m_AsleepIndicator.SetActive(false);
     }
 
     public void Heal(float amount) {
@@ -76,9 +84,10 @@ public class Combatant : MonoBehaviour {
             UpdateHealthBar();
         }
     }
-    
+
     private void Die() {
         m_Animator.Play("Die");
+        Destroy(m_Animator, 2); // make sure the animator doesn't reset when unity reloads scripts (in editor)
         
         m_AudioSource.clip = m_DeathSound;
         m_AudioSource.Play();
@@ -88,15 +97,16 @@ public class Combatant : MonoBehaviour {
         
         if(tag == "Player") {
             m_GameController.m_PlayerStats.AddPlayerDeath();
-
             m_GameController.SetGameOver();
-            //Debug
-            // m_Health = 100;
-            // UpdateHealthBar();
         }
         else {
+            transform.Find("FOVVisualization").gameObject.SetActive(false);
             m_GameController.m_PlayerStats.AddKill();
         }
+        foreach(MonoBehaviour component in GetComponents<MonoBehaviour>()) {
+            component.enabled = false;
+        }
+        // m_Animator.enabled = false;
     }
 
     public bool IsDead() {
@@ -105,12 +115,12 @@ public class Combatant : MonoBehaviour {
 
     private void UpdateHealthBar() {
         m_HealthBar.value = m_Health;
-        if(tag == "Player") {
+        // if(tag == "Player") {
             if(m_Armour == 0)
                 m_ArmourBuffUI.SetActive(false);
             else
                 m_ArmourBuffUI.GetComponentInChildren<TextMeshProUGUI>().SetText("" + m_Armour);
-        }
+        // }
     }
     private void UpdateAPRBuff() {
         if(m_ArmourPiercingRounds == 0)

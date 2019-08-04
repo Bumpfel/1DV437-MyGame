@@ -5,6 +5,7 @@ using UnityEditor;
 public class GameButton : MonoBehaviour {
     public SlidingDoor[] m_AffectedDoors = null;
 
+    private const float CameraSpeed = 40;
     private GameController m_GameController;
     private AudioSource m_AudioSource;
     private bool m_IsInsideTrigger = false;
@@ -32,41 +33,26 @@ public class GameButton : MonoBehaviour {
         }
     }
 
-    public float cameraVelocity = 30;
     private IEnumerator ShowUnlockedDoor(SlidingDoor[] doors) {
+        m_GameController.TogglePlayerControl(true);
         Camera camera = Camera.main;
-        camera.GetComponent<CameraController>().m_FollowPlayer = false;
+        CameraController cameraController = camera.GetComponent<CameraController>();
+        cameraController.m_FollowPlayer = false;
         Vector3 initialCameraPosition = camera.transform.position;
         Vector3 targetCameraPosition = doors[0].transform.position;
         targetCameraPosition.y = camera.transform.position.y;
 
-        yield return MoveCamera(camera, initialCameraPosition, targetCameraPosition);
+        yield return cameraController.MoveCamera(camera, targetCameraPosition, CameraSpeed);
 
         yield return new WaitForSeconds(.5f);
         foreach(SlidingDoor door in doors) {
             door.Unlock();
         }
         yield return new WaitForSeconds(2);
+        yield return cameraController.MoveCamera(camera, initialCameraPosition, CameraSpeed);
         Camera.main.GetComponent<CameraController>().m_FollowPlayer = true;
+        m_GameController.TogglePlayerControl(false);
     }
-
-    private IEnumerator MoveCamera(Camera camera, Vector3 from, Vector3 to) {
-        float distance = Vector3.Distance(from, to);
-
-        float duration = distance / cameraVelocity;
-        // float timeTaken = 0;
-        // while(timeTaken < duration) {
-        //     timeTaken += Time.deltaTime;
-        while(camera.transform.position != to) {
-            if(Input.GetKeyDown(KeyCode.F12)) {
-                break;
-            }
-            camera.transform.position = Vector3.Lerp(from, to, cameraVelocity * Time.deltaTime);
-            // camera.transform.position = Vector3.Lerp(from, to, timeTaken / duration);
-            yield return new WaitForEndOfFrame();
-        }
-    }
-
 
     void OnTriggerStay(Collider other) {
         if(other.tag == "Player") {

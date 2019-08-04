@@ -15,12 +15,24 @@ public class CameraController : MonoBehaviour {
 
     void Update() {
         if(m_Player && m_FollowPlayer) {
-            // Makes the camera follow the player with focus slighly in front of the player 
-            Vector3 inFrontOfPlayer = m_Player.forward * m_UnitsInFrontOfPlayer;
-            transform.position = new Vector3(m_Player.position.x + inFrontOfPlayer.x, transform.position.y, m_Player.position.z + inFrontOfPlayer.z);
-            // transform.position = m_Player.position + Vector3.up * transform.position.y;
+            if(!Input.GetKey(KeyCode.LeftControl)) {
+                // Makes the camera follow the player with focus slighly in front of the player 
+                Vector3 inFrontOfPlayer = m_Player.forward * m_UnitsInFrontOfPlayer;
+                
+                
+                //standard
+                // transform.position = new Vector3(m_Player.position.x + inFrontOfPlayer.x, transform.position.y, m_Player.position.z + inFrontOfPlayer.z);
+                
 
-            if(Input.GetKey(KeyCode.LeftControl)) {
+                //smooth                
+                Vector3 to = new Vector3(m_Player.position.x + inFrontOfPlayer.x, transform.position.y, m_Player.position.z + inFrontOfPlayer.z);
+                transform.position = Vector3.Lerp(transform.position, to, .15f);
+
+
+                // transform.position = m_Player.position + Vector3.up * transform.position.y;
+            }
+            else {
+            // if(Input.GetKey(KeyCode.LeftControl)) {
                 Vector3 mousePos = GetComponent<Camera>().ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.position.y));
                 Vector3 maxVector = m_Player.position + m_Player.forward * m_MaxDistanceFromCamera;
                 float mousePosDistance = Vector3.Distance(m_Player.position, mousePos);
@@ -34,6 +46,19 @@ public class CameraController : MonoBehaviour {
                 }
                 
             }
+        }
+    }
+
+    public IEnumerator MoveCamera(Camera camera, Vector3 to, float cameraSpeed) {
+        Vector3 from = camera.transform.position;
+        float distance = Vector3.Distance(from, to);
+
+        float duration = distance / cameraSpeed;
+        float timeTaken = 0;
+        while(timeTaken < duration) {
+            timeTaken += Time.deltaTime;
+            camera.transform.position = Vector3.Lerp(from, to, timeTaken / duration);
+            yield return new WaitForEndOfFrame();
         }
     }
 

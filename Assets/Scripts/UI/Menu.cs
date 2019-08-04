@@ -117,7 +117,7 @@ public class Menu : MonoBehaviour {
     }
 
     public void ResumeButton() {
-        m_GameController.TogglePause();
+        m_GameController.TogglePauseMenu();
     }
 
     public void RespawnButton() {

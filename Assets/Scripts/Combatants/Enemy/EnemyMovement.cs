@@ -11,15 +11,15 @@ public class EnemyMovement : MonoBehaviour {
     private Vector3 m_StartingPosition;
     private Vector3 m_EndPosition;
     private Quaternion m_StartingRotation;
+    private Combatant m_Combatant;
+    private Animator m_Animator;
+    private IEnumerator m_ActiveRoutine;
     private float m_MovementSpeed = 3;
     private float m_TurnDuration = 1f;
     private float m_StopTime;
     private bool m_HasTurnedOnPatrol = false; // förbättra logik för denna. nu sätts denna till true innan man vänt om fienden patrullerar
-    private Combatant m_Combatant;
-    private Animator m_Animator;
     // private float m_CheckIfStuckTimestamp = 0;
     private bool m_RecentlyMadeDiscovery = false;
-    private IEnumerator m_ActiveRoutine;
 
 
     // tanke - kunna ange koordinator som karaktären ska gå emellan, istället för bara fram/tillbaka
@@ -69,7 +69,7 @@ public class EnemyMovement : MonoBehaviour {
         ConfirmIsAlive();
         m_Animator.Play("WalkForward_Shoot");
 
-        while(true) {
+        while(!m_Combatant.m_IsAsleep) {
             if((!m_HasTurnedOnPatrol && Vector3.Distance(m_StartingPosition, transform.position) >= m_PatrolDistance) || 
             (m_HasTurnedOnPatrol && (m_HasTurnedOnPatrol && Vector3.Distance(transform.position, m_StartingPosition) < .2f))) {
             //IsStuck()) {
@@ -82,7 +82,8 @@ public class EnemyMovement : MonoBehaviour {
                 ConfirmIsAlive();
                 yield return Wait(m_TurnEndWaitTime);
                 ConfirmIsAlive();
-                m_Animator.Play("WalkForward_Shoot");
+                if(!m_Combatant.m_IsAsleep)
+                    m_Animator.Play("WalkForward_Shoot");
             }
             else {
                 ConfirmIsAlive();
@@ -90,6 +91,9 @@ public class EnemyMovement : MonoBehaviour {
                 yield return new WaitForFixedUpdate();
             }
         }
+        
+
+        m_Animator.Play("Idle_GunMiddle");
     }
 
     // private bool IsStuck() {
@@ -176,7 +180,7 @@ public class EnemyMovement : MonoBehaviour {
         while(timeTaken < m_TurnDuration) {
             timeTaken += Time.fixedDeltaTime;
             yield return new WaitForFixedUpdate();
-            ConfirmIsAlive();
+            // ConfirmIsAlive();
             transform.rotation = Quaternion.Lerp(startRotation, targetRotation, timeTaken / m_TurnDuration);
         }
         //DEBUG
@@ -192,11 +196,11 @@ public class EnemyMovement : MonoBehaviour {
         float startRotation = transform.eulerAngles.y;
         float endRotation = startRotation - 180;
         float timeTaken = 0.0f;
+        float yRotation;
         while(timeTaken < m_TurnDuration) {
             timeTaken += Time.deltaTime;
-            float yRotation = Mathf.Lerp(startRotation, endRotation, timeTaken / m_TurnDuration) % 180;
+            yRotation = Mathf.Lerp(startRotation, endRotation, timeTaken / m_TurnDuration) % 180;
             transform.eulerAngles = new Vector3(transform.eulerAngles.x, yRotation, transform.eulerAngles.z);
-            // yield return null;
             yield return new WaitForFixedUpdate();
         }
     }
@@ -205,7 +209,7 @@ public class EnemyMovement : MonoBehaviour {
         if(m_Combatant.IsDead()) {
             StopCoroutine(m_ActiveRoutine);
             StopAllCoroutines();
-            Destroy(this);
+            enabled = false;
         }
     }
 }

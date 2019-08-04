@@ -27,20 +27,20 @@ public class EnemyAttack : Attack {
 
     void Update() {
         if(!m_Combatant.IsDead()) {
-            SearchForTargets();
-            // ShootAtDetectedTarget();
+            ReactToVisibleTargets();
+            ShootAtDetectedTarget();
         }
     }
 
     private void ShootAtDetectedTarget() {
-        if(m_FOV.m_VisibleTargets.Count > 0 && CloseEnoughToShoot())
+        if(m_FOV && m_FOV.m_VisibleTargets.Count > 0 && CloseEnoughToShoot())
             ContinuousFire();
         else if(m_RecentlyDetectedPlayer)
             StopContinuousFire(); // just to stop firing animation
     }
 
-    private void SearchForTargets() { // TODO (liten) något missledande namn
-        if(m_FOV.m_VisibleTargets.Count > 0) {
+    private void ReactToVisibleTargets() {
+        if(m_FOV && m_FOV.m_VisibleTargets.Count > 0) {
             m_IsAlerted = true;
             m_Target = m_FOV.m_VisibleTargets[0];
 

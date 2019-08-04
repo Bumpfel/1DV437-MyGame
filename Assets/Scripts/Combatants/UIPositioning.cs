@@ -3,10 +3,12 @@ using UnityEngine.UI;
 
 public class UIPositioning : MonoBehaviour {
 
-    private float m_VerticalOffset = 2.5f;
     private Quaternion m_RelativeRotation;
     private EnemyAttack m_EnemyAttack; 
     private GameObject m_AlertIndicator;
+
+    private Vector3 playerPosition;
+    private const float m_VerticalOffset = 2;
 
     void Start() {
         m_RelativeRotation = transform.localRotation;
@@ -16,8 +18,8 @@ public class UIPositioning : MonoBehaviour {
     }
 
     void Update() {
-        Vector3 playerPosition = transform.parent.position;
-        transform.position = new Vector3(playerPosition.x, transform.position.y, playerPosition.z + m_VerticalOffset);
+        playerPosition = transform.parent.position;
+        transform.position = new Vector3(playerPosition.x, transform.position.y , playerPosition.z + m_VerticalOffset);
         transform.rotation = m_RelativeRotation;
 
         if(m_AlertIndicator) {

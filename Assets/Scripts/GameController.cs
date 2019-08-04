@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -6,6 +6,8 @@ public class GameController : MonoBehaviour {
 
     public GameObject PlayerModel;
     public CameraController m_CameraController;
+
+    public AudioClip m_LevelEndedAudio;
 
     [HideInInspector]
     public PlayerStats m_PlayerStats;
@@ -37,7 +39,7 @@ public class GameController : MonoBehaviour {
         m_PlayerStats = new PlayerStats("Player", SceneManager.GetActiveScene().buildIndex);
         
         // m_Menu = GetComponentInChildren<Menu>(true);
-        m_Menu.Initialize(); //sad
+        m_Menu.Initialize();
 
         m_ScreenUI = GetComponentInChildren<ScreenUI>(true);
         m_ScreenUI.gameObject.SetActive(true);
@@ -50,15 +52,17 @@ public class GameController : MonoBehaviour {
 
     void Update() {
         if(Input.GetKeyDown(KeyCode.Escape)) {
-            TogglePause();
+            TogglePauseMenu();
         }
         if(Input.GetKeyDown(KeyCode.F9)) { // debug
-            EndLevel();
+            AudioSource.PlayClipAtPoint(m_LevelEndedAudio, Camera.main.transform.position, 1);
+            // EndLevel();
         }
+
     }
 
     public void StartGame() {
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(2);
     }
 
     public void RestartLevel() { //Respawn() {
@@ -99,6 +103,10 @@ public class GameController : MonoBehaviour {
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         if(currentSceneIndex < nrOfScenes) {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+
+            // AudioSource audioSource = GetComponent<AudioSource>();
+            // audioSource.Play();
+            AudioSource.PlayClipAtPoint(m_LevelEndedAudio, Camera.main.transform.position, 1);
             //TODO meny med knapp innan nästa bana laddas
         }
         else {
@@ -106,7 +114,8 @@ public class GameController : MonoBehaviour {
             m_Player.GetComponent<PlayerAttack>().m_GamePaused = true;
             m_Player.layer = 0; // makes enemies ignore the player
             m_Menu.ShowCredits();
-            
+            AudioSource.PlayClipAtPoint(m_LevelEndedAudio, Camera.main.transform.position, 1);
+
             // TODO play cheerful music
             // UI animation ? balloons and fireworks
         }
@@ -131,13 +140,12 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    public void TogglePause() {
+    public void TogglePauseMenu() {
         if(!m_GameOver && m_Menu.ToggleMenu()) {
             if(LevelIsLoaded()) {
                 // Cursor.visible = !Cursor.visible;
                 m_Paused = !m_Paused;
-                m_Player.GetComponent<PlayerMovement>().m_GamePaused = m_Paused;
-                m_Player.GetComponent<PlayerAttack>().m_GamePaused = m_Paused;
+                TogglePlayerControl(m_Paused);
                 Time.timeScale = m_Paused ? 0 : 1;
             }
         }
@@ -148,5 +156,12 @@ public class GameController : MonoBehaviour {
         }
         // debugSavePlayerData();
     }
+
+    public void TogglePlayerControl(bool disabled) {
+        m_Player.GetComponent<PlayerMovement>().m_GamePaused = disabled;
+        m_Player.GetComponent<PlayerAttack>().m_GamePaused = disabled;
+    }
+
+
 
 }

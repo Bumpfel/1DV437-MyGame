@@ -41,8 +41,7 @@ public class PlayerMovement : MonoBehaviour {
     [HideInInspector]
     public bool m_GamePaused = false;
 
-
-    private float speedSmoothTime = .1f;
+    private const float speedSmoothTime = .1f;
     private float speedSmoothVelocity;
     private float currentSpeed;
 
@@ -80,9 +79,9 @@ public class PlayerMovement : MonoBehaviour {
         if(!m_Combatant.IsDead() && !m_GamePaused) {
             Look();
 
-            if(m_MovementControl == MovementControl.CharacterRelativeMovement)
-                CharacterRelativeMovement();
-            else
+            // if(m_MovementControl == MovementControl.CharacterRelativeMovement)
+                // CharacterRelativeMovement();
+            // else
                 SmoothCameraRelativeMovement();
                 // SmoothCharacterRelativeMovement();
                 // CameraRelativeMovement();
@@ -169,60 +168,60 @@ public class PlayerMovement : MonoBehaviour {
 
 
 
-    private void CharacterRelativeMovement() {
-        float movementInput = Input.GetAxisRaw(m_VerticalAxis);
+    // private void CharacterRelativeMovement() {
+    //     float movementInput = Input.GetAxisRaw(m_VerticalAxis);
 
-        Vector3 forwardMovement = transform.forward * movementInput * m_WalkSpeed;
-        if(Input.GetAxisRaw(m_SprintKey) > 0)
-            forwardMovement *= m_RunModifier;
-
-
-        if(movementInput != 0) {           
-            if(Input.GetAxisRaw(m_SprintKey) > 0) {
-                if(!m_IsRunning && movementInput > 0) {
-                    m_Animator.Play("Run_Guard");
-                    m_IsRunning = true;
-                }
-            }
-            else {
-                forwardMovement = transform.forward * movementInput * m_WalkSpeed;
-
-                if(!m_IsWalking) {
-                    m_Animator.Play("WalkForward_Shoot");
-                    m_IsWalking = true;
-                }
-            }                
-        }
-        else if(m_IsRunning || m_IsWalking) {
-            m_Animator.Play("Idle_Shoot");
-            m_IsRunning = false;            
-            m_IsWalking = false;
-        }
+    //     Vector3 forwardMovement = transform.forward * movementInput * m_WalkSpeed;
+    //     if(Input.GetAxisRaw(m_SprintKey) > 0)
+    //         forwardMovement *= m_RunModifier;
 
 
-        //strafe
-        float strafe = Input.GetAxisRaw(m_HorizontalAxis);
+    //     if(movementInput != 0) {           
+    //         if(Input.GetAxisRaw(m_SprintKey) > 0) {
+    //             if(!m_IsRunning && movementInput > 0) {
+    //                 m_Animator.Play("Run_Guard");
+    //                 m_IsRunning = true;
+    //             }
+    //         }
+    //         else {
+    //             forwardMovement = transform.forward * movementInput * m_WalkSpeed;
 
-        Vector3 strafeMovement = transform.right * strafe * m_StrafeSpeed;
-        if(strafe != 0) {
-            // m_Body.MovePosition(m_Body.position + strafeMovement);
+    //             if(!m_IsWalking) {
+    //                 m_Animator.Play("WalkForward_Shoot");
+    //                 m_IsWalking = true;
+    //             }
+    //         }                
+    //     }
+    //     else if(m_IsRunning || m_IsWalking) {
+    //         m_Animator.Play("Idle_Shoot");
+    //         m_IsRunning = false;            
+    //         m_IsWalking = false;
+    //     }
 
-            if(strafe < 0 && !m_IsStrafingLeft) {
-                m_Animator.Play("WalkLeft_Shoot");
-                m_IsStrafingLeft = true;
-            }
-            else if(strafe > 0 && !m_IsStrafingRight) {
-                m_Animator.Play("WalkRight_Shoot");
-                m_IsStrafingRight = true;
-            }
-        }
-        else if(m_IsStrafingLeft || m_IsStrafingRight) {
-            m_Animator.Play("Idle_Shoot");
-            m_IsStrafingLeft = false;
-            m_IsStrafingRight = false;
-        }
-        m_MoveTo = forwardMovement + strafeMovement;
-    }
+
+    //     //strafe
+    //     float strafe = Input.GetAxisRaw(m_HorizontalAxis);
+
+    //     Vector3 strafeMovement = transform.right * strafe * m_StrafeSpeed;
+    //     if(strafe != 0) {
+    //         // m_Body.MovePosition(m_Body.position + strafeMovement);
+
+    //         if(strafe < 0 && !m_IsStrafingLeft) {
+    //             m_Animator.Play("WalkLeft_Shoot");
+    //             m_IsStrafingLeft = true;
+    //         }
+    //         else if(strafe > 0 && !m_IsStrafingRight) {
+    //             m_Animator.Play("WalkRight_Shoot");
+    //             m_IsStrafingRight = true;
+    //         }
+    //     }
+    //     else if(m_IsStrafingLeft || m_IsStrafingRight) {
+    //         m_Animator.Play("Idle_Shoot");
+    //         m_IsStrafingLeft = false;
+    //         m_IsStrafingRight = false;
+    //     }
+    //     m_MoveTo = forwardMovement + strafeMovement;
+    // }
 
 
 

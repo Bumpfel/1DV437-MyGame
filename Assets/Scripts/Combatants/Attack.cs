@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 public class Attack : MonoBehaviour {
     
     public Rigidbody m_Bullet;
@@ -18,30 +17,38 @@ public class Attack : MonoBehaviour {
 
     private float m_AttackTimestamp;
     private const float MeleeDamage = 100;
-    private const float MeleeRange = 2.5f;
+    private const float MeleeRange = 2;
     private const float MeleeTime = .35f;
-    private const float MaxMeleeAngle = 60;
+    private const float MaxMeleeAngle = 90;
     private bool m_PlayingMeleeAnimation = false;
+    private LayerMask m_EnemyMask;
+    private LayerMask m_ObstacleMask;
 
     protected void Start() {
         m_Animator = GetComponent<Animator>();
         m_Animator.Play("Idle_GunMiddle");
         m_BulletSpawn = transform.Find("BulletSpawn");
 
-        AudioSource[] audios = GetComponents<AudioSource>(); // There are two different audio sources to make they sure an attack does not interrupt another
+        AudioSource[] audios = GetComponents<AudioSource>(); // There are two different audio sources to make they sure an attack does not interrupt the sound of the other
         m_GunAudioSource = audios[0];
         m_GunAudioSource.clip = m_GunSound;
         m_MeleeAudioSource = audios[1];
         m_MeleeAudioSource.clip = m_MeleeAttackSound;
 
         m_Combatant = GetComponent<Combatant>();
+
+        m_EnemyMask = LayerMask.GetMask("Enemies");
+        m_ObstacleMask = LayerMask.GetMask("Obstacles");
     }
 
     protected void Fire() {
         Rigidbody bullet = Instantiate(m_Bullet, m_BulletSpawn.position, m_BulletSpawn.rotation);
-        bool armourPiercing = false;
-        if(armourPiercing = m_Combatant.UseArmourPiercingRounds())
+        if(m_Combatant.UseArmourPiercingRounds()) {
+            m_GunAudioSource.pitch = .85f;
             bullet.gameObject.GetComponent<Bullet>().SetArmorPiercing();
+        }
+        else
+            m_GunAudioSource.pitch = 1;
         
         if(tag == "Player") {
             m_Animator.Play("Shoot_single", 0, .25f);
@@ -49,10 +56,6 @@ public class Attack : MonoBehaviour {
         else
             m_Animator.PlayInFixedTime("Shoot_single", 0, m_FireRate);
 
-        if(armourPiercing)
-            m_GunAudioSource.pitch = .85f;
-        else
-            m_GunAudioSource.pitch = 1;
         m_GunAudioSource.Play();
     }
 
@@ -77,52 +80,44 @@ public class Attack : MonoBehaviour {
             m_Animator.Play("basic_Melee_Attack", 0, .1f);
             m_MeleeAudioSource.Play();
 
-            LayerMask enemyMask = LayerMask.GetMask("Enemies");
-            LayerMask obstacleMask = LayerMask.GetMask("Obstacles");
+            Collider[] colliders = Physics.OverlapSphere(transform.position + transform.forward * .7f, MeleeRange / 2, m_EnemyMask);
+            if(colliders.Length > 0) {
+                Combatant enemy = colliders[0].gameObject.GetComponent<Combatant>();
+                Vector3 directionToTarget = (enemy.transform.position - transform.position).normalized;
+                // Debug.DrawRay(transform.position + Vector3.up * 1.5f, directionToTarget, Color.magenta, 2f);
 
-            // Find all enemy colliders overlapping a sphere around the player
-            Collider[] colliders = Physics.OverlapSphere(transform.position, MeleeRange, enemyMask);
-            foreach(Collider collider in colliders) {
-                Vector3 directionToTarget = collider.transform.position - transform.position;
-                
-                // filter colliders by those that are in an arc in front of the combatant (player)
-                float angleToTarget = Vector3.Angle(transform.forward + transform.right * .2f, directionToTarget); // adjusting what I consider to be "in front" of the combatant for a melee attack 
-                if(angleToTarget < MaxMeleeAngle / 2) {
-                    // Debug.DrawRay(transform.position, directionToTarget, Color.white, .1f);
-                    // check if an obstacle is in the way
-                    if(!Physics.Raycast(transform.position, directionToTarget, MeleeRange, obstacleMask)) {
-                        collider.gameObject.GetComponent<Combatant>().TakeDamage(MeleeDamage);
-                    }
+                // checking if there are obstacles in the way. Starting cast from the back of the player collider since starting from center causes problems if too close to the target.
+                float colliderRadius = transform.GetComponent<CapsuleCollider>().radius;
+                if(!Physics.Raycast(transform.position + transform.forward * - colliderRadius / 2, directionToTarget, MeleeRange, m_ObstacleMask)) { 
+                    enemy.TakeDamage(MeleeDamage);
                 }
             }
         }
     }
 
 
-    protected void MeleeAttack() { // external interface. TODO not used. animation didn't look good while sprinting and not calling PerformMeleeAttack immediately made it feel a bit unresponsive
-        if(!m_PlayingMeleeAnimation) {
-            StartCoroutine(PlayMeleeAnimation());
-        }
-    }
+    // protected void MeleeAttack() { // external interface. TODO not used. animation didn't look good while sprinting and not calling PerformMeleeAttack immediately made it feel a bit unresponsive
+    //     if(!m_PlayingMeleeAnimation) {
+    //         StartCoroutine(PlayMeleeAnimation());
+    //     }
+    // }
     
-    private IEnumerator PlayMeleeAnimation() { //TODO  not used
-        m_PlayingMeleeAnimation = true;
-        float timeTaken = 0;
-        m_Animator.Play("Melee_Attack");
-        while(timeTaken < MeleeTime) {
-            timeTaken += Time.deltaTime;
-            m_Animator.SetFloat("meleeSpeed", timeTaken / MeleeTime);
-            if(timeTaken / MeleeTime > .85) {
-                PerformMeleeAttack();
-            }
-            yield return new WaitForEndOfFrame();
-        }
-        m_PlayingMeleeAnimation = false;
-    }
+    // private IEnumerator PlayMeleeAnimation() { // not used
+    //     m_PlayingMeleeAnimation = true;
+    //     float timeTaken = 0;
+    //     m_Animator.Play("Melee_Attack");
+    //     while(timeTaken < MeleeTime) {
+    //         timeTaken += Time.deltaTime;
+    //         m_Animator.SetFloat("meleeSpeed", timeTaken / MeleeTime);
+    //         if(timeTaken / MeleeTime > .85) {
+    //             PerformMeleeAttack();
+    //         }
+    //         yield return new WaitForEndOfFrame();
+    //     }
+    //     m_PlayingMeleeAnimation = false;
+    // }
 
 }
-
-
 
 
 
