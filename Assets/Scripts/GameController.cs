@@ -162,6 +162,9 @@ public class GameController : MonoBehaviour {
         m_Player.GetComponent<PlayerAttack>().m_GamePaused = disabled;
     }
 
-
+    public float GetSavedVolume(ExposedMixerGroup mixerGroup) {
+        return PlayerPrefs.GetFloat(mixerGroup.ToString());
+    }
 
 }
+public enum ExposedMixerGroup { MasterVolume, SFXVolume, MusicVolume };

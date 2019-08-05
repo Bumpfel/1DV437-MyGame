@@ -32,7 +32,7 @@ public class EnemyAttack : Attack {
     void Update() {
         if(!m_Combatant.IsDead()) {
             ReactToVisibleTargets();
-            ShootAtDetectedTarget();
+            // ShootAtDetectedTarget();
         }
     }
 
@@ -50,6 +50,7 @@ public class EnemyAttack : Attack {
 
             if(!m_RecentlyDetectedPlayer) {
                 m_Movement.Halt();
+                // m_Movement.m_IsTurning = false; // should not need. should be enough to use IsAlserted from EnemyMovement instead
                 // print(name + " detected " + m_Target.name); // debug
             }
             TurnTowardsTarget();

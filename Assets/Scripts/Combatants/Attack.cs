@@ -78,7 +78,7 @@ public class Attack : MonoBehaviour {
         if(Time.time > m_AttackTimestamp + MeleeTime) {
             m_AttackTimestamp = Time.time;
             m_MeleeAudioSource.Play();
-            // m_Animator.Play("basic_Melee_Attack", 0, .15f);
+            m_Animator.Play("basic_Melee_Attack", 0, .15f);
 
             Collider[] colliders = Physics.OverlapSphere(transform.position + transform.forward * .7f, MeleeRange / 2, m_EnemyMask);
             if(colliders.Length > 0) {

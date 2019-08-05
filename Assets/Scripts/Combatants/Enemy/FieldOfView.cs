@@ -94,6 +94,11 @@ public class FieldOfView : MonoBehaviour {
         // }
         
     }
+
+    public bool HasTargetInView() {
+        return m_VisibleTargets.Count > 0;
+    }
+
     private void FindVisibleTarget() {
         m_VisibleTargets.Clear();
         m_LastSearched = Time.time;

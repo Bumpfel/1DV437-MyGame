@@ -74,16 +74,18 @@ public class Combatant : MonoBehaviour {
                     m_IsAsleep = false;
                     reactionTime *= 2;
                 }
-                StartCoroutine(DelayReaction(5));
+                // StartCoroutine(DelayReaction(reactionTime));
+                GetComponent<EnemyMovement>().ReactToTakingDamage();
             }
         // }
     }
 
     private IEnumerator DelayReaction(float time) {
-        float timestamp = Time.time;
-        while(Time.time < timestamp + time) {
-            yield return null;
-        }
+        yield return new WaitForSeconds(time);
+        // float timestamp = Time.time;
+        // while(Time.time < timestamp + time) {
+        //     yield return null;
+        // }
         // yield return new WaitForSeconds(time);
         GetComponent<EnemyMovement>().ReactToTakingDamage();
     }
