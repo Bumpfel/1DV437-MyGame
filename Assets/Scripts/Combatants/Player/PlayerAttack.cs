@@ -34,8 +34,8 @@ public class PlayerAttack : Attack {
 
     private void MeleeIfTriggered() {
         if(Input.GetButtonDown(m_FireButton2)) {
-            PerformMeleeAttack();
-
+            // PerformMeleeAttack();
+            MeleeAttack();
         }
     }
 

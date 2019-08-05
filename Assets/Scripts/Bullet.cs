@@ -11,7 +11,10 @@ public class Bullet : MonoBehaviour {
     private RaycastHit m_Hitinfo;
     private float m_CalculatedHitTimeStamp;
 
+    private Vector3 m_Origin;
+
     void Start() {
+        m_Origin = transform.position;
         Destroy(gameObject, DestroyBulletAfterSeconds);
     }
     
@@ -19,14 +22,19 @@ public class Bullet : MonoBehaviour {
         // cast a ray forwards with a distance equal to the distance the bullet travels in one fixed udpate and see if there is a collision
         if(Physics.Raycast(transform.position, transform.forward, out m_Hitinfo, BulletVelocity * Time.fixedDeltaTime)) {
             // DrawDebugLines();
-            Destroy(gameObject);
-
             if(m_Hitinfo.collider.tag != "Ignored") {
                 if(m_Hitinfo.collider.tag == "Player" || m_Hitinfo.collider.tag == "Enemy") {
                     Combatant target = m_Hitinfo.collider.gameObject.GetComponentInParent<Combatant>();
-                    target.TakeDamage(m_BulletDmg);
+                    target.TakeDamage(m_BulletDmg, m_Origin);
                 }
+                // if(m_Hitinfo.collider.tag == "Enemy") {
+                    // var tempObj = new GameObject("temp");
+                    // tempObj.transform.position = m_Origin;
+                    // m_Hitinfo.collider.GetComponentInParent<FieldOfView>().m_VisibleTargets.Add(tempObj.transform);
+                // }
             }
+            Destroy(gameObject);
+            
         }
         MoveBullet();
     }

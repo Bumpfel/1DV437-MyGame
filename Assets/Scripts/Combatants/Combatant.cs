@@ -21,6 +21,8 @@ public class Combatant : MonoBehaviour {
     public float m_Armour = 0;
     public int m_ArmourPiercingRounds = 0;
 
+    private const float ReactionTime = .5f;
+
     void Start() {
         m_GameController = GetComponentInParent<GameController>();
         m_Animator = GetComponent<Animator>();
@@ -51,9 +53,8 @@ public class Combatant : MonoBehaviour {
         m_AudioSource = GetComponent<AudioSource>();
     }
 
-    public void TakeDamage(float amount) {
+    public void TakeDamage(float amount, Vector3 dmgSource) {
         // if(!IsDead()) {
-            WakeUp();
 
             float unmitigatedDmg = Mathf.Max(0, amount - m_Armour);
             float mitigatedDmg = amount - unmitigatedDmg;
@@ -67,15 +68,24 @@ public class Combatant : MonoBehaviour {
                 return;
             }
             else if(tag == "Enemy") {
-                GetComponent<EnemyMovement>().ReactToTakingDamage();
+                float reactionTime = ReactionTime;
+                if(m_IsAsleep) {
+                    m_AsleepIndicator.SetActive(false);
+                    m_IsAsleep = false;
+                    reactionTime *= 2;
+                }
+                StartCoroutine(DelayReaction(5));
             }
         // }
     }
 
-    private void WakeUp() {
-        m_IsAsleep = false;
-        if(tag == "Enemy")
-            m_AsleepIndicator.SetActive(false);
+    private IEnumerator DelayReaction(float time) {
+        float timestamp = Time.time;
+        while(Time.time < timestamp + time) {
+            yield return null;
+        }
+        // yield return new WaitForSeconds(time);
+        GetComponent<EnemyMovement>().ReactToTakingDamage();
     }
 
     public void Heal(float amount) {

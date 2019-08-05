@@ -17,6 +17,10 @@ public class EnemyAttack : Attack {
     private float m_AngleDifferenceToTarget;
     private bool m_IsAlerted = false;
 
+    // TurnTowardsTarget vars
+    Quaternion orgRotation;
+    Quaternion targetRotation;
+
     new void Start() {
         base.Start();
         m_FOV = GetComponent<FieldOfView>();
@@ -67,9 +71,9 @@ public class EnemyAttack : Attack {
     }
 
     private void TurnTowardsTarget() { // TODO flytta till EnemyMovement?
-        Quaternion orgRotation = transform.rotation;
+        orgRotation = transform.rotation;
         transform.LookAt(m_Target); // TODO ugly solution
-        Quaternion targetRotation = transform.rotation;
+        targetRotation = transform.rotation;
         transform.rotation = orgRotation;
         m_AngleDifferenceToTarget = Mathf.Abs(targetRotation.eulerAngles.y - transform.rotation.eulerAngles.y);
 

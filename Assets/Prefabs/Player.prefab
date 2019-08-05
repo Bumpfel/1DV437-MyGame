@@ -2527,6 +2527,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_DeathSound: {fileID: 8300000, guid: ce5196f2f3d0344c19fd98e1033a1f46, type: 3}
   m_IsAsleep: 0
+  m_Armour: 0
+  m_ArmourPiercingRounds: 0
 --- !u!114 &2078180916
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3345,11 +3347,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8429937908231873968}
     m_Modifications:
-    - target: {fileID: 1788339970329819707, guid: 27430e5722e9ebb4abcdbd969438ff36,
-        type: 3}
-      propertyPath: m_Name
-      value: HealthBar
-      objectReference: {fileID: 0}
     - target: {fileID: 8169889774862220044, guid: 27430e5722e9ebb4abcdbd969438ff36,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3454,6 +3451,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1788339970329819707, guid: 27430e5722e9ebb4abcdbd969438ff36,
+        type: 3}
+      propertyPath: m_Name
+      value: HealthBar
       objectReference: {fileID: 0}
     - target: {fileID: 3064638281012636446, guid: 27430e5722e9ebb4abcdbd969438ff36,
         type: 3}
@@ -3590,6 +3592,28 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8510234188594805840, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
+        type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee,
+        type: 2}
+    - target: {fileID: 8510234188594805840, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    - target: {fileID: 1460697660488297965, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
+        type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee,
+        type: 2}
+    - target: {fileID: 1460697660488297965, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f1362fb441e9aad4b8fe6bb38e56dbfa, type: 3}
 --- !u!224 &8881011751055058940 stripped

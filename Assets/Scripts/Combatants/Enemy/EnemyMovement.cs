@@ -20,6 +20,7 @@ public class EnemyMovement : MonoBehaviour {
     private bool m_HasTurnedOnPatrol = false; // förbättra logik för denna. nu sätts denna till true innan man vänt om fienden patrullerar
     // private float m_CheckIfStuckTimestamp = 0;
     private bool m_RecentlyMadeDiscovery = false;
+    private bool m_DoingDiscoverySpin = false;
 
 
     // tanke - kunna ange koordinator som karaktären ska gå emellan, istället för bara fram/tillbaka
@@ -127,19 +128,21 @@ public class EnemyMovement : MonoBehaviour {
 
     // Public helper method
     public void ReactToTakingDamage() {
-        // if(!m_RecentlyMadeDiscovery && !GetComponent<EnemyAttack>().IsEngaging()) {
-        //     m_RecentlyMadeDiscovery = true;
-        //     Halt();
-        //     m_ActiveRoutine = DiscoverySpin();
-        //     StartCoroutine(m_ActiveRoutine);
-        // }
+        if(!m_DoingDiscoverySpin && !GetComponent<EnemyAttack>().IsAlerted()) { // !m_RecentlyMadeDiscovery &&
+            // m_RecentlyMadeDiscovery = true;
+            Halt();
+            m_ActiveRoutine = DiscoverySpin();
+            StartCoroutine(m_ActiveRoutine);
+        }
     }
 
     private IEnumerator DiscoverySpin() { // Not used
+        m_DoingDiscoverySpin = true;
         print(name + " was recently shot. Turning");
         // yield return Turn(false);
         yield return Rotate();
-        m_RecentlyMadeDiscovery = false;
+        // m_RecentlyMadeDiscovery = false;
+        m_DoingDiscoverySpin = false;
         yield return Wait(m_PatrolEndWaitTime);
         ReturnToPatrol();
     }

@@ -6,7 +6,9 @@ public class SlidingDoor : MonoBehaviour {
 
     public bool m_IsLocked = false;
     public bool m_IsExitDoor = false;
-    // public bool m_AutoCloses = false;
+    public bool m_Automatic = false;
+
+    private float m_WasLastInsideTrigger;
     
     private bool m_IsOpen = false;
     private Transform m_LeftDoorBlade;
@@ -25,6 +27,7 @@ public class SlidingDoor : MonoBehaviour {
     private Color m_UnlockedExitDoorColor = Color.green;
     
     private const float OpenDelay = .2f;
+    public float AutomaticCloseDelay = .05f;
     private const float SlideTime = 10;
     private float m_OpenTimestamp;
     private bool m_IsInsideTrigger = false; // used because can't have Input check in OnTriggerStay. it can call methods twice
@@ -50,23 +53,42 @@ public class SlidingDoor : MonoBehaviour {
 
     void Update() {
         if(m_IsInsideTrigger) {
-            if(Input.GetButtonDown(m_GameController.m_ActionKey) && Time.time > m_OpenTimestamp + OpenDelay) {
-                OpenClose();
+            if(m_Automatic) {
+                if(!m_IsOpen)
+                    Open(true);
             }
-            if(Input.GetKeyDown(KeyCode.U)) { //TODO for testing
-                Unlock();
+            else {
+                if(Input.GetButtonDown(m_GameController.m_ActionKey) && Time.time > m_OpenTimestamp + OpenDelay) {
+                    Open(!m_IsOpen);
+                }
+                else if(Input.GetKeyDown(KeyCode.U)) { //TODO for testing
+                    Unlock();
+                }
+            }
+        }
+        else {
+            if(m_Automatic && m_IsOpen && Time.time > m_WasLastInsideTrigger + AutomaticCloseDelay) {
+                Open(false);
             }
         }
     }
 
     void OnTriggerStay(Collider other) {
-        if(other.tag == "Player") {
+        // if(other.tag == "Player") {
+            if(m_Automatic) {
+                m_WasLastInsideTrigger = Time.time; // introducing the use of a tiny delay since ontriggerexit is unreliable
+            }
+        // }
+    }
+
+    void OnTriggerEnter(Collider other) {
+        if(other.tag == "Player" || m_Automatic) {
             m_IsInsideTrigger = true;
         }
     }
 
     void OnTriggerExit(Collider other) {
-        if(other.tag == "Player") {
+        if(other.tag == "Player" || m_Automatic) {
             m_IsInsideTrigger = false;
         }
     }
@@ -78,7 +100,7 @@ public class SlidingDoor : MonoBehaviour {
     }
 
 
-    public void OpenClose() {// TODO bättre namn
+    public void Open(bool open) {
         if(m_IsLocked) {
             m_GameController.DisplayMessage("This door is locked");
         }
@@ -89,14 +111,14 @@ public class SlidingDoor : MonoBehaviour {
             else if(m_RunningCoroutine != null) {
                 StopCoroutine(m_RunningCoroutine);
                 m_RunningCoroutine = null;
-                m_IsOpen = !m_IsOpen;
+                m_IsOpen = open;
                 m_AudioSource.Stop();
             }
             
             m_AudioSource.timeSamples = m_IsOpen ? 0 : m_AudioSource.clip.samples - 1;
             m_AudioSource.pitch = 1.7f * (m_IsOpen ? 1 : -1);
             m_AudioSource.Play();
-            m_RunningCoroutine = StartCoroutine(ToggleOpenDoor());
+            m_RunningCoroutine = StartCoroutine(AnimateDoor(open));
         }
     }
 
@@ -107,13 +129,13 @@ public class SlidingDoor : MonoBehaviour {
         }
     }
 
-    private IEnumerator ToggleOpenDoor() { // TODO bättre namn
+    private IEnumerator AnimateDoor(bool open) { // TODO bättre namn
         yield return new WaitForFixedUpdate();
         m_OpenTimestamp = Time.time;
         float estimatedTime = SlideTime * Time.fixedDeltaTime;
 
-        m_LeftDoorTargetPosition = m_IsOpen ? m_OriginalLeftDoorBladePosition : m_OriginalLeftDoorBladePosition + m_LeftDoorBlade.right * (m_LeftDoorBlade.localScale.x) * -.9f;
-        m_RightDoorTargetPosition = m_IsOpen ? m_OriginalRightDoorBladePosition : m_OriginalRightDoorBladePosition + m_RightDoorBlade.right * (m_RightDoorBlade.localScale.x) * .9f;
+        m_LeftDoorTargetPosition = !open ? m_OriginalLeftDoorBladePosition : m_OriginalLeftDoorBladePosition + m_LeftDoorBlade.right * (m_LeftDoorBlade.localScale.x) * -.9f;
+        m_RightDoorTargetPosition = !open ? m_OriginalRightDoorBladePosition : m_OriginalRightDoorBladePosition + m_RightDoorBlade.right * (m_RightDoorBlade.localScale.x) * .9f;
         while(Time.time < m_OpenTimestamp + estimatedTime) {
             yield return new WaitForFixedUpdate();
             m_LeftDoorBlade.position = Vector3.Lerp(m_LeftDoorBlade.position, m_LeftDoorTargetPosition, SlideTime * Time.fixedDeltaTime);
@@ -122,7 +144,7 @@ public class SlidingDoor : MonoBehaviour {
         m_LeftDoorBlade.position = m_LeftDoorTargetPosition;
         m_RightDoorBlade.position = m_RightDoorTargetPosition;
 
-        m_IsOpen = !m_IsOpen;
+        m_IsOpen = open;
         m_RunningCoroutine = null;
     }
 

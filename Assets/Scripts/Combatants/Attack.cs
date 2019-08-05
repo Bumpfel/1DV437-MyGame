@@ -18,7 +18,7 @@ public class Attack : MonoBehaviour {
     private float m_AttackTimestamp;
     private const float MeleeDamage = 100;
     private const float MeleeRange = 2;
-    private const float MeleeTime = .35f;
+    private const float MeleeTime = .2f; //.35f;
     private const float MaxMeleeAngle = 90;
     private bool m_PlayingMeleeAnimation = false;
     private LayerMask m_EnemyMask;
@@ -74,11 +74,11 @@ public class Attack : MonoBehaviour {
         m_Animator.Play("Idle_Shoot");
     }
 
-    protected void PerformMeleeAttack() {
+    protected void MeleeAttack() {
         if(Time.time > m_AttackTimestamp + MeleeTime) {
             m_AttackTimestamp = Time.time;
-            m_Animator.Play("basic_Melee_Attack", 0, .1f);
             m_MeleeAudioSource.Play();
+            // m_Animator.Play("basic_Melee_Attack", 0, .15f);
 
             Collider[] colliders = Physics.OverlapSphere(transform.position + transform.forward * .7f, MeleeRange / 2, m_EnemyMask);
             if(colliders.Length > 0) {
@@ -88,15 +88,16 @@ public class Attack : MonoBehaviour {
 
                 // checking if there are obstacles in the way. Starting cast from the back of the player collider since starting from center causes problems if too close to the target.
                 float colliderRadius = transform.GetComponent<CapsuleCollider>().radius;
-                if(!Physics.Raycast(transform.position + transform.forward * - colliderRadius / 2, directionToTarget, MeleeRange, m_ObstacleMask)) { 
-                    enemy.TakeDamage(MeleeDamage);
+                Vector3 origin = transform.position + transform.forward * - colliderRadius / 2;
+                if(!Physics.Raycast(origin, directionToTarget, MeleeRange, m_ObstacleMask)) { 
+                    enemy.TakeDamage(MeleeDamage, origin);
                 }
             }
         }
     }
 
 
-    // protected void MeleeAttack() { // external interface. TODO not used. animation didn't look good while sprinting and not calling PerformMeleeAttack immediately made it feel a bit unresponsive
+    // protected void MeleeAttack2() { // external interface. TODO not used. animation didn't look good while sprinting and not calling PerformMeleeAttack immediately made it feel a bit unresponsive
     //     if(!m_PlayingMeleeAnimation) {
     //         StartCoroutine(PlayMeleeAnimation());
     //     }
@@ -105,12 +106,12 @@ public class Attack : MonoBehaviour {
     // private IEnumerator PlayMeleeAnimation() { // not used
     //     m_PlayingMeleeAnimation = true;
     //     float timeTaken = 0;
-    //     m_Animator.Play("Melee_Attack");
+    //     m_Animator.Play("animated_Melee_Attack");
     //     while(timeTaken < MeleeTime) {
     //         timeTaken += Time.deltaTime;
     //         m_Animator.SetFloat("meleeSpeed", timeTaken / MeleeTime);
-    //         if(timeTaken / MeleeTime > .85) {
-    //             PerformMeleeAttack();
+    //         if(timeTaken / MeleeTime > .8) {
+    //             MeleeAttack();
     //         }
     //         yield return new WaitForEndOfFrame();
     //     }

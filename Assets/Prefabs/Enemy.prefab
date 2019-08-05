@@ -1581,7 +1581,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ba7825d722575f4cbe5e69491f92676, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ViewRadius: 20
+  m_ViewRadius: 25
   m_ViewAngle: 125
   m_VisibleTargets: []
 --- !u!136 &4123646448261959245
@@ -1728,8 +1728,6 @@ MonoBehaviour:
   m_FireRate: 0.2
   m_GunSound: {fileID: 8300000, guid: 19d69c28094cc45c7b810d8da7ad71c0, type: 3}
   m_MeleeAttackSound: {fileID: 8300000, guid: 58748f782368640aa8b64609a22ea9ba, type: 3}
-  targetPosition: {x: 0, y: 0, z: 0}
-  direction: {x: 0, y: 0, z: 0}
 --- !u!114 &7812999535778217427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4218,6 +4216,17 @@ PrefabInstance:
       propertyPath: m_textInfo.pageCount
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8510234188594805840, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
+        type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee,
+        type: 2}
+    - target: {fileID: 8510234188594805840, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
     - target: {fileID: 1460697660488297965, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
         type: 3}
       propertyPath: m_textInfo.characterCount
@@ -4238,6 +4247,17 @@ PrefabInstance:
       propertyPath: m_textInfo.pageCount
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1460697660488297965, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
+        type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee,
+        type: 2}
+    - target: {fileID: 1460697660488297965, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f1362fb441e9aad4b8fe6bb38e56dbfa, type: 3}
 --- !u!224 &6273848357388040286 stripped
@@ -4253,11 +4273,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1222774855088090926}
     m_Modifications:
-    - target: {fileID: 1788339970329819707, guid: 27430e5722e9ebb4abcdbd969438ff36,
-        type: 3}
-      propertyPath: m_Name
-      value: HealthBar
-      objectReference: {fileID: 0}
     - target: {fileID: 8169889774862220044, guid: 27430e5722e9ebb4abcdbd969438ff36,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -4362,6 +4377,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1788339970329819707, guid: 27430e5722e9ebb4abcdbd969438ff36,
+        type: 3}
+      propertyPath: m_Name
+      value: HealthBar
       objectReference: {fileID: 0}
     - target: {fileID: 3064638281012636446, guid: 27430e5722e9ebb4abcdbd969438ff36,
         type: 3}
