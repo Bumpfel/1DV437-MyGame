@@ -6,9 +6,10 @@ public class EnemyMovement : MonoBehaviour {
 
     public float m_PatrolDistance = 0f;
     public float m_PatrolEndWaitTime = 3f;
-
     private const float TurnEndWaitTime = .5f;
-    private const float TurnDuration = 1;
+    private const float NormalTurnDuration = 1;
+    private float m_TurnDuration;
+    private const float ReactionTime = .2f;
     private const float m_MovementSpeed = 3;
 
     private Vector3 m_StartingPosition;
@@ -20,8 +21,9 @@ public class EnemyMovement : MonoBehaviour {
     private float m_StopTime;
     private bool m_IsHeadingBack = false; // heading back to starting position
     // private float m_CheckIfStuckTimestamp = 0;
-    [HideInInspector]
-    public bool m_IsTurning = false;
+    private bool m_IsTurning = false;
+    private bool m_WasAsleep;
+    private bool m_IsFirstTurn;
 
     // tanke - kunna ange koordinator som karaktären ska gå emellan, istället för bara fram/tillbaka
     // skulle kunna skapa game objects för koordinator, för att få en enklare, visuell justering av dessa koordinater. får dock inte flyttas med fienden (får inte vara barn av fiendemodellen)
@@ -49,16 +51,18 @@ public class EnemyMovement : MonoBehaviour {
         return m_EndPosition;
     }
 
-//   void OnEnable() {
-//         AssemblyReloadEvents.afterAssemblyReload += OnAfterAssemblyReload;
-//     }
+    void OnEnable() {
+        AssemblyReloadEvents.afterAssemblyReload += OnAfterAssemblyReload;
+    }
 
-//     void OnDisable() {
-//         AssemblyReloadEvents.afterAssemblyReload -= OnAfterAssemblyReload;
-//     }
-//     public void OnAfterAssemblyReload() {
-//         // StartCoroutine(m_ActiveRoutine);
-//     }
+    void OnDisable() {
+        AssemblyReloadEvents.afterAssemblyReload -= OnAfterAssemblyReload;
+    }
+
+    public void OnAfterAssemblyReload() {
+        if(!GetComponent<EnemyAttack>().IsAlerted())
+            ReturnToPatrol();
+    }
 
     private bool ShouldPatrol() {
         return m_PatrolDistance > 0;
@@ -67,30 +71,29 @@ public class EnemyMovement : MonoBehaviour {
     private IEnumerator Patrol() {
         if(!ShouldPatrol())
             yield break;
-        ConfirmIsAlive();
+        StopCoroutinesIfDead();
         m_Animator.Play("WalkForward_Shoot");
 
-        while(true) {//!m_Combatant.m_IsAsleep) {
+        while(true) {
             if((!m_IsHeadingBack && Vector3.Distance(m_StartingPosition, transform.position) >= m_PatrolDistance) || 
-            (m_IsHeadingBack && Vector3.Distance(transform.position, m_StartingPosition) < .2f)) {
+            (m_IsHeadingBack && Vector3.Distance(transform.position, m_EndPosition) >= m_PatrolDistance)) {
+            // (m_IsHeadingBack && Vector3.Distance(transform.position, m_StartingPosition) < .2f)) {
                 m_IsHeadingBack = !m_IsHeadingBack;
-                ConfirmIsAlive();
+                StopCoroutinesIfDead();
                 yield return Wait(m_PatrolEndWaitTime);
-                ConfirmIsAlive();
-                yield return Turn();
-                ConfirmIsAlive();
+                StopCoroutinesIfDead();
+                yield return Turn(true);
+                StopCoroutinesIfDead();
                 yield return Wait(TurnEndWaitTime);
-                ConfirmIsAlive();
+                StopCoroutinesIfDead();
                 m_Animator.Play("WalkForward_Shoot");
             }
             else {
-                ConfirmIsAlive();
+                StopCoroutinesIfDead();
                 Walk();
                 yield return new WaitForFixedUpdate();
             }
         }
-        
-        // m_Animator.Play("Idle_GunMiddle");
     }
 
     // private bool IsStuck() {
@@ -116,14 +119,15 @@ public class EnemyMovement : MonoBehaviour {
     }
 
     private IEnumerator ResetPatrol() {
-        ConfirmIsAlive();
-        yield return Turn();
-        ConfirmIsAlive();
+        StopCoroutinesIfDead();
+        yield return Turn(true);
+        StopCoroutinesIfDead();
         yield return Patrol();
     }
 
     // Public helper method
-    public void ReactToTakingDamage() {
+    public void ReactToTakingDamage(bool wasAsleep) {
+        m_WasAsleep = wasAsleep;
         if(!m_IsTurning && !GetComponent<EnemyAttack>().IsAlerted()) {
             Halt();
             m_ActiveRoutine = DiscoverySpin();
@@ -132,9 +136,10 @@ public class EnemyMovement : MonoBehaviour {
     }
 
     private IEnumerator DiscoverySpin() {
-        print(name + " was recently shot. Turning");
-        // yield return Turn();
-        yield return SpinAround();
+        m_IsFirstTurn = true;
+        yield return Turn(false);
+        m_IsFirstTurn = false;
+        yield return Turn(false);
         yield return Wait(m_PatrolEndWaitTime);
         ReturnToPatrol();
     }
@@ -144,9 +149,8 @@ public class EnemyMovement : MonoBehaviour {
     }
     
     public void Halt() {
-        ConfirmIsAlive();
+        StopCoroutinesIfDead();
         m_Animator.Play("Idle_Shoot");
-        // print("halting");
         if(m_ActiveRoutine != null)
             StopCoroutine(m_ActiveRoutine);
     }
@@ -156,61 +160,41 @@ public class EnemyMovement : MonoBehaviour {
         yield return new WaitForSeconds(time);
     }
 
-    private IEnumerator Turn() {
+    private IEnumerator Turn(bool isPatrolTurn) {
+        Quaternion targetRotation;
+        if(isPatrolTurn) {
+            targetRotation = m_IsHeadingBack ? m_StartingRotation * Quaternion.Euler(0, 180, 0) : m_StartingRotation;
+            m_TurnDuration = NormalTurnDuration;
+        }
+        else {
+            targetRotation = transform.rotation * Quaternion.Euler(0, 180, 0);
+            m_TurnDuration = NormalTurnDuration / 2;
+            if(m_IsFirstTurn)
+                yield return new WaitForSeconds(ReactionTime * (m_WasAsleep ? 2 : 1));
+        }
+
         m_IsTurning = true;
         m_Animator.Play("WalkLeft_Shoot");
-
-        float degrees = 180;
-
-        // Quaternion targetRotation;
-        // if(isPatrolTurn)
-        Quaternion targetRotation = m_IsHeadingBack ? m_StartingRotation * Quaternion.Euler(0, degrees, 0) : m_StartingRotation;
-        // }
-        // else {
-        //     m_TurnDuration = 2;
-        //     targetRotation = Quaternion.Euler(0, transform.rotation.y + 360, 0);
-        // }
         
         float timestamp = Time.time;
         float timeTaken = 0;
         Quaternion startRotation = transform.rotation;
-        // float angleDifference = Mathf.Abs(transform.rotation.eulerAngles.y - targetRotation.eulerAngles.y);
-        // float duration = angleDifference * (m_NormalTurnDuration / degrees);
 
-        while(timeTaken < TurnDuration) {
-            ConfirmIsAlive();
+        while(timeTaken < m_TurnDuration) {
+            StopCoroutinesIfDead();
             timeTaken += Time.fixedDeltaTime;
             yield return new WaitForFixedUpdate();
-            transform.rotation = Quaternion.Lerp(startRotation, targetRotation, timeTaken / TurnDuration);
+            transform.rotation = Quaternion.Lerp(startRotation, targetRotation, timeTaken / m_TurnDuration);
         }
-        //DEBUG
-        // if(name == "Enemy (2)")
-        //     print("current rotation: " + transform.rotation.y + ", target rotation: " + targetRotation.y);
-        // transform.rotation = targetRotation;
         transform.position = new Vector3(transform.position.x, 0, transform.position.z); //TODO nödlösning för att en gubbe verkar ibland ändra y-position och därmed ser fov fel ut
         m_Animator.Play("Idle_GunMiddle");
         m_IsTurning = false;
     }
 
-    private IEnumerator SpinAround() {
-        m_IsTurning = true;
-        float startRotation = transform.eulerAngles.y;
-        float endRotation = startRotation - 180;
-        float timeTaken = 0.0f;
-        float yRotation;
-        while(timeTaken < TurnDuration) {
-            ConfirmIsAlive();
-            timeTaken += Time.fixedDeltaTime;
-            yRotation = Mathf.Lerp(startRotation, endRotation, timeTaken / TurnDuration) % 180;
-            transform.eulerAngles = new Vector3(transform.eulerAngles.x, yRotation, transform.eulerAngles.z);
-            yield return new WaitForFixedUpdate();
-        }
-        m_IsTurning = false;
-    }
-
-    private void ConfirmIsAlive() {
+    public void StopCoroutinesIfDead() {
         if(m_Combatant.IsDead()) {
-            StopCoroutine(m_ActiveRoutine);
+            if(m_ActiveRoutine != null)
+                StopCoroutine(m_ActiveRoutine);
             StopAllCoroutines();
             enabled = false;
         }

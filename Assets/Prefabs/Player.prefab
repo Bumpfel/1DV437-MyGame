@@ -2317,6 +2317,7 @@ GameObject:
   - component: {fileID: 4665366817207089168}
   - component: {fileID: 2078180916}
   - component: {fileID: 5461190703730265755}
+  - component: {fileID: 4206857184755693810}
   m_Layer: 10
   m_Name: Player
   m_TagString: Player
@@ -2374,7 +2375,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4225024356588960008}
   serializedVersion: 2
-  m_Mass: 0.0001
+  m_Mass: 100
   m_Drag: 100
   m_AngularDrag: 100
   m_UseGravity: 0
@@ -2412,8 +2413,7 @@ MonoBehaviour:
   m_PlayerNumber: 1
   m_WalkSpeed: 5
   m_StrafeSpeed: 4
-  m_RotationSpeed: 200
-  m_RunModifier: 2
+  m_MoveTo: {x: 0, y: 0, z: 0}
   m_AimReticle: {fileID: 399229254}
   m_GamePaused: 0
 --- !u!82 &2078180915
@@ -2645,6 +2645,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!65 &4206857184755693810
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4225024356588960008}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 0.2614678, y: 0.40170622, z: 1.4281762}
+  m_Center: {x: 0.25060737, y: 1.5586925, z: 0.91408813}
 --- !u!1 &4225024356605985910
 GameObject:
   m_ObjectHideFlags: 0
@@ -3347,6 +3360,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8429937908231873968}
     m_Modifications:
+    - target: {fileID: 1788339970329819707, guid: 27430e5722e9ebb4abcdbd969438ff36,
+        type: 3}
+      propertyPath: m_Name
+      value: HealthBar
+      objectReference: {fileID: 0}
     - target: {fileID: 8169889774862220044, guid: 27430e5722e9ebb4abcdbd969438ff36,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3451,11 +3469,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1788339970329819707, guid: 27430e5722e9ebb4abcdbd969438ff36,
-        type: 3}
-      propertyPath: m_Name
-      value: HealthBar
       objectReference: {fileID: 0}
     - target: {fileID: 3064638281012636446, guid: 27430e5722e9ebb4abcdbd969438ff36,
         type: 3}
@@ -3592,24 +3605,24 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 8510234188594805840, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
+    - target: {fileID: 1460697660488297965, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
         type: 3}
       propertyPath: m_fontAsset
       value: 
       objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee,
         type: 2}
-    - target: {fileID: 8510234188594805840, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
+    - target: {fileID: 1460697660488297965, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
         type: 3}
       propertyPath: m_sharedMaterial
       value: 
       objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-    - target: {fileID: 1460697660488297965, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
+    - target: {fileID: 8510234188594805840, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
         type: 3}
       propertyPath: m_fontAsset
       value: 
       objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee,
         type: 2}
-    - target: {fileID: 1460697660488297965, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
+    - target: {fileID: 8510234188594805840, guid: f1362fb441e9aad4b8fe6bb38e56dbfa,
         type: 3}
       propertyPath: m_sharedMaterial
       value: 

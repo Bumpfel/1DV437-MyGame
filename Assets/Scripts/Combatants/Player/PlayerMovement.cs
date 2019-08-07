@@ -3,47 +3,52 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEditor;
 
 public class PlayerMovement : MonoBehaviour {
     
     public enum MovementControl { CameraRelativeMovement, CharacterRelativeMovement };
     
     public MovementControl m_MovementControl = MovementControl.CameraRelativeMovement;
-    public int m_PlayerNumber = 1; // TODO temp
+    public int m_PlayerNumber = 1;
     public float m_WalkSpeed = 5;
     public float m_StrafeSpeed = 4;
-    public int m_RotationSpeed = 200;
-    public float m_RunModifier = 2f;
+    // public int m_RotationSpeed = 200;
+    private const float RunModifier = 2;
 
-    private Vector3 m_MoveTo;
-    
+    private float m_CollisionCheckRadius;
+
+    public Vector3 m_MoveTo; // temp public
+    private float m_MovementDistance;
     private Camera m_ViewCamera;
-
     public Canvas m_AimReticle;
     // private Rigidbody m_Body;
     private Animator m_Animator;
+    private Combatant m_Combatant;
+    private LayerMask m_ObstacleMask;
+
     private bool m_IsRunning = false;
     private bool m_IsWalking = false;
     private bool m_IsStrafingLeft = false;
     private bool m_IsStrafingRight = false;
-    // private readonly float m_TURN_WAIT = 0.2f;
     private float m_TurnTimestamp;
 
     private string m_VerticalAxis;
-    // private string m_TurnAxis;
     private string m_LookAxisX;
     private string m_LookAxisY;
     private string m_HorizontalAxis;
     private string m_SprintKey;
     
-    private Combatant m_Combatant;
 
     [HideInInspector]
     public bool m_GamePaused = false;
-
     private const float speedSmoothTime = .1f;
     private float speedSmoothVelocity;
     private float currentSpeed;
+
+
+    private float m_TargetAngle;
+    private Quaternion m_TargetRotation;
 
     void Start() {
         m_ViewCamera = Camera.main;
@@ -58,6 +63,9 @@ public class PlayerMovement : MonoBehaviour {
 
         m_Combatant = GetComponent<Combatant>();
 
+        m_ObstacleMask = LayerMask.GetMask("Obstacles");
+        m_CollisionCheckRadius = GetComponent<CapsuleCollider>().radius * .8f;
+
         // print(m_AimReticle.GetComponentInChildren<Image>().transform.localScale);
 
         // if(m_MovementControl == MovementControl.CharacterRelativeMovement) {
@@ -69,8 +77,14 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        if(!m_Combatant.IsDead() && !m_GamePaused) {
-            transform.position = transform.position + m_MoveTo * Time.fixedDeltaTime;
+        SmoothCameraRelativeMovement();
+
+        if(!m_Combatant.IsDead() && !m_GamePaused && !transform.position.Equals(m_MoveTo)) {
+            Collider[] colliders = Physics.OverlapSphere(transform.position, m_CollisionCheckRadius, m_ObstacleMask);
+            // Collider[] collidedWithWeapon = Physics.OverlapBox(transform.position + transform.forward * .9f + transform.right * .25f, new Vector3(.25f / 2, .4f / 2, 1.4f / 2), transform.rotation, m_ObstacleMask);
+            if(colliders.Length == 0) {// && collidedWithWeapon.Length == 0)
+                transform.position = transform.position + m_MoveTo * Time.fixedDeltaTime;
+            }
         }
     }
 
@@ -78,19 +92,16 @@ public class PlayerMovement : MonoBehaviour {
     void Update() {
         if(!m_Combatant.IsDead() && !m_GamePaused) {
             Look();
-
             // if(m_MovementControl == MovementControl.CharacterRelativeMovement)
                 // CharacterRelativeMovement();
             // else
-                SmoothCameraRelativeMovement();
+                // SmoothCameraRelativeMovement();
                 // SmoothCharacterRelativeMovement();
                 // CameraRelativeMovement();
         }
     }
 
     private void CameraRelativeMovement() { // not currently used
-        Vector3 mousePos = m_ViewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y));
-		transform.LookAt(mousePos + Vector3.up * transform.position.y);
         float moveSpeed = m_WalkSpeed;
 
         Vector3 movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
@@ -98,19 +109,15 @@ public class PlayerMovement : MonoBehaviour {
         m_Animator.SetFloat("speedPercent", speedPercent);
  
         if(Input.GetButton(m_SprintKey)) {
-            moveSpeed *= m_RunModifier;
+            moveSpeed *= RunModifier;
         }
 		m_MoveTo = movementInput * moveSpeed;
     }
 
    private void SmoothCameraRelativeMovement() { // has smooth animations
-        Vector3 mousePos = m_ViewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y));
-		transform.LookAt(mousePos + Vector3.up * transform.position.y);
         float moveSpeed = m_WalkSpeed;
-
         Vector3 movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
-
-        float targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunModifier : m_WalkSpeed) * movementInput.magnitude;
+        float targetSpeed = (IsRunning() ? m_WalkSpeed * RunModifier : m_WalkSpeed) * movementInput.magnitude;
         currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
         // transform.Translate(transform.forward * currentSpeed * Time.fixedDeltaTime);
         
@@ -118,19 +125,15 @@ public class PlayerMovement : MonoBehaviour {
         m_Animator.SetFloat("speedPercent", animationSpeedPercent, speedSmoothTime, Time.fixedDeltaTime);
 
         if(Input.GetButton(m_SprintKey)) {
-            moveSpeed *= m_RunModifier;
+            moveSpeed *= RunModifier;
         }
 		m_MoveTo = movementInput * moveSpeed;
     }
 
        private void SmoothCharacterRelativeMovement() {
-        Vector3 mousePos = m_ViewCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y));
-		transform.LookAt(mousePos + Vector3.up * transform.position.y);
-        // float moveSpeed = m_WalkSpeed;
-
+        float moveSpeed = m_WalkSpeed;
         Vector3 movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
-
-        float targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunModifier : m_WalkSpeed) * movementInput.magnitude;
+        float targetSpeed = (IsRunning() ? m_WalkSpeed * RunModifier : m_WalkSpeed) * movementInput.magnitude;
         currentSpeed = Mathf.SmoothDamp(Input.GetAxisRaw(m_VerticalAxis), targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
         //----
 
@@ -148,6 +151,13 @@ public class PlayerMovement : MonoBehaviour {
     private void Look() {
         Vector3 mousePosInWorld = new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y);
         Vector3 mousePosRelativeToCamera = m_ViewCamera.ScreenToWorldPoint(mousePosInWorld);
+        
+        // Quaternion orgRotation = transform.rotation;
+        // transform.LookAt(mousePosRelativeToCamera + Vector3.up * transform.position.y);
+        // m_TargetRotation = transform.rotation;
+        // transform.rotation = orgRotation;
+        // m_TargetAngle = Mathf.Abs(m_TargetRotation.eulerAngles.y - transform.rotation.eulerAngles.y);
+
         transform.LookAt(mousePosRelativeToCamera + Vector3.up * transform.position.y);
         
         //placing reticle on top (5 units up), compensating for aim reticle size, so the bullet is fire at the center of the reticle
@@ -236,3 +246,16 @@ public class PlayerMovement : MonoBehaviour {
     // }
 
 }
+
+
+// [CustomEditor (typeof(PlayerMovement))]
+// public class CollisionEditor : Editor {
+
+//     private PlayerMovement player;
+//     private float ColliderRadius = .2f;
+//     void OnSceneGUI() {
+//         player = (PlayerMovement) target;
+//         Handles.color = Color.yellow;
+//         Handles.DrawWireArc(player.transform.position, Vector3.up, Vector3.forward, 360, ColliderRadius);
+//     }
+// }

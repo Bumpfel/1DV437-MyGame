@@ -43,6 +43,11 @@ public class Bullet : MonoBehaviour {
         transform.position = transform.position + transform.forward * BulletVelocity * Time.fixedDeltaTime;
     }
 
+//     private void MoveRigidbodyBullet() {
+//         GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * BulletVelocity * Time.fixedDeltaTime);
+// ;
+//     }
+
     public void SetArmorPiercing() {
         m_BulletDmg *= 2;
     }

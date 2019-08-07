@@ -10,7 +10,7 @@ public class PlayerAttackEditor : Editor {
         attacker = (PlayerAttack) target;
 
         Handles.color = Color.magenta;
-        Handles.DrawWireArc(attacker.transform.position + attacker.transform.forward * .7f, Vector3.up, Vector3.forward, 360, MeleeRange / 2);
+        // Handles.DrawWireArc(attacker.transform.position + attacker.transform.forward * .7f, Vector3.up, Vector3.forward, 360, MeleeRange / 2);
         // Handles.DrawLine(attacker.transform.position, attacker.targetPosition);
     }
 

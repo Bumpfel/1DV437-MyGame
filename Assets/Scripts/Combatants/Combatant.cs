@@ -21,8 +21,6 @@ public class Combatant : MonoBehaviour {
     public float m_Armour = 0;
     public int m_ArmourPiercingRounds = 0;
 
-    private const float ReactionTime = .5f;
-
     void Start() {
         m_GameController = GetComponentInParent<GameController>();
         m_Animator = GetComponent<Animator>();
@@ -68,26 +66,13 @@ public class Combatant : MonoBehaviour {
                 return;
             }
             else if(tag == "Enemy") {
-                float reactionTime = ReactionTime;
+                GetComponent<EnemyMovement>().ReactToTakingDamage(m_IsAsleep);
                 if(m_IsAsleep) {
                     m_AsleepIndicator.SetActive(false);
                     m_IsAsleep = false;
-                    reactionTime *= 2;
                 }
-                // StartCoroutine(DelayReaction(reactionTime));
-                GetComponent<EnemyMovement>().ReactToTakingDamage();
             }
         // }
-    }
-
-    private IEnumerator DelayReaction(float time) {
-        yield return new WaitForSeconds(time);
-        // float timestamp = Time.time;
-        // while(Time.time < timestamp + time) {
-        //     yield return null;
-        // }
-        // yield return new WaitForSeconds(time);
-        GetComponent<EnemyMovement>().ReactToTakingDamage();
     }
 
     public void Heal(float amount) {
@@ -98,9 +83,11 @@ public class Combatant : MonoBehaviour {
     }
 
     private void Die() {
+        // m_Animator.enabled = false;
         m_Animator.Play("Die");
-        Destroy(m_Animator, 2); // make sure the animator doesn't reset when unity reloads scripts (in editor)
-        
+        float animLen = m_Animator.GetCurrentAnimatorClipInfo(0)[0].clip.length;
+        Destroy(m_Animator, animLen);
+
         m_AudioSource.clip = m_DeathSound;
         m_AudioSource.Play();
 
@@ -112,13 +99,13 @@ public class Combatant : MonoBehaviour {
             m_GameController.SetGameOver();
         }
         else {
+            GetComponent<EnemyMovement>().StopCoroutinesIfDead(); // ugly solution to stop patrol coroutines
             transform.Find("FOVVisualization").gameObject.SetActive(false);
             m_GameController.m_PlayerStats.AddKill();
         }
         foreach(MonoBehaviour component in GetComponents<MonoBehaviour>()) {
             component.enabled = false;
         }
-        // m_Animator.enabled = false;
     }
 
     public bool IsDead() {

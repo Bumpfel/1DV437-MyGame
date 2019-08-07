@@ -23,6 +23,8 @@ public class GameController : MonoBehaviour {
     private bool m_Paused = false;
     private int m_CurrentSceneIndex;
     private bool m_GameOver = false;
+    
+    private Light m_DayLight;
 
     // private enum Message { DOOR_LOCKED  };
 
@@ -47,7 +49,13 @@ public class GameController : MonoBehaviour {
         m_PlayerSpawn = GetComponentInChildren<Transform>().Find("PlayerSpawn");
         m_Player = Instantiate(PlayerModel, m_PlayerSpawn.position, m_PlayerSpawn.rotation, transform);
         m_CameraController.SetPlayer(m_Player.transform);
-        Time.timeScale = 1;
+
+        Light[] lights = FindObjectsOfType<Light>();
+        foreach(Light light in lights) {
+            if(light.tag == "DayLight") {
+                m_DayLight = light;
+            }
+        }
     }
 
     void Update() {
@@ -58,7 +66,7 @@ public class GameController : MonoBehaviour {
             AudioSource.PlayClipAtPoint(m_LevelEndedAudio, Camera.main.transform.position, 1);
             // EndLevel();
         }
-
+        // m_DayLight.intensity = Mathf.Min(Time.timeSinceLevelLoad / 240, 1);
     }
 
     public void StartGame() {
@@ -70,6 +78,8 @@ public class GameController : MonoBehaviour {
         Initialize();
         m_GameOver = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        m_Paused = false;
+        Time.timeScale = 1;
     }
 
     public void LoadMainMenu() {

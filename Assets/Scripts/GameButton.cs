@@ -26,10 +26,10 @@ public class GameButton : MonoBehaviour {
                     wasLocked = true;
                 }
             }
-            // if(wasLocked) {
+            if(wasLocked) {
                 StartCoroutine(ShowUnlockedDoor(m_AffectedDoors));
                 m_GameController.DisplayMessage((m_AffectedDoors.Length > 1 ? "Doors" : "Door") + " unlocked");
-            // }
+            }
         }
     }
 
@@ -39,7 +39,12 @@ public class GameButton : MonoBehaviour {
         CameraController cameraController = camera.GetComponent<CameraController>();
         cameraController.m_FollowPlayer = false;
         Vector3 initialCameraPosition = camera.transform.position;
-        Vector3 targetCameraPosition = doors[0].transform.position;
+
+        Vector3 targetCameraPosition = new Vector3();
+        foreach(SlidingDoor door in doors) {
+            targetCameraPosition += door.transform.position;
+        }
+        targetCameraPosition /= doors.Length;
         targetCameraPosition.y = camera.transform.position.y;
 
         yield return cameraController.MoveCamera(camera, targetCameraPosition, CameraSpeed);

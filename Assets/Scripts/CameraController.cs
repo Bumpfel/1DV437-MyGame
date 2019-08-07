@@ -5,15 +5,16 @@ using UnityEngine;
 public class CameraController : MonoBehaviour {
     private Transform m_Player;
     public float m_UnitsInFrontOfPlayer = 3;
-    private float m_MaxDistanceFromCamera = 12;
+    private float m_MaxDistanceFromCamera = 12; // when holding ctrl
 
+    private float m_FollowSpeed = .1f;
     public bool m_FollowPlayer = true;
 
     public void SetPlayer(Transform player) {
         m_Player = player;
     }
 
-    void Update() {
+    void FixedUpdate() {
         if(m_Player && m_FollowPlayer) {
             if(!Input.GetKey(KeyCode.LeftControl)) {
                 // Makes the camera follow the player with focus slighly in front of the player 
@@ -24,9 +25,9 @@ public class CameraController : MonoBehaviour {
                 // transform.position = new Vector3(m_Player.position.x + inFrontOfPlayer.x, transform.position.y, m_Player.position.z + inFrontOfPlayer.z);
                 
 
-                //smooth                
+                //smooth
                 Vector3 to = new Vector3(m_Player.position.x + inFrontOfPlayer.x, transform.position.y, m_Player.position.z + inFrontOfPlayer.z);
-                transform.position = Vector3.Lerp(transform.position, to, .15f);
+                transform.position = Vector3.Lerp(transform.position, to, m_FollowSpeed);
 
 
                 // transform.position = m_Player.position + Vector3.up * transform.position.y;

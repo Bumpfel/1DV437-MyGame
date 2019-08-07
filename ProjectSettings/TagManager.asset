@@ -13,6 +13,7 @@ TagManager:
   - BuffUI
   - ArmourBuff
   - APRBuff
+  - DayLight
   layers:
   - Default
   - TransparentFX
@@ -27,7 +28,7 @@ TagManager:
   - Players
   - Enemies
   - Background
-  - Immovables
+  - Unselectable
   - 
   - 
   - 

@@ -18,7 +18,7 @@ public class Attack : MonoBehaviour {
     private float m_AttackTimestamp;
     private const float MeleeDamage = 100;
     private const float MeleeRange = 2;
-    private const float MeleeTime = .2f; //.35f;
+    private const float MeleeTime = .5f;
     private const float MaxMeleeAngle = 90;
     private bool m_PlayingMeleeAnimation = false;
     private LayerMask m_EnemyMask;
@@ -52,11 +52,17 @@ public class Attack : MonoBehaviour {
         
         if(tag == "Player") {
             m_Animator.Play("Shoot_single", 0, .25f);
+            // m_GunAudioSource.Play();
         }
-        else
+        else {
             m_Animator.PlayInFixedTime("Shoot_single", 0, m_FireRate);
 
+            // float savedVolume = GetComponentInParent<GameController>().GetSavedVolume(ExposedMixerGroup.SFXVolume);
+            // Vector3 audioClipPoint = transform.position + Vector3.up * Camera.main.transform.position.y * .9f;
+            // AudioSource.PlayClipAtPoint(m_GunAudioSource.clip, audioClipPoint, savedVolume);
+        }
         m_GunAudioSource.Play();
+
     }
 
 

@@ -7,9 +7,9 @@ public class SlidingDoor : MonoBehaviour {
     public bool m_IsLocked = false;
     public bool m_IsExitDoor = false;
     public bool m_Automatic = false;
+    public float m_OpenDuration = 1;
 
-    private float m_WasLastInsideTrigger;
-    
+    private const float AutomaticCloseDelay = .3f;
     private bool m_IsOpen = false;
     private Transform m_LeftDoorBlade;
     private Transform m_RightDoorBlade;
@@ -26,12 +26,9 @@ public class SlidingDoor : MonoBehaviour {
     private Color m_UnlockedDoorColor = Color.black; // TODO get real color
     private Color m_UnlockedExitDoorColor = Color.green;
     
-    private const float OpenDelay = .2f;
-    private const float AutomaticCloseDelay = .3f;
-    private const float SlideTime = 10;
-    private float m_OpenTimestamp;
     private bool m_IsInsideTrigger = false; // used because can't have Input check in OnTriggerStay. it can call methods twice
-
+    private float m_WasLastInsideTrigger;
+    
 
     void Start() {
         m_LeftDoorBlade = transform.Find("DoorBladeLeft");
@@ -58,7 +55,7 @@ public class SlidingDoor : MonoBehaviour {
                     OpenDoor(true);
             }
             else {
-                if(Input.GetButtonDown(m_GameController.m_ActionKey) && Time.time > m_OpenTimestamp + OpenDelay) {
+                if(Input.GetButtonDown(m_GameController.m_ActionKey)) {// && Time.time > m_OpenTimestamp + OpenDelay) {
                     OpenDoor(!m_IsOpen);
                 }
                 else if(Input.GetKeyDown(KeyCode.U)) { //TODO for testing
@@ -74,11 +71,9 @@ public class SlidingDoor : MonoBehaviour {
     }
 
     void OnTriggerStay(Collider other) {
-        // if(other.tag == "Player") {
-            if(m_Automatic) {
-                m_WasLastInsideTrigger = Time.time; // introducing the use of a small delay since ontriggerexit is unreliable
-            }
-        // }
+        if(m_Automatic) {
+            m_WasLastInsideTrigger = Time.time; // introducing the use of a small delay since ontriggerexit is wonky
+        }
     }
 
     void OnTriggerEnter(Collider other) {
@@ -112,7 +107,7 @@ public class SlidingDoor : MonoBehaviour {
                 StopCoroutine(m_RunningCoroutine);
                 m_RunningCoroutine = null;
                 m_IsOpen = open;
-                m_AudioSource.Stop();
+                // m_AudioSource.Stop();
             }
             
             // m_AudioSource.timeSamples = open ? m_AudioSource.clip.samples - 1 : 0;
@@ -135,15 +130,16 @@ public class SlidingDoor : MonoBehaviour {
 
     private IEnumerator AnimateDoor(bool open) {
         yield return new WaitForFixedUpdate();
-        m_OpenTimestamp = Time.time;
-        float estimatedTime = SlideTime * Time.fixedDeltaTime;
 
         m_LeftDoorTargetPosition = !open ? m_OriginalLeftDoorBladePosition : m_OriginalLeftDoorBladePosition + m_LeftDoorBlade.right * (m_LeftDoorBlade.localScale.x) * -.9f;
         m_RightDoorTargetPosition = !open ? m_OriginalRightDoorBladePosition : m_OriginalRightDoorBladePosition + m_RightDoorBlade.right * (m_RightDoorBlade.localScale.x) * .9f;
-        while(Time.time < m_OpenTimestamp + estimatedTime) {
+
+        float timeTaken = 0;
+        while(timeTaken < m_OpenDuration) {
+            timeTaken += Time.fixedDeltaTime;
+            m_LeftDoorBlade.position = Vector3.Lerp(m_LeftDoorBlade.position, m_LeftDoorTargetPosition, timeTaken / m_OpenDuration);
+            m_RightDoorBlade.position = Vector3.Lerp(m_RightDoorBlade.position, m_RightDoorTargetPosition, timeTaken / m_OpenDuration);
             yield return new WaitForFixedUpdate();
-            m_LeftDoorBlade.position = Vector3.Lerp(m_LeftDoorBlade.position, m_LeftDoorTargetPosition, SlideTime * Time.fixedDeltaTime);
-            m_RightDoorBlade.position = Vector3.Lerp(m_RightDoorBlade.position, m_RightDoorTargetPosition, SlideTime * Time.fixedDeltaTime);
         }
         m_LeftDoorBlade.position = m_LeftDoorTargetPosition;
         m_RightDoorBlade.position = m_RightDoorTargetPosition;

@@ -7,7 +7,7 @@ public class PatrolEditor : Editor {
 
     void OnSceneGUI() {
         EnemyMovement enemy = (EnemyMovement) target;
-        Handles.color = Color.cyan;
+        Handles.color = Color.yellow;
         if(!Application.isPlaying)
             Handles.DrawLine(enemy.transform.position, enemy.transform.position + enemy.transform.forward * enemy.m_PatrolDistance);
         else
