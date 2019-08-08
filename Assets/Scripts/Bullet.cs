@@ -4,49 +4,72 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour {
     
-    public LayerMask m_CombatantsMask;
-    private const float BulletVelocity = 100;
-    private const float DestroyBulletAfterSeconds = 3;
+    public GameObject ConcreteImpact;
+    public GameObject MetalImpact;
+    public GameObject WoodImpact;
+    public GameObject BodyImpact;
+    private ParticleSystem m_Impact;
+    private const float BulletVelocity = 500;
+    private const float MaximumBulletSurvivalTime = 3;
     private float m_BulletDmg = 25;
     private RaycastHit m_Hitinfo;
+    private Rigidbody m_Body;
     private float m_CalculatedHitTimeStamp;
 
     private Vector3 m_Origin;
+    private Vector3 m_PrevPosition;
 
-    void Start() {
+    private bool m_HasHit = false;
+
+    private void Start() {
         m_Origin = transform.position;
-        Destroy(gameObject, DestroyBulletAfterSeconds);
+        m_PrevPosition = transform.position;
+        m_Body = GetComponent<Rigidbody>();
+        m_Body.AddForce(transform.forward * BulletVelocity, ForceMode.Force);
+        Destroy(gameObject, MaximumBulletSurvivalTime);
     }
-    
-    void FixedUpdate() {
-        // cast a ray forwards with a distance equal to the distance the bullet travels in one fixed udpate and see if there is a collision
-        if(Physics.Raycast(transform.position, transform.forward, out m_Hitinfo, BulletVelocity * Time.fixedDeltaTime)) {
-            // DrawDebugLines();
-            if(m_Hitinfo.collider.tag != "Ignored") {
-                if(m_Hitinfo.collider.tag == "Player" || m_Hitinfo.collider.tag == "Enemy") {
-                    Combatant target = m_Hitinfo.collider.gameObject.GetComponentInParent<Combatant>();
-                    target.TakeDamage(m_BulletDmg, m_Origin);
-                }
-                // if(m_Hitinfo.collider.tag == "Enemy") {
-                    // var tempObj = new GameObject("temp");
-                    // tempObj.transform.position = m_Origin;
-                    // m_Hitinfo.collider.GetComponentInParent<FieldOfView>().m_VisibleTargets.Add(tempObj.transform);
-                // }
+
+    private void FixedUpdate() {
+        CheckCollision();
+    }
+
+    private void CheckCollision() {
+        // cast a ray forwards from its previous position with a distance equal to the distance the bullet has travelled since previous check, and see if there is a collision
+        Vector3 direction = (transform.position - m_PrevPosition).normalized;
+        if(Physics.Raycast(m_PrevPosition, direction, out m_Hitinfo, Vector3.Distance(m_PrevPosition, transform.position))) {
+            if(!m_HasHit && (m_Hitinfo.collider.tag == "Player" || m_Hitinfo.collider.tag == "Enemy")) {
+                Combatant target = m_Hitinfo.collider.gameObject.GetComponentInParent<Combatant>();
+                target.TakeDamage(m_BulletDmg, m_Origin);
+                Destroy(gameObject);
+                m_Impact = Instantiate(BodyImpact.GetComponent<ParticleSystem>());
+                m_Impact.transform.rotation = transform.rotation * Quaternion.Euler(0, 180, 0);
+                m_Impact.transform.position = m_Hitinfo.point;
             }
-            Destroy(gameObject);
-            
+            else if(m_Hitinfo.collider.tag != "Ignored") {
+                m_Body.MovePosition(m_Hitinfo.point);
+                if(!m_HasHit) {
+                    if(m_Hitinfo.collider.tag == "Metal")
+                        m_Impact = Instantiate(MetalImpact.GetComponent<ParticleSystem>());
+                    else if(m_Hitinfo.collider.tag == "Wood")
+                        m_Impact = Instantiate(WoodImpact.GetComponent<ParticleSystem>());
+                    else
+                        m_Impact = Instantiate(ConcreteImpact.GetComponent<ParticleSystem>());
+
+                    m_Impact.transform.rotation = transform.rotation * Quaternion.Euler(0, 180, 0);
+                    m_Impact.transform.position = m_Hitinfo.point;
+                    Light light = GetComponent<Light>();
+                    Destroy(light);
+                    m_HasHit = true;
+                    Destroy(gameObject);
+                }
+            }
         }
-        MoveBullet();
+        m_PrevPosition = transform.position;
     }
 
-    private void MoveBullet() {
-        transform.position = transform.position + transform.forward * BulletVelocity * Time.fixedDeltaTime;
-    }
-
-//     private void MoveRigidbodyBullet() {
-//         GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * BulletVelocity * Time.fixedDeltaTime);
-// ;
-//     }
+    // private void MoveBullet() {
+    //     transform.position = transform.position + transform.forward * BulletVelocity * Time.fixedDeltaTime;
+    // }
 
     public void SetArmorPiercing() {
         m_BulletDmg *= 2;

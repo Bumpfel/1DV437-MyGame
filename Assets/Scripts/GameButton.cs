@@ -4,6 +4,7 @@ using UnityEditor;
 
 public class GameButton : MonoBehaviour {
     public SlidingDoor[] m_AffectedDoors = null;
+    public string m_AreaName = "";
 
     private const float CameraSpeed = 40;
     private GameController m_GameController;
@@ -24,16 +25,17 @@ public class GameButton : MonoBehaviour {
             foreach(SlidingDoor door in m_AffectedDoors) {
                 if(door.m_IsLocked) {
                     wasLocked = true;
+                    door.Unlock();
                 }
             }
             if(wasLocked) {
-                StartCoroutine(ShowUnlockedDoor(m_AffectedDoors));
-                m_GameController.DisplayMessage((m_AffectedDoors.Length > 1 ? "Doors" : "Door") + " unlocked");
+                // StartCoroutine(ShowUnlockedDoor());
+                m_GameController.DisplayMessage(m_AreaName + (m_AffectedDoors.Length > 1 ? " doors" : " door") + " unlocked");
             }
         }
     }
 
-    private IEnumerator ShowUnlockedDoor(SlidingDoor[] doors) {
+    private IEnumerator ShowUnlockedDoor() {
         m_GameController.TogglePlayerControl(true);
         Camera camera = Camera.main;
         CameraController cameraController = camera.GetComponent<CameraController>();
@@ -41,16 +43,16 @@ public class GameButton : MonoBehaviour {
         Vector3 initialCameraPosition = camera.transform.position;
 
         Vector3 targetCameraPosition = new Vector3();
-        foreach(SlidingDoor door in doors) {
+        foreach(SlidingDoor door in m_AffectedDoors) {
             targetCameraPosition += door.transform.position;
         }
-        targetCameraPosition /= doors.Length;
+        targetCameraPosition /= m_AffectedDoors.Length;
         targetCameraPosition.y = camera.transform.position.y;
 
         yield return cameraController.MoveCamera(camera, targetCameraPosition, CameraSpeed);
-
         yield return new WaitForSeconds(.5f);
-        foreach(SlidingDoor door in doors) {
+
+        foreach(SlidingDoor door in m_AffectedDoors) {
             door.Unlock();
         }
         yield return new WaitForSeconds(2);

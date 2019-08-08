@@ -12,13 +12,13 @@ public class PlayerMovement : MonoBehaviour {
     public MovementControl m_MovementControl = MovementControl.CameraRelativeMovement;
     public int m_PlayerNumber = 1;
     public float m_WalkSpeed = 5;
-    public float m_StrafeSpeed = 4;
+    // public float m_StrafeSpeed = 4;
     // public int m_RotationSpeed = 200;
-    private const float RunModifier = 2;
+    public float m_RunSpeedModifier = 1.8f;
 
     private float m_CollisionCheckRadius;
 
-    public Vector3 m_MoveTo; // temp public
+    private Vector3 m_MoveTo;
     private float m_MovementDistance;
     private Camera m_ViewCamera;
     public Canvas m_AimReticle;
@@ -109,7 +109,7 @@ public class PlayerMovement : MonoBehaviour {
         m_Animator.SetFloat("speedPercent", speedPercent);
  
         if(Input.GetButton(m_SprintKey)) {
-            moveSpeed *= RunModifier;
+            moveSpeed *= m_RunSpeedModifier;
         }
 		m_MoveTo = movementInput * moveSpeed;
     }
@@ -117,7 +117,7 @@ public class PlayerMovement : MonoBehaviour {
    private void SmoothCameraRelativeMovement() { // has smooth animations
         float moveSpeed = m_WalkSpeed;
         Vector3 movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
-        float targetSpeed = (IsRunning() ? m_WalkSpeed * RunModifier : m_WalkSpeed) * movementInput.magnitude;
+        float targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
         currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
         // transform.Translate(transform.forward * currentSpeed * Time.fixedDeltaTime);
         
@@ -125,7 +125,7 @@ public class PlayerMovement : MonoBehaviour {
         m_Animator.SetFloat("speedPercent", animationSpeedPercent, speedSmoothTime, Time.fixedDeltaTime);
 
         if(Input.GetButton(m_SprintKey)) {
-            moveSpeed *= RunModifier;
+            moveSpeed *= m_RunSpeedModifier;
         }
 		m_MoveTo = movementInput * moveSpeed;
     }
@@ -133,7 +133,7 @@ public class PlayerMovement : MonoBehaviour {
        private void SmoothCharacterRelativeMovement() {
         float moveSpeed = m_WalkSpeed;
         Vector3 movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
-        float targetSpeed = (IsRunning() ? m_WalkSpeed * RunModifier : m_WalkSpeed) * movementInput.magnitude;
+        float targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
         currentSpeed = Mathf.SmoothDamp(Input.GetAxisRaw(m_VerticalAxis), targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
         //----
 

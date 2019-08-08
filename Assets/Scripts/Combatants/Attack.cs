@@ -4,18 +4,20 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Attack : MonoBehaviour {
     
-    public Rigidbody m_Bullet;
-    public float m_FireRate = .3f; // for automatic firing mode
+    public GameObject m_Bullet;
     public AudioClip m_GunSound;
     public AudioClip m_MeleeAttackSound;
+    public GameObject MuzzleFlashPrefab;
+    public float m_FireRate = .3f; // for automatic firing mode
 
+    private ParticleSystem m_MuzzleFlash;
     protected Animator m_Animator;
     protected Combatant m_Combatant;
     private AudioSource m_GunAudioSource;
     private AudioSource m_MeleeAudioSource;
     private Transform m_BulletSpawn;
 
-    private float m_AttackTimestamp;
+    protected float m_AttackTimestamp;
     private const float MeleeDamage = 100;
     private const float MeleeRange = 2;
     private const float MeleeTime = .5f;
@@ -25,6 +27,9 @@ public class Attack : MonoBehaviour {
     private LayerMask m_ObstacleMask;
 
     protected void Start() {
+        // m_MuzzleFlash = Instantiate(MuzzleFlashPrefab.GetComponent<ParticleSystem>());
+        // m_MuzzleFlash.gameObject.SetActive(false);
+
         m_Animator = GetComponent<Animator>();
         m_Animator.Play("Idle_GunMiddle");
         m_BulletSpawn = transform.Find("BulletSpawn");
@@ -41,41 +46,30 @@ public class Attack : MonoBehaviour {
         m_ObstacleMask = LayerMask.GetMask("Obstacles");
     }
 
-    protected void Fire() {
-        Rigidbody bullet = Instantiate(m_Bullet, m_BulletSpawn.position, m_BulletSpawn.rotation);
+    protected virtual void Fire() {
+        GameObject bullet = Instantiate(m_Bullet, m_BulletSpawn.position, m_BulletSpawn.rotation);
+        // m_MuzzleFlash.gameObject.SetActive(true);
+        // m_MuzzleFlash.transform.position = m_BulletSpawn.position + transform.forward * 1.3f;
+        // m_MuzzleFlash.transform.rotation = m_BulletSpawn.rotation;
+        // m_MuzzleFlash.Play();
+
         if(m_Combatant.UseArmourPiercingRounds()) {
             m_GunAudioSource.pitch = .85f;
-            bullet.gameObject.GetComponent<Bullet>().SetArmorPiercing();
+            bullet.GetComponent<Bullet>().SetArmorPiercing();
         }
         else
             m_GunAudioSource.pitch = 1;
-        
-        if(tag == "Player") {
-            m_Animator.Play("Shoot_single", 0, .25f);
-            // m_GunAudioSource.Play();
-        }
-        else {
-            m_Animator.PlayInFixedTime("Shoot_single", 0, m_FireRate);
-
-            // float savedVolume = GetComponentInParent<GameController>().GetSavedVolume(ExposedMixerGroup.SFXVolume);
-            // Vector3 audioClipPoint = transform.position + Vector3.up * Camera.main.transform.position.y * .9f;
-            // AudioSource.PlayClipAtPoint(m_GunAudioSource.clip, audioClipPoint, savedVolume);
-        }
         m_GunAudioSource.Play();
-
     }
 
-
-    /// <summary>
-    /// Automatic firing bound by a fire rate. Use for enemy attacks 
-    /// </summary>
-    protected void ContinuousFire() {
+    protected void AutomaticFire() {
          if(Time.time > m_AttackTimestamp + m_FireRate) {
+            m_Animator.PlayInFixedTime("Shoot_single", 0, m_FireRate);
             Fire();
             m_AttackTimestamp = Time.time;
          }
     }
-
+    
     protected void StopContinuousFire() {
         m_Animator.Play("Idle_Shoot");
     }
@@ -95,7 +89,7 @@ public class Attack : MonoBehaviour {
                 // checking if there are obstacles in the way. Starting cast from the back of the player collider since starting from center causes problems if too close to the target.
                 float colliderRadius = transform.GetComponent<CapsuleCollider>().radius;
                 Vector3 origin = transform.position + transform.forward * - colliderRadius / 2;
-                if(!Physics.Raycast(origin, directionToTarget, MeleeRange, m_ObstacleMask)) { 
+                if(!Physics.Raycast(origin, directionToTarget, MeleeRange, m_ObstacleMask)) {
                     enemy.TakeDamage(MeleeDamage, origin);
                 }
             }

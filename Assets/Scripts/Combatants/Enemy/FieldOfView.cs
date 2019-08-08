@@ -6,10 +6,10 @@ using UnityEngine;
 public class FieldOfView : MonoBehaviour {
 
     [Range(0, 100)]
-    public float m_ViewRadius = 20f;
+    public float m_ViewRadius = 25;
 
     [Range(0, 360)]
-    public float m_ViewAngle = 120f;
+    public float m_ViewAngle = 120;
 
     private LayerMask m_PlayerMask;
     private LayerMask m_ObstacleMask;
@@ -19,22 +19,22 @@ public class FieldOfView : MonoBehaviour {
     [HideInInspector]
     public List<Transform> m_VisibleTargets = new List<Transform>();
 
-    // [Range(0.1f, 2)]
-    private const float m_MeshResolution = 1;
-    private const int m_EdgeResolveIterations = 4;
-    private const float m_EdgeDistanceTreshold = .5f;
+    // TODO temp public. is normally const
+    public  float m_MeshResolution = .5f;
+    public int m_EdgeResolveIterations = 4; 
+    public float m_EdgeDistanceTreshold = .8f;
 
     private Mesh m_ViewMesh;
-    private Combatant m_Combatant;
     private float m_LastSearched;
     private const float m_SearchInterval = .2f;
-    private Vector3 m_RaycastOrigin;
-    private float m_EyePosition = 1.7f;
+    private Vector3 m_SightOrigin;
+    // private readonly Vector3 EyePosition = Vector3.up * 1.7f;
+    private readonly Vector3 FOVHeight = Vector3.up * .1f;
 
     private MeshRenderer m_HelperRenderer;
 
 
-    // temp variables for FindVisibleTargets
+    // variables for FindVisibleTargets
     private Collider[] targetsInViewRadius;
     private Transform target;
     private Vector3 dirToTarget;
@@ -42,7 +42,7 @@ public class FieldOfView : MonoBehaviour {
     private float distToTarget;
 
 
-    // temp variables for DrawFieldOfView
+    // variables for DrawFieldOfView
     private int stepCount;
     private float stepAngleSize;
     private List<Vector3> viewPoints = new List<Vector3>();
@@ -77,12 +77,13 @@ public class FieldOfView : MonoBehaviour {
         FOVHelper.localScale += new Vector3((m_ViewRadius - FOVHelper.localScale.x) * increasedRange, 0, (m_ViewRadius - FOVHelper.localScale.z) * increasedRange);
         m_HelperRenderer = FOVHelper.GetComponent<MeshRenderer>();
 
-        m_Combatant = GetComponent<Combatant>();
+        // m_Combatant = GetComponent<Combatant>();
     }
 
     void LateUpdate() {
         // if(!m_Combatant.IsDead()) {
-            if(m_HelperRenderer.isVisible && !m_Combatant.m_IsAsleep) {
+            if(m_HelperRenderer.isVisible) {
+                m_SightOrigin = transform.position + FOVHeight;
                 DrawFieldOfView();
                 if(Time.time > m_LastSearched + m_SearchInterval)
                     FindVisibleTarget();
@@ -113,8 +114,6 @@ public class FieldOfView : MonoBehaviour {
             if(Vector3.Angle(transform.forward, dirToTarget) < m_ViewAngle / 2) {
                 distToTarget = Vector3.Distance(transform.position, target.position);
                 
-                m_RaycastOrigin = transform.position + Vector3.up * m_EyePosition;
-
                 // Check if sight is obstructed by obstacles or other enemies
                 
                 // if(!Physics.Raycast(m_RaycastOrigin, dirToTarget, out hitinfo, distToTarget)) {
@@ -122,7 +121,7 @@ public class FieldOfView : MonoBehaviour {
                 //         m_VisibleTargets.Add(target);
                 // }
 
-                if(!Physics.Raycast(m_RaycastOrigin, dirToTarget, out hitinfo, distToTarget, m_CombinedMask)) {
+                if(!Physics.Raycast(m_SightOrigin, dirToTarget, out hitinfo, distToTarget, m_CombinedMask)) {
                     m_VisibleTargets.Add(target);
                 }
             }
@@ -159,7 +158,7 @@ public class FieldOfView : MonoBehaviour {
         verticesList.Clear();
         trianglesList.Clear();
 
-        verticesList.Add(Vector3.zero);
+        verticesList.Add(Vector3.zero + FOVHeight);
 
         for(int i = 0; i < vertexCount - 1; i ++) {
             verticesList.Add(transform.InverseTransformPoint(viewPoints[i]));
@@ -210,11 +209,12 @@ public class FieldOfView : MonoBehaviour {
     private ViewCastInfo ViewCast(float globalAngle) {
         dir = DirFromAngle(globalAngle, true);
         
-        if(Physics.Raycast(transform.position, dir, out hit, m_ViewRadius, m_CombinedMask)) {
+        // Debug.DrawRay(m_SightOrigin);
+        if(Physics.Raycast(m_SightOrigin, dir, out hit, m_ViewRadius, m_CombinedMask)) {
             return new ViewCastInfo(true, hit.point, hit.distance, globalAngle);
         }
         else {
-            return new ViewCastInfo(false, transform.position + dir * m_ViewRadius, m_ViewRadius, globalAngle);
+            return new ViewCastInfo(false, m_SightOrigin + dir * m_ViewRadius, m_ViewRadius, globalAngle);
         }
     }
 

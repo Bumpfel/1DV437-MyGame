@@ -26,7 +26,7 @@ public class PickupObject : MonoBehaviour {
 
     void OnTriggerEnter(Collider other) {
         if(other.tag == "Player") {
-            Combatant player = other.GetComponent<Combatant>();
+            PlayerBehaviour player = other.GetComponent<PlayerBehaviour>();
 
             if(m_Type == Type.Heal) {
                 if(player.GetHealth() < 100) {

@@ -9,6 +9,8 @@ public class SlidingDoor : MonoBehaviour {
     public bool m_Automatic = false;
     public float m_OpenDuration = 1;
 
+    public Material m_UnlockedDoorMaterial;
+
     private const float AutomaticCloseDelay = .3f;
     private bool m_IsOpen = false;
     private Transform m_LeftDoorBlade;
@@ -22,10 +24,7 @@ public class SlidingDoor : MonoBehaviour {
     private Coroutine m_RunningCoroutine;
 
     private AudioSource m_AudioSource;
-    private GameController m_GameController;
-    private Color m_UnlockedDoorColor = Color.black; // TODO get real color
-    private Color m_UnlockedExitDoorColor = Color.green;
-    
+    private GameController m_GameController;    
     private bool m_IsInsideTrigger = false; // used because can't have Input check in OnTriggerStay. it can call methods twice
     private float m_WasLastInsideTrigger;
     
@@ -91,7 +90,7 @@ public class SlidingDoor : MonoBehaviour {
 
     public void Unlock() {
         m_IsLocked = false;
-        ChangeDoorColor(m_IsExitDoor ? m_UnlockedExitDoorColor : m_UnlockedDoorColor);
+        ChangeDoorColor();
     }
 
 
@@ -121,10 +120,10 @@ public class SlidingDoor : MonoBehaviour {
         }
     }
 
-    private void ChangeDoorColor(Color newColor) {
+    private void ChangeDoorColor() {
         Renderer[] renderers = GetComponentsInChildren<Renderer>();
         foreach(Renderer renderer in renderers) {
-            renderer.material.SetColor("_Color", newColor);
+            renderer.material = m_UnlockedDoorMaterial;
         }
     }
 

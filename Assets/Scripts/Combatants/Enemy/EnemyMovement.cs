@@ -17,12 +17,10 @@ public class EnemyMovement : MonoBehaviour {
     private Quaternion m_StartingRotation;
     private Combatant m_Combatant;
     private Animator m_Animator;
-    private IEnumerator m_ActiveRoutine;
     private float m_StopTime;
     private bool m_IsHeadingBack = false; // heading back to starting position
     // private float m_CheckIfStuckTimestamp = 0;
     private bool m_IsTurning = false;
-    private bool m_WasAsleep;
     private bool m_IsFirstTurn;
 
     // tanke - kunna ange koordinator som karaktären ska gå emellan, istället för bara fram/tillbaka
@@ -34,10 +32,8 @@ public class EnemyMovement : MonoBehaviour {
         m_StartingRotation = transform.rotation;
 
         m_Animator = GetComponent<Animator>();
-        // m_Animator.Play("Idle_Shoot");
 
-        m_ActiveRoutine = Patrol();
-        StartCoroutine(m_ActiveRoutine);
+        StartCoroutine(Patrol());
 
         m_EndPosition = transform.position + transform.forward * m_PatrolDistance;
     }
@@ -57,6 +53,7 @@ public class EnemyMovement : MonoBehaviour {
 
     void OnDisable() {
         AssemblyReloadEvents.afterAssemblyReload -= OnAfterAssemblyReload;
+        StopAllCoroutines();
     }
 
     public void OnAfterAssemblyReload() {
@@ -71,7 +68,7 @@ public class EnemyMovement : MonoBehaviour {
     private IEnumerator Patrol() {
         if(!ShouldPatrol())
             yield break;
-        StopCoroutinesIfDead();
+        yield return new WaitForSeconds(.5f);
         m_Animator.Play("WalkForward_Shoot");
 
         while(true) {
@@ -79,17 +76,12 @@ public class EnemyMovement : MonoBehaviour {
             (m_IsHeadingBack && Vector3.Distance(transform.position, m_EndPosition) >= m_PatrolDistance)) {
             // (m_IsHeadingBack && Vector3.Distance(transform.position, m_StartingPosition) < .2f)) {
                 m_IsHeadingBack = !m_IsHeadingBack;
-                StopCoroutinesIfDead();
                 yield return Wait(m_PatrolEndWaitTime);
-                StopCoroutinesIfDead();
                 yield return Turn(true);
-                StopCoroutinesIfDead();
                 yield return Wait(TurnEndWaitTime);
-                StopCoroutinesIfDead();
                 m_Animator.Play("WalkForward_Shoot");
             }
             else {
-                StopCoroutinesIfDead();
                 Walk();
                 yield return new WaitForFixedUpdate();
             }
@@ -114,24 +106,19 @@ public class EnemyMovement : MonoBehaviour {
 
     // Public helper method
     public void ReturnToPatrol() {
-        m_ActiveRoutine = ResetPatrol();
-        StartCoroutine(m_ActiveRoutine);
+        StartCoroutine(ResetPatrol());
     }
 
     private IEnumerator ResetPatrol() {
-        StopCoroutinesIfDead();
         yield return Turn(true);
-        StopCoroutinesIfDead();
         yield return Patrol();
     }
 
     // Public helper method
-    public void ReactToTakingDamage(bool wasAsleep) {
-        m_WasAsleep = wasAsleep;
+    public void ReactToTakingDamage() {
         if(!m_IsTurning && !GetComponent<EnemyAttack>().IsAlerted()) {
             Halt();
-            m_ActiveRoutine = DiscoverySpin();
-            StartCoroutine(m_ActiveRoutine);
+            StartCoroutine(DiscoverySpin());
         }
     }
 
@@ -149,10 +136,8 @@ public class EnemyMovement : MonoBehaviour {
     }
     
     public void Halt() {
-        StopCoroutinesIfDead();
         m_Animator.Play("Idle_Shoot");
-        if(m_ActiveRoutine != null)
-            StopCoroutine(m_ActiveRoutine);
+        StopAllCoroutines();
     }
 
     private IEnumerator Wait(float time) {
@@ -170,7 +155,7 @@ public class EnemyMovement : MonoBehaviour {
             targetRotation = transform.rotation * Quaternion.Euler(0, 180, 0);
             m_TurnDuration = NormalTurnDuration / 2;
             if(m_IsFirstTurn)
-                yield return new WaitForSeconds(ReactionTime * (m_WasAsleep ? 2 : 1));
+                yield return new WaitForSeconds(ReactionTime);
         }
 
         m_IsTurning = true;
@@ -181,7 +166,6 @@ public class EnemyMovement : MonoBehaviour {
         Quaternion startRotation = transform.rotation;
 
         while(timeTaken < m_TurnDuration) {
-            StopCoroutinesIfDead();
             timeTaken += Time.fixedDeltaTime;
             yield return new WaitForFixedUpdate();
             transform.rotation = Quaternion.Lerp(startRotation, targetRotation, timeTaken / m_TurnDuration);
@@ -191,12 +175,12 @@ public class EnemyMovement : MonoBehaviour {
         m_IsTurning = false;
     }
 
-    public void StopCoroutinesIfDead() {
-        if(m_Combatant.IsDead()) {
-            if(m_ActiveRoutine != null)
-                StopCoroutine(m_ActiveRoutine);
-            StopAllCoroutines();
-            enabled = false;
-        }
-    }
+    // public void StopCoroutinesIfDead() {
+    //     if(m_Combatant.IsDead()) {
+    //         // if(m_ActiveRoutine != null)
+    //         //     StopCoroutine(m_ActiveRoutine);
+    //         StopAllCoroutines();
+    //         enabled = false;
+    //     }
+    // }
 }

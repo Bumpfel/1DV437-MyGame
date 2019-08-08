@@ -20,11 +20,17 @@ public class PlayerAttack : Attack {
     }
 
     void Update() {
-        if(!m_Combatant.IsDead() && !m_GamePaused) {
+        if(!m_GamePaused) {
             FireIfTriggered();
             MeleeIfTriggered();
         }
     }
+
+    protected override void Fire() {
+        base.Fire();
+        m_Animator.Play("Shoot_single", 0, .25f);
+    }
+
 
     private void FireIfTriggered() {
         if(Input.GetButtonDown(m_FireButton) && !m_PlayerMovement.IsRunning()) {

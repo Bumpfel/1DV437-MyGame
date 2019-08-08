@@ -2412,8 +2412,7 @@ MonoBehaviour:
   m_MovementControl: 0
   m_PlayerNumber: 1
   m_WalkSpeed: 5
-  m_StrafeSpeed: 4
-  m_MoveTo: {x: 0, y: 0, z: 0}
+  m_RunSpeedModifier: 1.8
   m_AimReticle: {fileID: 399229254}
   m_GamePaused: 0
 --- !u!82 &2078180915
@@ -2522,11 +2521,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4225024356588960008}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c241def04e0e143428e0d89da8c1911e, type: 3}
+  m_Script: {fileID: 11500000, guid: 3dbf75e7580ee9b48a5bb16984eed0f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_DeathSound: {fileID: 8300000, guid: ce5196f2f3d0344c19fd98e1033a1f46, type: 3}
-  m_IsAsleep: 0
   m_Armour: 0
   m_ArmourPiercingRounds: 0
 --- !u!114 &2078180916
@@ -2541,11 +2539,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73b7e087bdc2a8147a7853a8ef6820b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Bullet: {fileID: -3895706290591916329, guid: 32d48b2e9a41a3c45aca8997aca18c96,
+  m_Bullet: {fileID: 5165910885932175698, guid: 28e2b47e6e2b65e45854d7095b935d7d,
     type: 3}
-  m_FireRate: 0.3
   m_GunSound: {fileID: 8300000, guid: 0c59ae651206345a486bbc53091b5e45, type: 3}
   m_MeleeAttackSound: {fileID: 8300000, guid: 58748f782368640aa8b64609a22ea9ba, type: 3}
+  MuzzleFlashPrefab: {fileID: 100000, guid: 03a4a1935a9f4454c861dfa0aa6df562, type: 3}
   m_PlayerNumber: 1
   m_GamePaused: 0
 --- !u!82 &5461190703730265755

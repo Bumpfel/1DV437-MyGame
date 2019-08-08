@@ -63,6 +63,8 @@ MonoBehaviour:
   m_IsLocked: 0
   m_IsExitDoor: 0
   m_Automatic: 0
+  m_OpenDuration: 1
+  m_UnlockedDoorMaterial: {fileID: 0}
 --- !u!82 &4595139858943182848
 AudioSource:
   m_ObjectHideFlags: 0
@@ -175,7 +177,7 @@ GameObject:
   - component: {fileID: 7098145109336494021}
   m_Layer: 9
   m_Name: DoorBladeRight
-  m_TagString: Untagged
+  m_TagString: Metal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -483,7 +485,7 @@ GameObject:
   - component: {fileID: 4384748596279278396}
   m_Layer: 9
   m_Name: DoorBladeLeft
-  m_TagString: Untagged
+  m_TagString: Metal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

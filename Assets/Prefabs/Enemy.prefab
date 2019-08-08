@@ -1584,6 +1584,9 @@ MonoBehaviour:
   m_ViewRadius: 25
   m_ViewAngle: 125
   m_VisibleTargets: []
+  m_MeshResolution: 1
+  m_EdgeResolveIterations: 4
+  m_EdgeDistanceTreshold: 0.8
 --- !u!136 &4123646448261959245
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1704,13 +1707,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 2711765308722520456}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c241def04e0e143428e0d89da8c1911e, type: 3}
+  m_Script: {fileID: 11500000, guid: 2dff54f54cbad6c40995892f3815ee78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_DeathSound: {fileID: 8300000, guid: ce5196f2f3d0344c19fd98e1033a1f46, type: 3}
-  m_IsAsleep: 0
   m_Armour: 0
   m_ArmourPiercingRounds: 0
+  m_IsAsleep: 0
 --- !u!114 &816050893
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1723,11 +1726,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04b9108f9f2d3b644be5000b12a0ae06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Bullet: {fileID: -3895706290591916329, guid: 32d48b2e9a41a3c45aca8997aca18c96,
+  m_Bullet: {fileID: 5165910885932175698, guid: 28e2b47e6e2b65e45854d7095b935d7d,
     type: 3}
-  m_FireRate: 0.2
   m_GunSound: {fileID: 8300000, guid: 19d69c28094cc45c7b810d8da7ad71c0, type: 3}
   m_MeleeAttackSound: {fileID: 8300000, guid: 58748f782368640aa8b64609a22ea9ba, type: 3}
+  MuzzleFlashOriginal: {fileID: 100000, guid: 03a4a1935a9f4454c861dfa0aa6df562, type: 3}
+  m_FireRate: 0.2
 --- !u!114 &7812999535778217427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2634,7 +2638,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2711765309207204124}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.05, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2711765308722520449}
