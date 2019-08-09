@@ -29,14 +29,14 @@ public class GameButton : MonoBehaviour {
                 }
             }
             if(wasLocked) {
-                // StartCoroutine(ShowUnlockedDoor());
+                // StartCoroutine(ShowUnlockedDoors());
                 m_GameController.DisplayMessage(m_AreaName + (m_AffectedDoors.Length > 1 ? " doors" : " door") + " unlocked");
             }
         }
     }
 
-    private IEnumerator ShowUnlockedDoor() {
-        m_GameController.TogglePlayerControl(true);
+    private IEnumerator ShowUnlockedDoors() { // not used
+        m_GameController.SetPlayerControls(false);
         Camera camera = Camera.main;
         CameraController cameraController = camera.GetComponent<CameraController>();
         cameraController.m_FollowPlayer = false;
@@ -58,7 +58,7 @@ public class GameButton : MonoBehaviour {
         yield return new WaitForSeconds(2);
         yield return cameraController.MoveCamera(camera, initialCameraPosition, CameraSpeed);
         Camera.main.GetComponent<CameraController>().m_FollowPlayer = true;
-        m_GameController.TogglePlayerControl(false);
+        m_GameController.SetPlayerControls(true);
     }
 
     void OnTriggerStay(Collider other) {

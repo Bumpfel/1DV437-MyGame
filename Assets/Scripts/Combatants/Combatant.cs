@@ -59,7 +59,6 @@ public abstract class Combatant : MonoBehaviour {
     }
 
     protected virtual void Die() {
-        // m_Animator.enabled = false;
         m_Animator.Play("Die");
         float animLen = m_Animator.GetCurrentAnimatorClipInfo(0)[0].clip.length;
         // Destroy(m_Animator, animLen);

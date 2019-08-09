@@ -6,7 +6,7 @@ using UnityEngine;
 public class FieldOfView : MonoBehaviour {
 
     [Range(0, 100)]
-    public float m_ViewRadius = 25;
+    public float m_ViewRadius = 20;
 
     [Range(0, 360)]
     public float m_ViewAngle = 120;
@@ -27,10 +27,8 @@ public class FieldOfView : MonoBehaviour {
     private Mesh m_ViewMesh;
     private float m_LastSearched;
     private const float m_SearchInterval = .2f;
+    private readonly Vector3 EyePosition = Vector3.up * 1.7f; //.1f;
     private Vector3 m_SightOrigin;
-    // private readonly Vector3 EyePosition = Vector3.up * 1.7f;
-    private readonly Vector3 FOVHeight = Vector3.up * .1f;
-
     private MeshRenderer m_HelperRenderer;
 
 
@@ -83,7 +81,7 @@ public class FieldOfView : MonoBehaviour {
     void LateUpdate() {
         // if(!m_Combatant.IsDead()) {
             if(m_HelperRenderer.isVisible) {
-                m_SightOrigin = transform.position + FOVHeight;
+                m_SightOrigin = transform.position + EyePosition;
                 DrawFieldOfView();
                 if(Time.time > m_LastSearched + m_SearchInterval)
                     FindVisibleTarget();
@@ -158,7 +156,7 @@ public class FieldOfView : MonoBehaviour {
         verticesList.Clear();
         trianglesList.Clear();
 
-        verticesList.Add(Vector3.zero + FOVHeight);
+        verticesList.Add(Vector3.zero + EyePosition);
 
         for(int i = 0; i < vertexCount - 1; i ++) {
             verticesList.Add(transform.InverseTransformPoint(viewPoints[i]));

@@ -8,11 +8,13 @@ public class EnemyBehaviour : Combatant {
     private const float WakeUpDelayOnCollider = 1;
     private GameObject m_AsleepIndicator;
     private MonoBehaviour m_FieldOfView;
-
+    private EnemyMovement m_EnemyMovement;
 
 
     private new void Start() {
         base.Start();
+        m_EnemyMovement = GetComponent<EnemyMovement>();
+
         m_AsleepIndicator = m_CharacterGUI.transform.Find("Asleep").gameObject;
         if(m_IsAsleep) {
             m_AsleepIndicator.SetActive(true);
@@ -36,17 +38,23 @@ public class EnemyBehaviour : Combatant {
         if(m_IsAsleep) {
             StartCoroutine(WakeUp(WakeUpDelayOnTakingDmg, true));
         }
+        else if(!IsDead()) {
+            m_EnemyMovement.ReactToTakingDamage();
+        }
     }
 
     private IEnumerator WakeUp(float delay, bool tookDmg) {
         m_AsleepIndicator.SetActive(false);
         m_IsAsleep = false;
         yield return new WaitForSeconds(delay);
-        foreach(MonoBehaviour script in GetComponents<MonoBehaviour>()) {
-            script.enabled = true;
+        if(!IsDead()) {
+            foreach(MonoBehaviour script in GetComponents<MonoBehaviour>()) {
+                script.enabled = true;
+            }
+            if(tookDmg) {
+                m_EnemyMovement.ReactToTakingDamage();
+            }
         }
-        if(tookDmg)
-            GetComponent<EnemyMovement>().ReactToTakingDamage();
     }
 
     protected override void Die() {

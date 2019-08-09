@@ -19,7 +19,7 @@ public class Bullet : MonoBehaviour {
     private Vector3 m_Origin;
     private Vector3 m_PrevPosition;
 
-    private bool m_HasHit = false;
+    private bool m_ShowImpactEffects;
 
     private void Start() {
         m_Origin = transform.position;
@@ -36,45 +36,43 @@ public class Bullet : MonoBehaviour {
     private void CheckCollision() {
         // cast a ray forwards from its previous position with a distance equal to the distance the bullet has travelled since previous check, and see if there is a collision
         Vector3 direction = (transform.position - m_PrevPosition).normalized;
-        if(Physics.Raycast(m_PrevPosition, direction, out m_Hitinfo, Vector3.Distance(m_PrevPosition, transform.position))) {
-            if(!m_HasHit && (m_Hitinfo.collider.tag == "Player" || m_Hitinfo.collider.tag == "Enemy")) {
+        if(Physics.Raycast(m_PrevPosition, direction, out m_Hitinfo, Vector3.Distance(m_PrevPosition, transform.position)) && m_Hitinfo.collider != GetComponent<Collider>()) {
+            print("hit " + m_Hitinfo.collider.name);
+            if(m_Hitinfo.collider.tag == "Player" || m_Hitinfo.collider.tag == "Enemy") {
                 Combatant target = m_Hitinfo.collider.gameObject.GetComponentInParent<Combatant>();
                 target.TakeDamage(m_BulletDmg, m_Origin);
-                Destroy(gameObject);
-                m_Impact = Instantiate(BodyImpact.GetComponent<ParticleSystem>());
-                m_Impact.transform.rotation = transform.rotation * Quaternion.Euler(0, 180, 0);
-                m_Impact.transform.position = m_Hitinfo.point;
             }
             else if(m_Hitinfo.collider.tag != "Ignored") {
                 m_Body.MovePosition(m_Hitinfo.point);
-                if(!m_HasHit) {
-                    if(m_Hitinfo.collider.tag == "Metal")
-                        m_Impact = Instantiate(MetalImpact.GetComponent<ParticleSystem>());
-                    else if(m_Hitinfo.collider.tag == "Wood")
-                        m_Impact = Instantiate(WoodImpact.GetComponent<ParticleSystem>());
-                    else
-                        m_Impact = Instantiate(ConcreteImpact.GetComponent<ParticleSystem>());
-
-                    m_Impact.transform.rotation = transform.rotation * Quaternion.Euler(0, 180, 0);
-                    m_Impact.transform.position = m_Hitinfo.point;
-                    Light light = GetComponent<Light>();
-                    Destroy(light);
-                    m_HasHit = true;
-                    Destroy(gameObject);
-                }
             }
+            ShowImpactEffects();
+            Destroy(gameObject);
         }
         m_PrevPosition = transform.position;
     }
 
-    // private void MoveBullet() {
-    //     transform.position = transform.position + transform.forward * BulletVelocity * Time.fixedDeltaTime;
-    // }
+    private void ShowImpactEffects() {
+        if(ConcreteImpact != null) {
+            if(m_Hitinfo.collider.tag == "Player" || m_Hitinfo.collider.tag == "Enemy")
+                m_Impact = Instantiate(BodyImpact.GetComponent<ParticleSystem>());
+            else if(m_Hitinfo.collider.tag == "Metal")
+                m_Impact = Instantiate(MetalImpact.GetComponent<ParticleSystem>());
+            else if(m_Hitinfo.collider.tag == "Wood")
+                m_Impact = Instantiate(WoodImpact.GetComponent<ParticleSystem>());
+            else
+                m_Impact = Instantiate(ConcreteImpact.GetComponent<ParticleSystem>());
+
+            // print("impact duration: " + m_Impact.main.duration);
+            // Destroy(m_Impact, m_Impact.main.duration);
+            // m_Impact.transform.rotation = transform.rotation * Quaternion.Euler(0, 180, 0);
+            m_Impact.transform.LookAt(m_Hitinfo.normal);
+            m_Impact.transform.position = m_Hitinfo.point;
+        }
+    }
 
     public void SetArmorPiercing() {
         m_BulletDmg *= 2;
     }
-
 
     private int i = 0;
     private Color[] rayColors = { Color.red, Color.green, Color.blue };

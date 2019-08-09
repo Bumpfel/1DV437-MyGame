@@ -18,15 +18,13 @@ public class GameController : MonoBehaviour {
     private ScreenUI m_ScreenUI;
 
     // TODO add all controls here
-    public readonly string m_ActionKey = "Action_Player1";
+    public string m_ActionKey;
 
     private bool m_Paused = false;
     private int m_CurrentSceneIndex;
     private bool m_GameOver = false;
     
-    private Light m_DayLight;
-
-    // private enum Message { DOOR_LOCKED  };
+    // private Light m_DayLight;
 
     void Start() {
         // print("GameController Start()");
@@ -37,6 +35,7 @@ public class GameController : MonoBehaviour {
     }
 
     private void Initialize() {
+        m_ActionKey = Strings.Controls.Action_Player.ToString() + 1;
         // print("GameController Initialize()");
         m_PlayerStats = new PlayerStats("Player", SceneManager.GetActiveScene().buildIndex);
         
@@ -50,12 +49,14 @@ public class GameController : MonoBehaviour {
         m_Player = Instantiate(PlayerModel, m_PlayerSpawn.position, m_PlayerSpawn.rotation, transform);
         m_CameraController.SetPlayer(m_Player.transform);
 
-        Light[] lights = FindObjectsOfType<Light>();
-        foreach(Light light in lights) {
-            if(light.tag == "DayLight") {
-                m_DayLight = light;
-            }
-        }
+        SetImpactEffects(ImpactEffectsOn());
+
+        // Light[] lights = FindObjectsOfType<Light>();
+        // foreach(Light light in lights) {
+        //     if(light.tag == "DayLight") {
+        //         m_DayLight = light;
+        //     }
+        // }
     }
 
     void Update() {
@@ -95,6 +96,7 @@ public class GameController : MonoBehaviour {
     }
 
     public void SetGameOver() {
+        SetPlayerControls(false);
         m_GameOver = true;
         m_Menu.ShowGameOverMenu();
     }
@@ -105,6 +107,7 @@ public class GameController : MonoBehaviour {
 
 
     public void EndLevel() {
+        SetPlayerControls(false);
         m_GameOver = true;
         m_PlayerStats.SetLevelEnded();
         SaveSystem.SaveHighScoreData(m_PlayerStats);
@@ -120,8 +123,6 @@ public class GameController : MonoBehaviour {
             //TODO meny med knapp innan nästa bana laddas
         }
         else {
-            m_Player.GetComponent<PlayerMovement>().m_GamePaused = true;
-            m_Player.GetComponent<PlayerAttack>().m_GamePaused = true;
             m_Player.layer = 0; // makes enemies ignore the player
             m_Menu.ShowCredits();
             AudioSource.PlayClipAtPoint(m_LevelEndedAudio, Camera.main.transform.position, 1);
@@ -155,7 +156,7 @@ public class GameController : MonoBehaviour {
             if(LevelIsLoaded()) {
                 // Cursor.visible = !Cursor.visible;
                 m_Paused = !m_Paused;
-                TogglePlayerControl(m_Paused);
+                SetPlayerControls(!m_Paused);
                 Time.timeScale = m_Paused ? 0 : 1;
             }
         }
@@ -167,13 +168,24 @@ public class GameController : MonoBehaviour {
         // debugSavePlayerData();
     }
 
-    public void TogglePlayerControl(bool disabled) {
-        m_Player.GetComponent<PlayerMovement>().m_GamePaused = disabled;
-        m_Player.GetComponent<PlayerAttack>().m_GamePaused = disabled;
+    public void SetPlayerControls(bool enabled) {
+        m_Player.GetComponent<PlayerMovement>().m_ControlsEnabled = enabled;
+        m_Player.GetComponent<PlayerAttack>().m_ControlsEnabled = enabled;
     }
 
     public float GetSavedVolume(ExposedMixerGroup mixerGroup) {
         return PlayerPrefs.GetFloat(mixerGroup.ToString());
+    }
+
+    public void SetImpactEffects(bool enabled) {
+        foreach(Attack combatant in FindObjectsOfType<Attack>()) {
+            combatant.SetBullet(enabled);
+        }
+    }
+
+
+    public bool ImpactEffectsOn() {
+        return PlayerPrefs.GetInt(Strings.Settings.BulletImpactEffects.ToString()) == 0 ? false : true;
     }
 
 }

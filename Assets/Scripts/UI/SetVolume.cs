@@ -23,7 +23,7 @@ public class SetVolume : MonoBehaviour {
                 gameObject.GetComponent<Slider>().value = savedValue;
             }
         }
- 
+
     }
 
     // helper method for UI sliders

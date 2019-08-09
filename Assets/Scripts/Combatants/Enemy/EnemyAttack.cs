@@ -31,7 +31,7 @@ public class EnemyAttack : Attack {
 
     void Update() {
         ReactToVisibleTargets();
-        // ShootAtDetectedTarget();
+        ShootAtDetectedTarget();
     }
 
     // protected override void Fire() {
@@ -47,7 +47,7 @@ public class EnemyAttack : Attack {
         if(m_FOV && m_FOV.m_VisibleTargets.Count > 0 && CloseEnoughToShoot())
             AutomaticFire();
         else if(m_RecentlyDetectedPlayer)
-            StopContinuousFire(); // just to stop firing animation
+            StopAutomaticFire(); // just to stop firing animation
     }
 
 

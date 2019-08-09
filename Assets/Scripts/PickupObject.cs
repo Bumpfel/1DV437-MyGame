@@ -2,7 +2,7 @@
 
 public class PickupObject : MonoBehaviour {
     
-    public enum Type { Heal, ArmourPiercingRounds, Armour };
+    public enum Type { Heal, ArmourPiercingRounds, Armour, AutoFire };
     public Type m_Type = Type.Heal;
     private AudioSource m_AudioSource;
      private const float HealAmount = 50;
@@ -28,23 +28,25 @@ public class PickupObject : MonoBehaviour {
         if(other.tag == "Player") {
             PlayerBehaviour player = other.GetComponent<PlayerBehaviour>();
 
-            if(m_Type == Type.Heal) {
-                if(player.GetHealth() < 100) {
-                    float healedAmount = Mathf.Min(100 - player.GetHealth(), HealAmount);
-                    m_GameController.DisplayMessage("Healed for " + healedAmount);
-                    player.Heal(HealAmount);
-                    PickUpObject();
-                }
+            if(m_Type == Type.Heal && player.GetHealth() < 100) {
+                float healedAmount = Mathf.Min(100 - player.GetHealth(), HealAmount);
+                m_GameController.DisplayMessage("Healed for " + healedAmount);
+                player.Heal(HealAmount);
+                PickUpObject();
             }
-            else {
-                if(m_Type == Type.ArmourPiercingRounds) {
-                    player.AddArmourPiercingRounds(ArmourPiercingRoundsAmount);
-                    m_GameController.DisplayMessage("Picked up " + ArmourPiercingRoundsAmount + " Armour Piercing Rounds");
-                }
-                else if(m_Type == Type.Armour) {
-                    player.AddArmour(ArmourAmount);
-                    m_GameController.DisplayMessage("Picked up " + ArmourAmount + " " + m_Type);
-                }
+            else if(m_Type == Type.ArmourPiercingRounds) {
+                player.AddArmourPiercingRounds(ArmourPiercingRoundsAmount);
+                m_GameController.DisplayMessage("Picked up " + ArmourPiercingRoundsAmount + " Armour Piercing Rounds");
+                PickUpObject();
+            }
+            else if(m_Type == Type.Armour) {
+                player.AddArmour(ArmourAmount);
+                m_GameController.DisplayMessage("Picked up " + ArmourAmount + " " + m_Type);
+                PickUpObject();
+            }
+            else if(m_Type == Type.AutoFire) {
+                player.GetComponent<PlayerAttack>().m_AutomaticFire = true;
+                m_GameController.DisplayMessage("Picked up Automatic Fire");
                 PickUpObject();
             }
         }

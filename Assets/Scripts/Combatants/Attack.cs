@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Attack : MonoBehaviour {
     
-    public GameObject m_Bullet;
+    public GameObject BulletWithImpact;
+    public GameObject BulletWithoutImpact;
+    private GameObject m_Bullet;
     public AudioClip m_GunSound;
     public AudioClip m_MeleeAttackSound;
     public GameObject MuzzleFlashPrefab;
-    public float m_FireRate = .3f; // for automatic firing mode
+    public float m_FireRate = .2f; // for automatic firing mode
 
     private ParticleSystem m_MuzzleFlash;
     protected Animator m_Animator;
@@ -46,7 +48,14 @@ public class Attack : MonoBehaviour {
         m_ObstacleMask = LayerMask.GetMask("Obstacles");
     }
 
-    protected virtual void Fire() {
+    public void SetBullet(bool useImpactBullet) {
+        if(useImpactBullet)
+            m_Bullet = BulletWithImpact;
+        else
+            m_Bullet = BulletWithoutImpact;
+    }
+
+    private void Shoot() {
         GameObject bullet = Instantiate(m_Bullet, m_BulletSpawn.position, m_BulletSpawn.rotation);
         // m_MuzzleFlash.gameObject.SetActive(true);
         // m_MuzzleFlash.transform.position = m_BulletSpawn.position + transform.forward * 1.3f;
@@ -62,15 +71,21 @@ public class Attack : MonoBehaviour {
         m_GunAudioSource.Play();
     }
 
+    protected void SingleFire() {
+        m_Animator.Play("Shoot_single", 0, .25f);
+        Shoot();
+    }
+
+
     protected void AutomaticFire() {
          if(Time.time > m_AttackTimestamp + m_FireRate) {
             m_Animator.PlayInFixedTime("Shoot_single", 0, m_FireRate);
-            Fire();
+            Shoot();
             m_AttackTimestamp = Time.time;
          }
     }
     
-    protected void StopContinuousFire() {
+    protected void StopAutomaticFire() {
         m_Animator.Play("Idle_Shoot");
     }
 
