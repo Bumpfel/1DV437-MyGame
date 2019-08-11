@@ -87,5 +87,25 @@ PrefabInstance:
       propertyPath: WoodImpact
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 3798594906876270797, guid: 28e2b47e6e2b65e45854d7095b935d7d,
+        type: 3}
+      propertyPath: ConcreteImpactEffect
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3798594906876270797, guid: 28e2b47e6e2b65e45854d7095b935d7d,
+        type: 3}
+      propertyPath: MetalImpactEffect
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3798594906876270797, guid: 28e2b47e6e2b65e45854d7095b935d7d,
+        type: 3}
+      propertyPath: WoodImpactEffect
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3798594906876270797, guid: 28e2b47e6e2b65e45854d7095b935d7d,
+        type: 3}
+      propertyPath: BodyImpactEffect
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 28e2b47e6e2b65e45854d7095b935d7d, type: 3}

@@ -31,17 +31,8 @@ public class EnemyAttack : Attack {
 
     void Update() {
         ReactToVisibleTargets();
-        ShootAtDetectedTarget();
+        // ShootAtDetectedTarget();
     }
-
-    // protected override void Fire() {
-    //     base.Fire();
-    //     m_Animator.PlayInFixedTime("Shoot_single", 0, m_FireRate);
-    
-    //     // float savedVolume = GetComponentInParent<GameController>().GetSavedVolume(ExposedMixerGroup.SFXVolume);
-    //     // Vector3 audioClipPoint = transform.position + Vector3.up * Camera.main.transform.position.y * .9f;
-    //     // AudioSource.PlayClipAtPoint(m_GunAudioSource.clip, audioClipPoint, savedVolume);
-    // }
 
     private void ShootAtDetectedTarget() {
         if(m_FOV && m_FOV.m_VisibleTargets.Count > 0 && CloseEnoughToShoot())

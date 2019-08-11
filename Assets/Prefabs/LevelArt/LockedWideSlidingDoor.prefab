@@ -106,16 +106,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_UnlockedDoorMaterial
       value: 
-      objectReference: {fileID: 2100000, guid: 6686742cf6021ac4da708a4bb10276e8, type: 2}
+      objectReference: {fileID: 2100000, guid: c155f8550b5355f4b8bdab89fb3156a6, type: 2}
     - target: {fileID: 5605931462091107712, guid: a182501d208825e4090a7582b45fa3a6,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 9f30e6023394e1841a3a32263007e6cf, type: 2}
+      objectReference: {fileID: 2100000, guid: 05c5f9a56baf5d94a970e146e3705dc6, type: 2}
     - target: {fileID: 4343777632224314279, guid: a182501d208825e4090a7582b45fa3a6,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 9f30e6023394e1841a3a32263007e6cf, type: 2}
+      objectReference: {fileID: 2100000, guid: 05c5f9a56baf5d94a970e146e3705dc6, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a182501d208825e4090a7582b45fa3a6, type: 3}

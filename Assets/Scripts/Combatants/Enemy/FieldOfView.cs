@@ -27,7 +27,9 @@ public class FieldOfView : MonoBehaviour {
     private Mesh m_ViewMesh;
     private float m_LastSearched;
     private const float m_SearchInterval = .2f;
-    private readonly Vector3 EyePosition = Vector3.up * 1.7f; //.1f;
+
+    private const float EyeHeight = 1.6f;
+    private readonly Vector3 EyePosition = Vector3.up * EyeHeight; // the height from which the enemy detects objects
     private Vector3 m_SightOrigin;
     private MeshRenderer m_HelperRenderer;
 
@@ -59,6 +61,9 @@ public class FieldOfView : MonoBehaviour {
     RaycastHit hit2;
 
     void Start() {
+        float heightFromGround = 1 - EyeHeight; // = 1 meter off the ground
+        transform.Find("FOVVisualization").transform.position += Vector3.up * heightFromGround; // to raise the fov from the ground. don't want it in eye height, since then it covers many objects
+
         m_PlayerMask = LayerMask.GetMask("Players");
         m_ObstacleMask = LayerMask.GetMask("Obstacles");
         m_EnemyMask = LayerMask.GetMask("Enemies");

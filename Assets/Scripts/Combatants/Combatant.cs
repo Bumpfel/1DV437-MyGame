@@ -83,7 +83,7 @@ public abstract class Combatant : MonoBehaviour {
         if(m_Armour == 0)
             m_ArmourBuffUI.SetActive(false);
         else
-            m_ArmourBuffUI.GetComponentInChildren<TextMeshProUGUI>().SetText("" + m_Armour);
+            m_ArmourBuffUI.GetComponentInChildren<TextMeshProUGUI>().SetText("" + Mathf.Round(m_Armour));
     }
     protected void UpdateAPRBuff() {
         if(m_ArmourPiercingRounds == 0)

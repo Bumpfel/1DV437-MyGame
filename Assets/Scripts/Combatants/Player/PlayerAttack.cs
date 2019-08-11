@@ -4,7 +4,7 @@ using UnityEditor;
 public class PlayerAttack : Attack {
     
     public int m_PlayerNumber = 1;
-    public bool m_AutomaticFire = false;
+    public bool m_AutomaticFire = true;
     private string m_FireButton;
     private string m_FireButton2;
     private Input m_Fire;

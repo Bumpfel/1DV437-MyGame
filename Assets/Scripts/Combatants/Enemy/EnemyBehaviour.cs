@@ -23,8 +23,6 @@ public class EnemyBehaviour : Combatant {
                     script.enabled = false;
                 }
             }
-            // GetComponent<FieldOfView>().enabled = false;
-            // GetComponent<FieldOfView>().enabled = false;
         }
     }
     

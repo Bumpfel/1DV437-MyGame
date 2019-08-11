@@ -14,9 +14,9 @@ public class PlayerBehaviour : Combatant {
     }
 
     protected override void Die() {
-        base.Die();
-        m_GameController.m_PlayerStats.AddPlayerDeath();
-        m_GameController.SetGameOver();
+        // base.Die();
+        // m_GameController.m_PlayerStats.AddPlayerDeath();
+        // m_GameController.SetGameOver();
     }
     
     public void AddArmourPiercingRounds(int rounds) {

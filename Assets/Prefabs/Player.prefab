@@ -2410,7 +2410,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_MovementControl: 0
-  m_PlayerNumber: 1
   m_WalkSpeed: 5
   m_RunSpeedModifier: 1.8
   m_AimReticle: {fileID: 399229254}
@@ -2548,7 +2547,7 @@ MonoBehaviour:
   MuzzleFlashPrefab: {fileID: 100000, guid: 03a4a1935a9f4454c861dfa0aa6df562, type: 3}
   m_FireRate: 0.1
   m_PlayerNumber: 1
-  m_AutomaticFire: 0
+  m_AutomaticFire: 1
   m_ControlsEnabled: 1
 --- !u!82 &5461190703730265755
 AudioSource:

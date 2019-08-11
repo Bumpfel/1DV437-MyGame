@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5125957674024188771}
   - component: {fileID: 1265342606540768232}
   - component: {fileID: 6413413664356303071}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Box
   m_TagString: Metal
   m_Icon: {fileID: 0}

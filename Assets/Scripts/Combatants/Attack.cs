@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,7 +19,8 @@ public class Attack : MonoBehaviour {
     private Transform m_BulletSpawn;
 
     protected float m_AttackTimestamp;
-    private const float MeleeDamage = 100;
+    private const float MeleeDamageMin = 90;
+    private const float MeleeDamageMax = 90;
     private const float MeleeRange = 2;
     private const float MeleeTime = .5f;
     private const float MaxMeleeAngle = 90;
@@ -55,8 +55,10 @@ public class Attack : MonoBehaviour {
             m_Bullet = BulletWithoutImpact;
     }
 
+    private GameObject bullet;
     private void Shoot() {
-        GameObject bullet = Instantiate(m_Bullet, m_BulletSpawn.position, m_BulletSpawn.rotation);
+        CalculateRecoil();
+        bullet = Instantiate(m_Bullet, m_BulletSpawn.position, m_BulletSpawn.rotation * shotAngleWithRecoil);
         // m_MuzzleFlash.gameObject.SetActive(true);
         // m_MuzzleFlash.transform.position = m_BulletSpawn.position + transform.forward * 1.3f;
         // m_MuzzleFlash.transform.rotation = m_BulletSpawn.rotation;
@@ -71,6 +73,26 @@ public class Attack : MonoBehaviour {
         m_GunAudioSource.Play();
     }
 
+
+    // recoil variables 
+    private Quaternion shotAngleWithRecoil;
+    private const float MinInstability = .1f;
+    private const float MaxInstability = .6f;
+    private const float InstabilityAddedPerShot = .2f;
+    private const float RecoilFactor = 10;
+    private float instability = MinInstability;
+    private float randomSpread;
+    private float timeSinceLastAttack;
+    private void CalculateRecoil() {
+        // instability builds up over time up to a max value, and is reduced by time between attacks down to a minimum value
+        timeSinceLastAttack = Time.time - m_AttackTimestamp;
+        instability = Mathf.Max(instability + InstabilityAddedPerShot - timeSinceLastAttack, MinInstability);
+        instability = Mathf.Min(instability, MaxInstability);
+
+        randomSpread = instability * RecoilFactor;
+        shotAngleWithRecoil = Quaternion.Euler(Random.Range(-randomSpread, randomSpread), Random.Range(-randomSpread, randomSpread), Random.Range(-randomSpread / 2, randomSpread / 2));
+    }
+
     protected void SingleFire() {
         m_Animator.Play("Shoot_single", 0, .25f);
         Shoot();
@@ -82,11 +104,15 @@ public class Attack : MonoBehaviour {
             m_Animator.PlayInFixedTime("Shoot_single", 0, m_FireRate);
             Shoot();
             m_AttackTimestamp = Time.time;
+
+            // float savedVolume = GetComponentInParent<GameController>().GetSavedVolume(ExposedMixerGroup.SFXVolume);
+            // Vector3 audioClipPoint = transform.position + Vector3.up * Camera.main.transform.position.y * .9f;
+            // AudioSource.PlayClipAtPoint(m_GunAudioSource.clip, audioClipPoint, savedVolume);
          }
     }
     
     protected void StopAutomaticFire() {
-        m_Animator.Play("Idle_Shoot");
+        // m_Animator.Play("Idle_Shoot");
     }
 
     protected void MeleeAttack() {
@@ -105,7 +131,7 @@ public class Attack : MonoBehaviour {
                 float colliderRadius = transform.GetComponent<CapsuleCollider>().radius;
                 Vector3 origin = transform.position + transform.forward * - colliderRadius / 2;
                 if(!Physics.Raycast(origin, directionToTarget, MeleeRange, m_ObstacleMask)) {
-                    enemy.TakeDamage(MeleeDamage, origin);
+                    enemy.TakeDamage(Random.Range(MeleeDamageMin, MeleeDamageMax), origin);
                 }
             }
         }

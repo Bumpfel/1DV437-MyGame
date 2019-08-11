@@ -64,7 +64,8 @@ MonoBehaviour:
   m_IsExitDoor: 0
   m_Automatic: 0
   m_OpenDuration: 1
-  m_UnlockedDoorMaterial: {fileID: 0}
+  m_UnlockedDoorMaterial: {fileID: 2100000, guid: c155f8550b5355f4b8bdab89fb3156a6,
+    type: 2}
 --- !u!82 &4595139858943182848
 AudioSource:
   m_ObjectHideFlags: 0
@@ -221,7 +222,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6686742cf6021ac4da708a4bb10276e8, type: 2}
+  - {fileID: 2100000, guid: c155f8550b5355f4b8bdab89fb3156a6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -529,7 +530,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6686742cf6021ac4da708a4bb10276e8, type: 2}
+  - {fileID: 2100000, guid: c155f8550b5355f4b8bdab89fb3156a6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

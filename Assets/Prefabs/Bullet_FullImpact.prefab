@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 7110796364976669252}
   - component: {fileID: 154304356316787655}
   m_Layer: 0
-  m_Name: Bullet
+  m_Name: Bullet_FullImpact
   m_TagString: Ignored
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -106,10 +106,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fe695f81fcd9fd4599e9fca81f1869e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ConcreteImpact: {fileID: 100006, guid: 382c72524bd69044fae222eefa70563a, type: 3}
-  MetalImpact: {fileID: 100002, guid: 627bfa08ce624ab40ab2fea71785b5f0, type: 3}
-  WoodImpact: {fileID: 100002, guid: 5d73f72c6be7d0440bbc9c87d4f718c0, type: 3}
-  BodyImpact: {fileID: 100002, guid: 26a0291d16c817446a06ff30ee66d7d3, type: 3}
+  ConcreteImpactEffect: {fileID: 100006, guid: 94a130fb17f1cae4388a8fe1d8bd3055, type: 3}
+  MetalImpactEffect: {fileID: 100002, guid: 627bfa08ce624ab40ab2fea71785b5f0, type: 3}
+  WoodImpactEffect: {fileID: 100002, guid: 053ffbc5e89111349bb060a39ffa0f37, type: 3}
+  BodyImpactEffect: {fileID: 100002, guid: 26a0291d16c817446a06ff30ee66d7d3, type: 3}
+  TestImpactEffect: {fileID: 0}
 --- !u!54 &7110796364976669252
 Rigidbody:
   m_ObjectHideFlags: 0

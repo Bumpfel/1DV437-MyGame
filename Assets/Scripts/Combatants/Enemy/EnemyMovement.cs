@@ -52,13 +52,15 @@ public class EnemyMovement : MonoBehaviour {
     }
 
     void OnDisable() {
-        AssemblyReloadEvents.afterAssemblyReload -= OnAfterAssemblyReload;
+        print(name + " movement disabled");
         StopAllCoroutines();
+        AssemblyReloadEvents.afterAssemblyReload -= OnAfterAssemblyReload;
     }
 
     public void OnAfterAssemblyReload() {
         if(!GetComponent<EnemyAttack>().IsAlerted())
             ReturnToPatrol();
+        print("enemy movement -- test");
     }
 
     private bool ShouldPatrol() {

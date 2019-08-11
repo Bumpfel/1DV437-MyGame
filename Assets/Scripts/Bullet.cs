@@ -4,14 +4,18 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour {
     
-    public GameObject ConcreteImpact;
-    public GameObject MetalImpact;
-    public GameObject WoodImpact;
-    public GameObject BodyImpact;
+    public GameObject ConcreteImpactEffect;
+    public GameObject MetalImpactEffect;
+    public GameObject WoodImpactEffect;
+    public GameObject BodyImpactEffect;
+    private GameObject m_UsedImpactEffect;
     private ParticleSystem m_Impact;
     private const float BulletVelocity = 500;
     private const float MaximumBulletSurvivalTime = 3;
-    private float m_BulletDmg = 25;
+    private const float BulletDmgMin = 20;
+    private const float BulletDmgMax = 25;
+    private const float ArmourPiercingMultiplier = 2;
+    private  float m_DmgMultiplier = 1;
     private RaycastHit m_Hitinfo;
     private Rigidbody m_Body;
     private float m_CalculatedHitTimeStamp;
@@ -37,41 +41,40 @@ public class Bullet : MonoBehaviour {
         // cast a ray forwards from its previous position with a distance equal to the distance the bullet has travelled since previous check, and see if there is a collision
         Vector3 direction = (transform.position - m_PrevPosition).normalized;
         if(Physics.Raycast(m_PrevPosition, direction, out m_Hitinfo, Vector3.Distance(m_PrevPosition, transform.position)) && m_Hitinfo.collider != GetComponent<Collider>()) {
-            print("hit " + m_Hitinfo.collider.name);
             if(m_Hitinfo.collider.tag == "Player" || m_Hitinfo.collider.tag == "Enemy") {
                 Combatant target = m_Hitinfo.collider.gameObject.GetComponentInParent<Combatant>();
-                target.TakeDamage(m_BulletDmg, m_Origin);
+                target.TakeDamage(Random.Range(BulletDmgMin, BulletDmgMax) * m_DmgMultiplier, m_Origin);
+                ShowImpactEffects();
+                Destroy(gameObject);
             }
             else if(m_Hitinfo.collider.tag != "Ignored") {
                 m_Body.MovePosition(m_Hitinfo.point);
+                ShowImpactEffects();
+                Destroy(gameObject);
             }
-            ShowImpactEffects();
-            Destroy(gameObject);
         }
         m_PrevPosition = transform.position;
     }
 
     private void ShowImpactEffects() {
-        if(ConcreteImpact != null) {
+        if(ConcreteImpactEffect != null) {
             if(m_Hitinfo.collider.tag == "Player" || m_Hitinfo.collider.tag == "Enemy")
-                m_Impact = Instantiate(BodyImpact.GetComponent<ParticleSystem>());
+                m_UsedImpactEffect = BodyImpactEffect;
             else if(m_Hitinfo.collider.tag == "Metal")
-                m_Impact = Instantiate(MetalImpact.GetComponent<ParticleSystem>());
+                m_UsedImpactEffect = MetalImpactEffect;
             else if(m_Hitinfo.collider.tag == "Wood")
-                m_Impact = Instantiate(WoodImpact.GetComponent<ParticleSystem>());
+                m_UsedImpactEffect = WoodImpactEffect;
             else
-                m_Impact = Instantiate(ConcreteImpact.GetComponent<ParticleSystem>());
+                m_UsedImpactEffect = ConcreteImpactEffect;
 
+            m_Impact = Instantiate(m_UsedImpactEffect.GetComponent<ParticleSystem>(), m_Hitinfo.point, Quaternion.LookRotation(m_Hitinfo.normal), m_Hitinfo.collider.transform);
             // print("impact duration: " + m_Impact.main.duration);
             // Destroy(m_Impact, m_Impact.main.duration);
-            // m_Impact.transform.rotation = transform.rotation * Quaternion.Euler(0, 180, 0);
-            m_Impact.transform.LookAt(m_Hitinfo.normal);
-            m_Impact.transform.position = m_Hitinfo.point;
         }
     }
 
     public void SetArmorPiercing() {
-        m_BulletDmg *= 2;
+        m_DmgMultiplier = ArmourPiercingMultiplier;
     }
 
     private int i = 0;

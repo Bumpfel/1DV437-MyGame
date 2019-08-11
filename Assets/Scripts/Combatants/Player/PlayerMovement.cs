@@ -10,7 +10,7 @@ public class PlayerMovement : MonoBehaviour {
     public enum MovementControl { CameraRelativeMovement, CharacterRelativeMovement };
     
     public MovementControl m_MovementControl = MovementControl.CameraRelativeMovement;
-    public int m_PlayerNumber = 1;
+    private int m_PlayerNumber = 1;
     public float m_WalkSpeed = 5;
     // public float m_StrafeSpeed = 4;
     // public int m_RotationSpeed = 200;
@@ -46,9 +46,21 @@ public class PlayerMovement : MonoBehaviour {
     private float m_SpeedSmoothVelocity;
     private float m_CurrentSpeed;
 
-
+    private readonly Vector3 CollisionCheckPoint = Vector3.up * 1.5f;
     private float m_TargetAngle;
     private Quaternion m_TargetRotation;
+
+
+    // method vars
+    private float actualSpeed;
+    private Vector3 prevPosition;
+    private float SpeedMultiplier = 5.5f;
+    private float moveSpeed;
+    private float targetSpeed;
+    private Vector3 movementInput;
+
+    private float animationSpeedPercent;
+    
 
     void Start() {
         m_ViewCamera = Camera.main;
@@ -66,6 +78,8 @@ public class PlayerMovement : MonoBehaviour {
         m_ObstacleMask = LayerMask.GetMask("Obstacles");
         m_CollisionCheckRadius = GetComponent<CapsuleCollider>().radius * .8f;
 
+        prevPosition = transform.position;
+
         // print(m_AimReticle.GetComponentInChildren<Image>().transform.localScale);
 
         // if(m_MovementControl == MovementControl.CharacterRelativeMovement) {
@@ -77,10 +91,11 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        SmoothCameraRelativeMovement();
+        // SmoothCameraRelativeMovement();
+        CameraRelativeMovementActualSpeed();
 
         if(m_ControlsEnabled && !transform.position.Equals(m_MoveTo)) {
-            Collider[] colliders = Physics.OverlapSphere(transform.position, m_CollisionCheckRadius, m_ObstacleMask);
+            Collider[] colliders = Physics.OverlapSphere(transform.position + CollisionCheckPoint, m_CollisionCheckRadius, m_ObstacleMask);
             // Collider[] collidedWithWeapon = Physics.OverlapBox(transform.position + transform.forward * .9f + transform.right * .25f, new Vector3(.25f / 2, .4f / 2, 1.4f / 2), transform.rotation, m_ObstacleMask);
             if(colliders.Length == 0) {// && collidedWithWeapon.Length == 0)
                 transform.position = transform.position + m_MoveTo * Time.fixedDeltaTime;
@@ -101,39 +116,46 @@ public class PlayerMovement : MonoBehaviour {
         }
     }
 
-    private void CameraRelativeMovement() { // not currently used
-        float moveSpeed = m_WalkSpeed;
+   private void CameraRelativeMovementActualSpeed() {
+        actualSpeed = Vector3.Distance(prevPosition, transform.position) * SpeedMultiplier;
+    
+        moveSpeed = m_WalkSpeed;
+        movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
+        targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
+        // m_CurrentSpeed = Mathf.SmoothDamp(m_CurrentSpeed, targetSpeed, ref m_SpeedSmoothVelocity, SpeedSmoothTime);
+        
+        m_Animator.SetFloat(Strings.AnimatorSettings.speedPercent.ToString(), actualSpeed, SpeedSmoothTime, Time.fixedDeltaTime);
 
-        Vector3 movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
-        float speedPercent = (IsRunning() ? 1 : 0.5f) * movementInput.magnitude;
-        m_Animator.SetFloat(Strings.AnimatorSettings.speedPercent.ToString(), speedPercent);
- 
         if(Input.GetButton(m_SprintKey)) {
             moveSpeed *= m_RunSpeedModifier;
         }
 		m_MoveTo = movementInput * moveSpeed;
+
+        prevPosition = transform.position;
     }
 
+
    private void SmoothCameraRelativeMovement() { // has smooth animations
-        float moveSpeed = m_WalkSpeed;
-        Vector3 movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
-        float targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
+        moveSpeed = m_WalkSpeed;
+        movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
+        targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
         m_CurrentSpeed = Mathf.SmoothDamp(m_CurrentSpeed, targetSpeed, ref m_SpeedSmoothVelocity, SpeedSmoothTime);
-        // transform.Translate(transform.forward * currentSpeed * Time.fixedDeltaTime);
-        
-        float animationSpeedPercent = (IsRunning() ? 1 : 0.5f) * movementInput.magnitude;
+    
+        animationSpeedPercent = (IsRunning() ? 1 : 0.5f) * movementInput.magnitude;
         m_Animator.SetFloat(Strings.AnimatorSettings.speedPercent.ToString(), animationSpeedPercent, SpeedSmoothTime, Time.fixedDeltaTime);
 
         if(Input.GetButton(m_SprintKey)) {
             moveSpeed *= m_RunSpeedModifier;
         }
-		m_MoveTo = movementInput * moveSpeed;
+
+        transform.Translate(transform.forward * m_CurrentSpeed * Time.fixedDeltaTime);
+		// m_MoveTo = movementInput * moveSpeed;
     }
 
        private void SmoothCharacterRelativeMovement() {
-        float moveSpeed = m_WalkSpeed;
-        Vector3 movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
-        float targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
+        moveSpeed = m_WalkSpeed;
+        movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
+        targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
         m_CurrentSpeed = Mathf.SmoothDamp(Input.GetAxisRaw(m_VerticalAxis), targetSpeed, ref m_SpeedSmoothVelocity, SpeedSmoothTime);
         //----
 
