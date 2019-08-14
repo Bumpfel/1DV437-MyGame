@@ -10,7 +10,6 @@ public class PlayerMovement : MonoBehaviour {
     public enum MovementControl { CameraRelativeMovement, CharacterRelativeMovement };
     
     public MovementControl m_MovementControl = MovementControl.CameraRelativeMovement;
-    private int m_PlayerNumber = 1;
     public float m_WalkSpeed = 5;
     // public float m_StrafeSpeed = 4;
     // public int m_RotationSpeed = 200;
@@ -41,7 +40,7 @@ public class PlayerMovement : MonoBehaviour {
     
 
     [HideInInspector]
-    public bool m_ControlsEnabled = true;
+    // public bool m_ControlsEnabled = true;
     private const float SpeedSmoothTime = .1f;
     private float m_SpeedSmoothVelocity;
     private float m_CurrentSpeed;
@@ -67,9 +66,9 @@ public class PlayerMovement : MonoBehaviour {
 
         m_Animator = GetComponent<Animator>();
 
-        m_VerticalAxis = Strings.Controls.Vertical_Player.ToString() + m_PlayerNumber;
-        m_HorizontalAxis = Strings.Controls.Horizontal_Player.ToString() + m_PlayerNumber;
-        m_SprintKey = Strings.Controls.Sprint_Player.ToString() + m_PlayerNumber;
+        m_VerticalAxis = Strings.Controls.Vertical.ToString();
+        m_HorizontalAxis = Strings.Controls.Horizontal.ToString();
+        m_SprintKey = Strings.Controls.Sprint.ToString();
 
         Cursor.visible = false;
 
@@ -94,10 +93,10 @@ public class PlayerMovement : MonoBehaviour {
         // SmoothCameraRelativeMovement();
         CameraRelativeMovementActualSpeed();
 
-        if(m_ControlsEnabled && !transform.position.Equals(m_MoveTo)) {
+        if(!transform.position.Equals(m_MoveTo)) {
             Collider[] colliders = Physics.OverlapSphere(transform.position + CollisionCheckPoint, m_CollisionCheckRadius, m_ObstacleMask);
             // Collider[] collidedWithWeapon = Physics.OverlapBox(transform.position + transform.forward * .9f + transform.right * .25f, new Vector3(.25f / 2, .4f / 2, 1.4f / 2), transform.rotation, m_ObstacleMask);
-            if(colliders.Length == 0) {// && collidedWithWeapon.Length == 0)
+            if(colliders.Length == 0 || colliders[0].isTrigger) {// && collidedWithWeapon.Length == 0)
                 transform.position = transform.position + m_MoveTo * Time.fixedDeltaTime;
             }
         }
@@ -105,18 +104,16 @@ public class PlayerMovement : MonoBehaviour {
 
 
     void Update() {
-        if(m_ControlsEnabled) {
-            Look();
-            // if(m_MovementControl == MovementControl.CharacterRelativeMovement)
-                // CharacterRelativeMovement();
-            // else
-                // SmoothCameraRelativeMovement();
-                // SmoothCharacterRelativeMovement();
-                // CameraRelativeMovement();
-        }
+        Look();
+        // if(m_MovementControl == MovementControl.CharacterRelativeMovement)
+            // CharacterRelativeMovement();
+        // else
+            // SmoothCameraRelativeMovement();
+            // SmoothCharacterRelativeMovement();
+            // CameraRelativeMovement();
     }
 
-   private void CameraRelativeMovementActualSpeed() {
+   private void CameraRelativeMovementActualSpeed() { // animates the character according to actual movement speed
         actualSpeed = Vector3.Distance(prevPosition, transform.position) * SpeedMultiplier;
     
         moveSpeed = m_WalkSpeed;

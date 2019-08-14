@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4469633712214787463}
   m_Layer: 0
   m_Name: chainlink_group-3_LOD0
-  m_TagString: Untagged
+  m_TagString: Ignored
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -104,7 +104,7 @@ GameObject:
   - component: {fileID: 205000010707581854}
   m_Layer: 0
   m_Name: chainlink_group-3
-  m_TagString: Untagged
+  m_TagString: Ignored
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -162,7 +162,7 @@ GameObject:
   - component: {fileID: 7411438452780636327}
   m_Layer: 0
   m_Name: chainlink_group-3_LOD1
-  m_TagString: Untagged
+  m_TagString: Ignored
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

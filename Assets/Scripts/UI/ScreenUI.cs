@@ -7,13 +7,14 @@ public enum Field { BigText, Message };
 
 public class ScreenUI : MonoBehaviour {
 
-    private TextMeshProUGUI m_BigText;
-    private TextMeshProUGUI m_Messages;
-      private float m_BigTextDuration = 1;
-    private float m_BigTextFadeDuration = 2;
-    private float m_MessageDuration = 2;
-    private float m_MessageFadeDuration = 1;
-    private Coroutine m_ActiveRoutine;
+    private static TextMeshProUGUI m_BigText;
+    private static TextMeshProUGUI m_MessageTemplate;
+    private static Coroutine m_ActiveRoutine;
+    private static float BigTextDuration = 1;
+    private static float BigTextFadeDuration = 2;
+    private static float MessageDuration = 2;
+    private static float MessageFadeDuration = 1;
+    private static MonoBehaviour monobehaviour = null;
 
     void Start() {
         ShowLevelText();
@@ -24,48 +25,60 @@ public class ScreenUI : MonoBehaviour {
         m_BigText.gameObject.SetActive(false);
         m_BigText.SetText("");
 
-        m_Messages = transform.Find("Message").GetComponent<TextMeshProUGUI>();
-        m_Messages.gameObject.SetActive(false);
-        m_Messages.SetText("");
+        m_MessageTemplate = transform.Find("Messages").Find("Message").GetComponent<TextMeshProUGUI>();
+        m_MessageTemplate.gameObject.SetActive(false);
+        m_MessageTemplate.SetText("");
     }
 
     public void ShowLevelText() {
-        SetScreenMessage(Field.BigText, SceneManager.GetActiveScene().name.ToString(), true);
+        DisplayMessage(SceneManager.GetActiveScene().name.ToString(), Field.BigText);
     }
 
-    public void SetScreenMessage(Field field, string text, bool fadeOut) {
+    public static void DisplayMessage(string text, Field field = Field.Message) {
         Settings settings;
-        if(field == Field.BigText)
-            settings =  new Settings(m_BigTextDuration, m_BigTextFadeDuration, m_BigText);
-        else
-            settings =  new Settings(m_MessageDuration, m_MessageFadeDuration, m_Messages);
+        if(field == Field.BigText) {
+            settings = new Settings(BigTextDuration, BigTextFadeDuration, m_BigText);
+            monobehaviour = m_BigText;
+        }
+        else {
+            TextMeshProUGUI newMessage = Instantiate(m_MessageTemplate);
+            newMessage.transform.parent = m_MessageTemplate.transform.parent;
+            newMessage.transform.SetAsFirstSibling();
+            settings = new Settings(MessageDuration, MessageFadeDuration, newMessage);
+
+            monobehaviour = newMessage;
+        }
 
         settings.textField.gameObject.SetActive(true);
         settings.textField.SetText(text);
-        if(fadeOut) {
-            if(m_ActiveRoutine != null)
-                StopCoroutine(m_ActiveRoutine);
-            m_ActiveRoutine = StartCoroutine(Fade(settings.textField, settings.duration, settings.fadeDuration, false));
-        }
+
+        if(m_ActiveRoutine != null && field == Field.BigText)
+            monobehaviour.StopCoroutine(m_ActiveRoutine);
+        monobehaviour.StartCoroutine(Fade(field, settings, false));
     }
 
-    private IEnumerator Fade(TextMeshProUGUI text, float showTextDuration, float fadeDuration, bool ignoreTimeScale) {
-        text.CrossFadeAlpha(1, 0, true);
-        yield return new WaitForSeconds(showTextDuration);
-        text.CrossFadeAlpha(0, fadeDuration, ignoreTimeScale);
-        yield return new WaitForSeconds(fadeDuration);
-        text.gameObject.SetActive(false);
-        text.SetText("");
+    private static IEnumerator Fade(Field field, Settings settings, bool ignoreTimeScale) {
+        settings.textField.CrossFadeAlpha(1, 0, true);
+        yield return new WaitForSeconds(settings.showDuration);
+        settings.textField.CrossFadeAlpha(0, settings.fadeDuration, ignoreTimeScale);
+        yield return new WaitForSeconds(settings.fadeDuration);
+        if(field == Field.BigText) {
+            settings.textField.gameObject.SetActive(false);
+            settings.textField.SetText("");
+        }
+        else {
+            Destroy(settings.textField.gameObject);
+        }
         m_ActiveRoutine = null;
     }
 
     private struct Settings {
-        public float duration;
+        public float showDuration;
         public float fadeDuration;
         public TextMeshProUGUI textField;
 
         public Settings(float _duration, float _fadeDuration, TextMeshProUGUI _textField) {
-            duration = _duration;
+            showDuration = _duration;
             fadeDuration = _fadeDuration;
             textField = _textField;
         }

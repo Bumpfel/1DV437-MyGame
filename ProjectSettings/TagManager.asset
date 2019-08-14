@@ -18,6 +18,8 @@ TagManager:
   - Metal
   - Wood
   - Concrete
+  - Nonblocking
+  - Semiblocking
   layers:
   - Default
   - TransparentFX

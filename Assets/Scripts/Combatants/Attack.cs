@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Attack : MonoBehaviour {
     
-    public GameObject BulletWithImpact;
-    public GameObject BulletWithoutImpact;
+    public GameObject BulletFullImpact;
+    public GameObject BulletSimpleImpact;
     private GameObject m_Bullet;
     public AudioClip m_GunSound;
     public AudioClip m_MeleeAttackSound;
@@ -17,16 +17,20 @@ public class Attack : MonoBehaviour {
     private AudioSource m_GunAudioSource;
     private AudioSource m_MeleeAudioSource;
     private Transform m_BulletSpawn;
-
+    private const float AudioPitchNormal = 1;
+    private const float AudioPitchARP = .85f;
     protected float m_AttackTimestamp;
     private const float MeleeDamageMin = 90;
     private const float MeleeDamageMax = 90;
     private const float MeleeRange = 2;
-    private const float MeleeTime = .5f;
+    private const float MeleeTime = .8f;
     private const float MaxMeleeAngle = 90;
+    private const float MeleeAttackOriginHeight = 1.5f;
+    private const float SurprisedMeleeDmgMultiplier = 1.3f;
     private bool m_PlayingMeleeAnimation = false;
     private LayerMask m_EnemyMask;
     private LayerMask m_ObstacleMask;
+    private bool m_UsePreInstantiatedBullets = false; // whether to use bullets from a pre-instantiated pool, or to instantiate new ones for every shot 
 
     protected void Start() {
         // m_MuzzleFlash = Instantiate(MuzzleFlashPrefab.GetComponent<ParticleSystem>());
@@ -48,35 +52,50 @@ public class Attack : MonoBehaviour {
         m_ObstacleMask = LayerMask.GetMask("Obstacles");
     }
 
-    public void SetBullet(bool useImpactBullet) {
-        if(useImpactBullet)
-            m_Bullet = BulletWithImpact;
-        else
-            m_Bullet = BulletWithoutImpact;
+    public void SetSimpleImpactEffects(bool enabled) {
+        if(enabled) 
+            m_Bullet = BulletSimpleImpact;
+        else {
+            // m_EffectPool.Clear();
+            // for(int i = 0; i < 100; i ++) {
+            //     m_EffectPool.Add();
+            // }
+            m_Bullet = BulletFullImpact; 
+        }
     }
 
     private GameObject bullet;
     private void Shoot() {
         CalculateRecoil();
-        bullet = Instantiate(m_Bullet, m_BulletSpawn.position, m_BulletSpawn.rotation * shotAngleWithRecoil);
+        if(m_UsePreInstantiatedBullets) {
+            bullet = BulletInstantiator.GetNextBullet();
+            bullet.GetComponent<Bullet>().SetStartingPoint(m_BulletSpawn.position, m_BulletSpawn.rotation * m_ShotAngleWithRecoil);
+        }
+        else {
+            bullet = Instantiate(m_Bullet, m_BulletSpawn.position, m_BulletSpawn.rotation * m_ShotAngleWithRecoil);
+        }
+        bullet.GetComponent<Bullet>().AddMomentum();
+       
         // m_MuzzleFlash.gameObject.SetActive(true);
         // m_MuzzleFlash.transform.position = m_BulletSpawn.position + transform.forward * 1.3f;
         // m_MuzzleFlash.transform.rotation = m_BulletSpawn.rotation;
         // m_MuzzleFlash.Play();
 
         if(m_Combatant.UseArmourPiercingRounds()) {
-            m_GunAudioSource.pitch = .85f;
+            m_GunAudioSource.pitch = AudioPitchARP;
             bullet.GetComponent<Bullet>().SetArmorPiercing();
         }
         else
-            m_GunAudioSource.pitch = 1;
-        m_GunAudioSource.Play();
+            m_GunAudioSource.pitch = AudioPitchNormal;
+        m_GunAudioSource.PlayOneShot(m_GunAudioSource.clip);
+        // m_GunAudioSource.Play();
+
+        // AudioSource.PlayClipAtPoint(m_GunAudioSource.clip, Camera.main.transform.position - Vector3.up * 1f);
     }
 
-
     // recoil variables 
-    private Quaternion shotAngleWithRecoil;
-    private const float MinInstability = .1f;
+    private Quaternion m_ShotAngleWithRecoil;
+    private const float MinInstability = .05f;
     private const float MaxInstability = .6f;
     private const float InstabilityAddedPerShot = .2f;
     private const float RecoilFactor = 10;
@@ -90,24 +109,14 @@ public class Attack : MonoBehaviour {
         instability = Mathf.Min(instability, MaxInstability);
 
         randomSpread = instability * RecoilFactor;
-        shotAngleWithRecoil = Quaternion.Euler(Random.Range(-randomSpread, randomSpread), Random.Range(-randomSpread, randomSpread), Random.Range(-randomSpread / 2, randomSpread / 2));
+        m_ShotAngleWithRecoil = Quaternion.Euler(Random.Range(-randomSpread, randomSpread), Random.Range(-randomSpread, randomSpread), Random.Range(-randomSpread / 2, randomSpread / 2));
     }
 
-    protected void SingleFire() {
-        m_Animator.Play("Shoot_single", 0, .25f);
-        Shoot();
-    }
-
-
-    protected void AutomaticFire() {
+    public void Fire() {
          if(Time.time > m_AttackTimestamp + m_FireRate) {
             m_Animator.PlayInFixedTime("Shoot_single", 0, m_FireRate);
             Shoot();
             m_AttackTimestamp = Time.time;
-
-            // float savedVolume = GetComponentInParent<GameController>().GetSavedVolume(ExposedMixerGroup.SFXVolume);
-            // Vector3 audioClipPoint = transform.position + Vector3.up * Camera.main.transform.position.y * .9f;
-            // AudioSource.PlayClipAtPoint(m_GunAudioSource.clip, audioClipPoint, savedVolume);
          }
     }
     
@@ -123,15 +132,19 @@ public class Attack : MonoBehaviour {
 
             Collider[] colliders = Physics.OverlapSphere(transform.position + transform.forward * .7f, MeleeRange / 2, m_EnemyMask);
             if(colliders.Length > 0) {
-                Combatant enemy = colliders[0].gameObject.GetComponent<Combatant>();
-                Vector3 directionToTarget = (enemy.transform.position - transform.position).normalized;
+                Combatant combatant = colliders[0].gameObject.GetComponent<Combatant>();
+                Vector3 directionToTarget = (combatant.transform.position - transform.position).normalized;
                 // Debug.DrawRay(transform.position + Vector3.up * 1.5f, directionToTarget, Color.magenta, 2f);
 
                 // checking if there are obstacles in the way. Starting cast from the back of the player collider since starting from center causes problems if too close to the target.
                 float colliderRadius = transform.GetComponent<CapsuleCollider>().radius;
-                Vector3 origin = transform.position + transform.forward * - colliderRadius / 2;
+                Vector3 origin = transform.position + Vector3.up * MeleeAttackOriginHeight + transform.forward * (-colliderRadius / 2);
                 if(!Physics.Raycast(origin, directionToTarget, MeleeRange, m_ObstacleMask)) {
-                    enemy.TakeDamage(Random.Range(MeleeDamageMin, MeleeDamageMax), origin);
+                    float multiplier = 1;
+                    if(combatant.tag == "Enemy" && !combatant.GetComponent<EnemyBehaviour>().IsAlerted())
+                        multiplier = SurprisedMeleeDmgMultiplier;
+ 
+                    combatant.TakeDamage(Random.Range(MeleeDamageMin, MeleeDamageMax) * multiplier, origin);
                 }
             }
         }

@@ -27,7 +27,7 @@ public class HingedDoor : MonoBehaviour {
 
     void Update() {
         if(m_IsInsideTrigger) {
-            if(Input.GetButtonDown(m_GameController.m_ActionKey)) {// && Time.time > m_OpenTimestamp + OpenDelay) {
+            if(Input.GetButtonDown(Strings.Controls.Action.ToString())) {// && Time.time > m_OpenTimestamp + OpenDelay) {
                 OpenDoor(!m_IsOpen);
             }
             else if(Input.GetKeyDown(KeyCode.U)) { //TODO for testing
@@ -60,7 +60,7 @@ public class HingedDoor : MonoBehaviour {
 
     public void OpenDoor(bool open) {
         if(m_IsLocked) {
-            m_GameController.DisplayMessage(Strings.Message.DoorIsLocked.ToString());
+            ScreenUI.DisplayMessage("Door is locked");
         }
         else {
             if(m_IsExitDoor) {

@@ -15,10 +15,6 @@ public class GameController : MonoBehaviour {
     private GameObject m_Player;
     private Transform m_PlayerSpawn;
     private Menu m_Menu;
-    private ScreenUI m_ScreenUI;
-
-    // TODO add all controls here
-    public string m_ActionKey;
 
     private bool m_Paused = false;
     private int m_CurrentSceneIndex;
@@ -27,7 +23,6 @@ public class GameController : MonoBehaviour {
     // private Light m_DayLight;
 
     void Start() {
-        // print("GameController Start()");
         m_Menu = GetComponentInChildren<Menu>(true);
         if(LevelIsLoaded()) {
             Initialize();
@@ -35,21 +30,18 @@ public class GameController : MonoBehaviour {
     }
 
     private void Initialize() {
-        m_ActionKey = Strings.Controls.Action_Player.ToString() + 1;
         // print("GameController Initialize()");
         m_PlayerStats = new PlayerStats("Player", SceneManager.GetActiveScene().buildIndex);
         
-        // m_Menu = GetComponentInChildren<Menu>(true);
         m_Menu.Initialize();
 
-        m_ScreenUI = GetComponentInChildren<ScreenUI>(true);
-        m_ScreenUI.gameObject.SetActive(true);
+        GetComponentInChildren<ScreenUI>(true).gameObject.SetActive(true);
 
         m_PlayerSpawn = GetComponentInChildren<Transform>().Find("PlayerSpawn");
         m_Player = Instantiate(PlayerModel, m_PlayerSpawn.position, m_PlayerSpawn.rotation, transform);
         m_CameraController.SetPlayer(m_Player.transform);
 
-        SetImpactEffects(ImpactEffectsOn());
+        SetImpactEffects(GetSavedImpactEffects());
 
         // Light[] lights = FindObjectsOfType<Light>();
         // foreach(Light light in lights) {
@@ -64,7 +56,7 @@ public class GameController : MonoBehaviour {
             TogglePauseMenu();
         }
         if(Input.GetKeyDown(KeyCode.F9)) { // debug
-            AudioSource.PlayClipAtPoint(m_LevelEndedAudio, Camera.main.transform.position, 1);
+            AudioSource.PlayClipAtPoint(m_LevelEndedAudio, Camera.main.transform.position - Vector3.up * 1, 1);
             // EndLevel();
         }
         // m_DayLight.intensity = Mathf.Min(Time.timeSinceLevelLoad / 240, 1);
@@ -101,9 +93,9 @@ public class GameController : MonoBehaviour {
         m_Menu.ShowGameOverMenu();
     }
 
-    public void DisplayMessage(string msg) {
-        m_ScreenUI.SetScreenMessage(Field.Message, msg, true);
-    }
+    // public void DisplayMessage(string msg) {
+    //     m_ScreenUI.PutScreenMessage(Field.Message, msg);
+    // }
 
 
     public void EndLevel() {
@@ -168,24 +160,24 @@ public class GameController : MonoBehaviour {
         // debugSavePlayerData();
     }
 
-    public void SetPlayerControls(bool enabled) {
-        m_Player.GetComponent<PlayerMovement>().m_ControlsEnabled = enabled;
-        m_Player.GetComponent<PlayerAttack>().m_ControlsEnabled = enabled;
+    public void SetPlayerControls(bool state) {
+        m_Player.GetComponent<PlayerMovement>().enabled = state;
+        m_Player.GetComponent<PlayerAttack>().enabled = state;
     }
 
     public float GetSavedVolume(ExposedMixerGroup mixerGroup) {
         return PlayerPrefs.GetFloat(mixerGroup.ToString());
     }
 
-    public void SetImpactEffects(bool enabled) {
+    public void SetImpactEffects(int impactEffect) {
         foreach(Attack combatant in FindObjectsOfType<Attack>()) {
-            combatant.SetBullet(enabled);
+            combatant.SetSimpleImpactEffects(impactEffect == 0 ? false : true);
         }
     }
 
 
-    public bool ImpactEffectsOn() {
-        return PlayerPrefs.GetInt(Strings.Settings.BulletImpactEffects.ToString()) == 0 ? false : true;
+    public int GetSavedImpactEffects() {
+        return PlayerPrefs.GetInt(Strings.Settings.BulletImpactEffects.ToString());
     }
 
 }

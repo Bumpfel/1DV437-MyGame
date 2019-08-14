@@ -1499,9 +1499,9 @@ GameObject:
   - component: {fileID: 4123646448261959245}
   - component: {fileID: 816050892}
   - component: {fileID: 816050887}
-  - component: {fileID: 816050893}
   - component: {fileID: 7812999535778217427}
   - component: {fileID: 7935923923799519117}
+  - component: {fileID: 840495857571154290}
   m_Layer: 11
   m_Name: Enemy
   m_TagString: Enemy
@@ -1714,26 +1714,6 @@ MonoBehaviour:
   m_Armour: 0
   m_ArmourPiercingRounds: 0
   m_IsAsleep: 0
---- !u!114 &816050893
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2711765308722520456}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 04b9108f9f2d3b644be5000b12a0ae06, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  BulletWithImpact: {fileID: 5165910885932175698, guid: 28e2b47e6e2b65e45854d7095b935d7d,
-    type: 3}
-  BulletWithoutImpact: {fileID: 6450419427604255694, guid: 997b03bd218db6743b5e25c6cba90ec8,
-    type: 3}
-  m_GunSound: {fileID: 8300000, guid: 19d69c28094cc45c7b810d8da7ad71c0, type: 3}
-  m_MeleeAttackSound: {fileID: 8300000, guid: 58748f782368640aa8b64609a22ea9ba, type: 3}
-  MuzzleFlashPrefab: {fileID: 0}
-  m_FireRate: 0.2
 --- !u!114 &7812999535778217427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1844,6 +1824,26 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &840495857571154290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2711765308722520456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e6d4ca62ffab6145916f1a02ce3c459, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BulletFullImpact: {fileID: 5165910885932175698, guid: 28e2b47e6e2b65e45854d7095b935d7d,
+    type: 3}
+  BulletSimpleImpact: {fileID: 140492019051855858, guid: 195d6f0679ecbc7428f54ae424b38367,
+    type: 3}
+  m_GunSound: {fileID: 8300000, guid: 19d69c28094cc45c7b810d8da7ad71c0, type: 3}
+  m_MeleeAttackSound: {fileID: 8300000, guid: 58748f782368640aa8b64609a22ea9ba, type: 3}
+  MuzzleFlashPrefab: {fileID: 0}
+  m_FireRate: 0.2
 --- !u!1 &2711765308728098085
 GameObject:
   m_ObjectHideFlags: 0

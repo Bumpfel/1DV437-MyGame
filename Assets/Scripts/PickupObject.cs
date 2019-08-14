@@ -9,11 +9,9 @@ public class PickupObject : MonoBehaviour {
     private const float ArmourAmount = 25;
     private const int ArmourPiercingRoundsAmount = 10;
     private const float RotationSpeed = .5f;
-    private GameController m_GameController;
 
     void Start() {
         m_AudioSource = GetComponent<AudioSource>();
-        m_GameController = FindObjectOfType<GameController>();
     }
 
     void Update() {
@@ -30,23 +28,23 @@ public class PickupObject : MonoBehaviour {
 
             if(m_Type == Type.Heal && player.GetHealth() < 100) {
                 float healedAmount = Mathf.Min(100 - player.GetHealth(), HealAmount);
-                m_GameController.DisplayMessage("Healed for " + healedAmount);
+                ScreenUI.DisplayMessage("Healed for " + healedAmount);
                 player.Heal(HealAmount);
                 PickUpObject();
             }
             else if(m_Type == Type.ArmourPiercingRounds) {
                 player.AddArmourPiercingRounds(ArmourPiercingRoundsAmount);
-                m_GameController.DisplayMessage("Picked up " + ArmourPiercingRoundsAmount + " Armour Piercing Rounds");
+                ScreenUI.DisplayMessage("Picked up " + ArmourPiercingRoundsAmount + " Armour Piercing Rounds");
                 PickUpObject();
             }
             else if(m_Type == Type.Armour) {
                 player.AddArmour(ArmourAmount);
-                m_GameController.DisplayMessage("Picked up " + ArmourAmount + " " + m_Type);
+                ScreenUI.DisplayMessage("Picked up " + ArmourAmount + " " + m_Type);
                 PickUpObject();
             }
             else if(m_Type == Type.AutoFire) {
                 player.GetComponent<PlayerAttack>().m_AutomaticFire = true;
-                m_GameController.DisplayMessage("Picked up Automatic Fire");
+                ScreenUI.DisplayMessage("Picked up Automatic Fire");
                 PickUpObject();
             }
         }

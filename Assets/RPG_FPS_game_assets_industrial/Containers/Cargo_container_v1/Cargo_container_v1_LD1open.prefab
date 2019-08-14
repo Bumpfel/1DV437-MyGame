@@ -192,7 +192,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4000013554313012}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cargo_container_v1_LD1open
   m_TagString: Untagged
   m_Icon: {fileID: 0}

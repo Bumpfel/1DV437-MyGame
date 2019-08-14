@@ -1,50 +1,45 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class SlidingDoor : MonoBehaviour {
 
+    // public bool switchAdjustmentSide = false;
     public bool m_IsLocked = false;
     public bool m_IsExitDoor = false;
     public bool m_Automatic = false;
     public float m_OpenDuration = 1;
-
     public Material m_UnlockedDoorMaterial;
+    public AudioClip m_DoorOpenSound;
+    public AudioClip m_DoorCloseSound;
+    public AudioClip m_DoorLockedSound;
 
+    private float m_SavedVolume;
     private const float AutomaticCloseDelay = .3f;
     private bool m_IsOpen = false;
-    private Transform m_LeftDoorBlade;
-    private Transform m_RightDoorBlade;
-    private Vector3 m_OriginalLeftDoorBladePosition;
-    private Vector3 m_OriginalRightDoorBladePosition;
-
-    private Vector3 m_LeftDoorTargetPosition;
-    private Vector3 m_RightDoorTargetPosition;
-
-    private Coroutine m_RunningCoroutine;
-
+    private bool m_DoorInMotion;
+    private Transform[] m_DoorBlades;
     private AudioSource m_AudioSource;
-    private GameController m_GameController;    
+    private Vector3 m_AudioClipPoint;
+    private GameController m_GameController;
     private bool m_IsInsideTrigger = false; // used because can't have Input check in OnTriggerStay. it can call methods twice
     private float m_WasLastInsideTrigger;
-    
 
     void Start() {
-        m_LeftDoorBlade = transform.Find("DoorBladeLeft");
-        m_OriginalLeftDoorBladePosition = m_LeftDoorBlade.transform.position;
-        m_RightDoorBlade = transform.Find("DoorBladeRight");
-        m_OriginalRightDoorBladePosition = m_RightDoorBlade.transform.position;
-
-        // Material doorMtrl = (Material) Resources.Load("Materials/Door", typeof(Material));
-        // m_UnlockedDoorColor = doorMtrl.color;
-
         m_GameController = FindObjectOfType<GameController>();
         m_AudioSource = GetComponent<AudioSource>();
 
-        // if(m_IsOpen) {
-        //     // print(name + " starts open");
-        //     m_RunningCoroutine = StartCoroutine("ToggleOpenDoor");
-        // }
+        transform.position += transform.forward * -.01f; //(switchAdjustmentSide ? .01f : -.01f);
+
+        m_DoorBlades = new Transform[transform.childCount];
+        for(int i = 0; i < transform.childCount; i ++) {
+            m_DoorBlades[i] = transform.GetChild(i);
+        }
+    }
+    
+    void OnEnable()  {
+        // print("door script enabled"); // TODO det var nåt jag tänkte på här...
     }
 
     void Update() {
@@ -54,7 +49,7 @@ public class SlidingDoor : MonoBehaviour {
                     OpenDoor(true);
             }
             else {
-                if(Input.GetButtonDown(m_GameController.m_ActionKey)) {// && Time.time > m_OpenTimestamp + OpenDelay) {
+                if(Input.GetButtonDown(Strings.Controls.Action.ToString())) { // && Time.time > m_OpenTimestamp + OpenDelay) {
                     OpenDoor(!m_IsOpen);
                 }
                 else if(Input.GetKeyDown(KeyCode.U)) { //TODO for testing
@@ -96,55 +91,56 @@ public class SlidingDoor : MonoBehaviour {
 
     public void OpenDoor(bool open) {
         if(m_IsLocked) {
-            m_GameController.DisplayMessage("This door is locked");
+            ScreenUI.DisplayMessage("This door is locked");
+            PlaySound(m_DoorLockedSound);
         }
         else {
             if(m_IsExitDoor) {
                 m_GameController.EndLevel();
             }
-            else if(m_RunningCoroutine != null) {
-                StopCoroutine(m_RunningCoroutine);
-                m_RunningCoroutine = null;
+            else if(m_DoorInMotion) {
+                StopAllCoroutines();
+                m_DoorInMotion = false;
                 m_IsOpen = open;
-                // m_AudioSource.Stop();
             }
+            m_SavedVolume = m_GameController.GetSavedVolume(ExposedMixerGroup.SFXVolume);
             
-            // m_AudioSource.timeSamples = open ? m_AudioSource.clip.samples - 1 : 0;
-            // m_AudioSource.pitch = 1.7f * (open ? -1 : 1);
-
-            float savedVolume = m_GameController.GetSavedVolume(ExposedMixerGroup.SFXVolume);
-
-            Vector3 audioClipPoint = transform.position + Vector3.up * Camera.main.transform.position.y * .9f;
-            AudioSource.PlayClipAtPoint(m_AudioSource.clip, audioClipPoint, m_AudioSource.volume * savedVolume);
-            m_RunningCoroutine = StartCoroutine(AnimateDoor(open));
+            m_AudioClipPoint = transform.position + Vector3.up * Camera.main.transform.position.y * .9f;
+            AudioSource.PlayClipAtPoint(m_DoorOpenSound, m_AudioClipPoint, m_AudioSource.volume * m_SavedVolume);
+            for(int i = 0; i < m_DoorBlades.Length; i ++) {
+                StartCoroutine(AnimateDoorBlade(m_DoorBlades[i], open));
+            }
         }
     }
 
     private void ChangeDoorColor() {
-        Renderer[] renderers = GetComponentsInChildren<Renderer>();
-        foreach(Renderer renderer in renderers) {
+        foreach(Renderer renderer in GetComponentsInChildren<Renderer>()) {
             renderer.material = m_UnlockedDoorMaterial;
         }
     }
 
-    private IEnumerator AnimateDoor(bool open) {
-        yield return new WaitForFixedUpdate();
+    private IEnumerator AnimateDoorBlade(Transform doorBlade, bool open) {
+        m_DoorInMotion = true;
 
-        m_LeftDoorTargetPosition = !open ? m_OriginalLeftDoorBladePosition : m_OriginalLeftDoorBladePosition + m_LeftDoorBlade.right * (m_LeftDoorBlade.localScale.x) * -.9f;
-        m_RightDoorTargetPosition = !open ? m_OriginalRightDoorBladePosition : m_OriginalRightDoorBladePosition + m_RightDoorBlade.right * (m_RightDoorBlade.localScale.x) * .9f;
+        Vector3 doorBladeTargetPosition = transform.position + (!open ? Vector3.zero : doorBlade.right * doorBlade.localScale.x * .9f);
 
         float timeTaken = 0;
         while(timeTaken < m_OpenDuration) {
             timeTaken += Time.fixedDeltaTime;
-            m_LeftDoorBlade.position = Vector3.Lerp(m_LeftDoorBlade.position, m_LeftDoorTargetPosition, timeTaken / m_OpenDuration);
-            m_RightDoorBlade.position = Vector3.Lerp(m_RightDoorBlade.position, m_RightDoorTargetPosition, timeTaken / m_OpenDuration);
+            doorBlade.position = Vector3.Lerp(doorBlade.position, doorBladeTargetPosition, timeTaken / m_OpenDuration);
             yield return new WaitForFixedUpdate();
         }
-        m_LeftDoorBlade.position = m_LeftDoorTargetPosition;
-        m_RightDoorBlade.position = m_RightDoorTargetPosition;
 
         m_IsOpen = open;
-        m_RunningCoroutine = null;
+        m_DoorInMotion = false;
+    }
+
+
+    private void PlaySound(AudioClip clip) {
+        if(clip != null) {
+            m_AudioSource.clip = clip;
+            m_AudioSource.Play();
+        }
     }
 
 

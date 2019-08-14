@@ -2313,9 +2313,9 @@ GameObject:
   - component: {fileID: 4225024356588960004}
   - component: {fileID: 315250720}
   - component: {fileID: 7245321833105693675}
-  - component: {fileID: 2078180915}
   - component: {fileID: 4665366817207089168}
   - component: {fileID: 2078180916}
+  - component: {fileID: 2078180915}
   - component: {fileID: 5461190703730265755}
   - component: {fileID: 4206857184755693810}
   m_Layer: 10
@@ -2375,7 +2375,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4225024356588960008}
   serializedVersion: 2
-  m_Mass: 100
+  m_Mass: 60
   m_Drag: 100
   m_AngularDrag: 100
   m_UseGravity: 0
@@ -2413,6 +2413,43 @@ MonoBehaviour:
   m_WalkSpeed: 5
   m_RunSpeedModifier: 1.8
   m_AimReticle: {fileID: 399229254}
+  m_ControlsEnabled: 1
+--- !u!114 &4665366817207089168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4225024356588960008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dbf75e7580ee9b48a5bb16984eed0f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_DeathSound: {fileID: 8300000, guid: ce5196f2f3d0344c19fd98e1033a1f46, type: 3}
+  m_Armour: 0
+  m_ArmourPiercingRounds: 0
+--- !u!114 &2078180916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4225024356588960008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73b7e087bdc2a8147a7853a8ef6820b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BulletFullImpact: {fileID: 5165910885932175698, guid: 28e2b47e6e2b65e45854d7095b935d7d,
+    type: 3}
+  BulletSimpleImpact: {fileID: 140492019051855858, guid: 195d6f0679ecbc7428f54ae424b38367,
+    type: 3}
+  m_GunSound: {fileID: 8300000, guid: 02e649747b5afab4ebc04322a19376b2, type: 3}
+  m_MeleeAttackSound: {fileID: 8300000, guid: 58748f782368640aa8b64609a22ea9ba, type: 3}
+  MuzzleFlashPrefab: {fileID: 100000, guid: 03a4a1935a9f4454c861dfa0aa6df562, type: 3}
+  m_FireRate: 0.1
+  m_AutomaticFire: 1
   m_ControlsEnabled: 1
 --- !u!82 &2078180915
 AudioSource:
@@ -2511,44 +2548,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &4665366817207089168
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4225024356588960008}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3dbf75e7580ee9b48a5bb16984eed0f7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_DeathSound: {fileID: 8300000, guid: ce5196f2f3d0344c19fd98e1033a1f46, type: 3}
-  m_Armour: 0
-  m_ArmourPiercingRounds: 0
---- !u!114 &2078180916
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4225024356588960008}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 73b7e087bdc2a8147a7853a8ef6820b4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  BulletWithImpact: {fileID: 5165910885932175698, guid: 28e2b47e6e2b65e45854d7095b935d7d,
-    type: 3}
-  BulletWithoutImpact: {fileID: 6450419427604255694, guid: 997b03bd218db6743b5e25c6cba90ec8,
-    type: 3}
-  m_GunSound: {fileID: 8300000, guid: 0c59ae651206345a486bbc53091b5e45, type: 3}
-  m_MeleeAttackSound: {fileID: 8300000, guid: 58748f782368640aa8b64609a22ea9ba, type: 3}
-  MuzzleFlashPrefab: {fileID: 100000, guid: 03a4a1935a9f4454c861dfa0aa6df562, type: 3}
-  m_FireRate: 0.1
-  m_PlayerNumber: 1
-  m_AutomaticFire: 1
-  m_ControlsEnabled: 1
 --- !u!82 &5461190703730265755
 AudioSource:
   m_ObjectHideFlags: 0

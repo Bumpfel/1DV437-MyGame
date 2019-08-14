@@ -60,7 +60,7 @@ public abstract class Combatant : MonoBehaviour {
 
     protected virtual void Die() {
         m_Animator.Play("Die");
-        float animLen = m_Animator.GetCurrentAnimatorClipInfo(0)[0].clip.length;
+        // float animLen = m_Animator.GetCurrentAnimatorClipInfo(0)[0].clip.length;
         // Destroy(m_Animator, animLen);
 
         m_AudioSource.clip = m_DeathSound;
@@ -74,7 +74,7 @@ public abstract class Combatant : MonoBehaviour {
         return m_Health;
     }
 
-    public bool IsDead() {
+    private bool IsDead() {
         return m_Health <= 0;
     }
 

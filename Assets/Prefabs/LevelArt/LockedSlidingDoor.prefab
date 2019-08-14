@@ -87,22 +87,32 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 8935982500970798905, guid: 0ae7615ded8805b43a5d25b4bd49d9ff,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6973770716839012148, guid: 0ae7615ded8805b43a5d25b4bd49d9ff,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 4911577798778700572, guid: 0ae7615ded8805b43a5d25b4bd49d9ff,
         type: 3}
       propertyPath: m_IsLocked
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 4911577798778700572, guid: 0ae7615ded8805b43a5d25b4bd49d9ff,
-        type: 3}
-      propertyPath: m_UnlockedDoorMaterial
-      value: 
-      objectReference: {fileID: 2100000, guid: c155f8550b5355f4b8bdab89fb3156a6, type: 2}
-    - target: {fileID: 5766412717104936978, guid: 0ae7615ded8805b43a5d25b4bd49d9ff,
+    - target: {fileID: 1025449434944988332, guid: 0ae7615ded8805b43a5d25b4bd49d9ff,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 05c5f9a56baf5d94a970e146e3705dc6, type: 2}
     - target: {fileID: 2414527091785684533, guid: 0ae7615ded8805b43a5d25b4bd49d9ff,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 05c5f9a56baf5d94a970e146e3705dc6, type: 2}
+    - target: {fileID: 5766412717104936978, guid: 0ae7615ded8805b43a5d25b4bd49d9ff,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 

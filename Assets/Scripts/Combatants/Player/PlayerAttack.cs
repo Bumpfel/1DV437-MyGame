@@ -2,54 +2,48 @@
 using UnityEditor;
 
 public class PlayerAttack : Attack {
-    
-    public int m_PlayerNumber = 1;
     public bool m_AutomaticFire = true;
     private string m_FireButton;
     private string m_FireButton2;
+    private string m_FiringModeSwitchButton;
     private Input m_Fire;
-    
-    [HideInInspector]
-    public bool m_ControlsEnabled = true;
 
     private PlayerMovement m_PlayerMovement;
  
     new void Start() {
         base.Start();
-        m_FireButton = Strings.Controls.Fire1_Player.ToString() + m_PlayerNumber;
-        m_FireButton2 = Strings.Controls.Fire2_Player.ToString() + m_PlayerNumber;
+        m_FireButton = Strings.Controls.Fire1.ToString();
+        m_FireButton2 = Strings.Controls.Fire2.ToString();
+        m_FiringModeSwitchButton = Strings.Controls.SwitchFiringMode.ToString();
 
         m_PlayerMovement = GetComponent<PlayerMovement>();
     }
 
     void Update() {
-        if(m_ControlsEnabled) {
-            if(m_AutomaticFire)
-                AutoFireIfTriggered();
-            else
-                FireIfTriggered();
-            MeleeIfTriggered();
-        }
-    }
-    
-    private void FireIfTriggered() {
-        if(Input.GetButtonDown(m_FireButton) && !m_PlayerMovement.IsRunning()) {
-            SingleFire();
-        }
+        CheckIfWantsToSwitchFiringMode();
+        CheckIfWantsToFire();
+        CheckIfWantsToMelee();
     }
 
-    private void AutoFireIfTriggered() {
+    private void CheckIfWantsToFire() {
         if(Input.GetButton(m_FireButton) && !m_PlayerMovement.IsRunning()) {
-            AutomaticFire();
-        }
-        else if(Input.GetButtonUp(m_FireButton)) {
-            StopAutomaticFire();
+            if(m_AutomaticFire && Input.GetButton(m_FireButton))
+                Fire();
+            else if(!m_AutomaticFire && Input.GetButtonDown(m_FireButton))
+                Fire();
         }
     }
 
-    private void MeleeIfTriggered() {
+    private void CheckIfWantsToMelee() {
         if(Input.GetButtonDown(m_FireButton2)) {
             MeleeAttack();
+        }
+    }
+
+    private void CheckIfWantsToSwitchFiringMode() {
+        if(Input.GetButtonDown(m_FiringModeSwitchButton)) {
+            m_AutomaticFire = !m_AutomaticFire;
+            ScreenUI.DisplayMessage("Switched to " + (m_AutomaticFire ? "automatic" : "single") + " firing mode");
         }
     }
 

@@ -7,10 +7,10 @@ public class PlayerBehaviour : Combatant {
     }
     
     public void Heal(float amount) {
-        if(!IsDead()) {
+        // if(!IsDead()) {
             m_Health = Mathf.Min(100, m_Health + amount);
             UpdateHealthBar();
-        }
+        // }
     }
 
     protected override void Die() {

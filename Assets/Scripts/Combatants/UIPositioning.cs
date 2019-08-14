@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class UIPositioning : MonoBehaviour {
 
     private Quaternion m_RelativeRotation;
-    private EnemyAttack m_EnemyAttack; 
+    private EnemyBehaviour m_EnemyAttack; 
     private GameObject m_AlertIndicator;
 
     private Vector3 playerPosition;
@@ -12,7 +12,7 @@ public class UIPositioning : MonoBehaviour {
 
     void Start() {
         m_RelativeRotation = transform.localRotation;
-        m_EnemyAttack = GetComponentInParent<EnemyAttack>();
+        m_EnemyAttack = GetComponentInParent<EnemyBehaviour>();
         if(m_EnemyAttack)
             m_AlertIndicator = transform.Find("AlertStatus").gameObject;
     }
