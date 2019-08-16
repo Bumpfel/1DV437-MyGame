@@ -245,7 +245,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_AffectedDoors:
   - {fileID: 0}
-  - {fileID: 0}
+  m_AreaName: 
 --- !u!82 &8556781038645550020
 AudioSource:
   m_ObjectHideFlags: 0

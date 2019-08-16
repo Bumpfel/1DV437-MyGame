@@ -1583,10 +1583,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ViewRadius: 25
   m_ViewAngle: 125
-  m_VisibleTargets: []
-  m_MeshResolution: 1
-  m_EdgeResolveIterations: 4
-  m_EdgeDistanceTreshold: 0.8
 --- !u!136 &4123646448261959245
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1658,7 +1654,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 0.8
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1723,7 +1719,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2711765308722520456}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c43b572dc6d495429158ca7c039d3d5, type: 3}
+  m_Script: {fileID: 11500000, guid: 7f675493e9e3be348adcf78c7a169657, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_PatrolDistance: 0

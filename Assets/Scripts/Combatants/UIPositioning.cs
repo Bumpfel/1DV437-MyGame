@@ -18,12 +18,15 @@ public class UIPositioning : MonoBehaviour {
     }
 
     void Update() {
+        if(Time.timeScale == 0)
+            return;
+    
         playerPosition = transform.parent.position;
         transform.position = new Vector3(playerPosition.x, transform.position.y , playerPosition.z + m_VerticalOffset);
         transform.rotation = m_RelativeRotation;
 
         if(m_AlertIndicator) {
-            if(m_EnemyAttack.IsAlerted()) {
+            if(m_EnemyAttack.IsAlerted) {
                 m_AlertIndicator.SetActive(true);
             }
             else {

@@ -16,13 +16,11 @@ public class FieldOfView : MonoBehaviour {
     private LayerMask m_EnemyMask;
     private LayerMask m_CombinedMask;
 
-    [HideInInspector]
-    public List<Transform> m_VisibleTargets = new List<Transform>();
+    private List<Transform> m_VisibleTargets = new List<Transform>();
 
-    // TODO temp public. is normally const
-    public  float m_MeshResolution = .5f;
-    public int m_EdgeResolveIterations = 4; 
-    public float m_EdgeDistanceTreshold = .8f;
+    private const float MeshResolution = .5f;
+    private const int EdgeResolveIterations = 4; 
+    private const float EdgeDistanceTreshold = .8f;
 
     private Mesh m_ViewMesh;
     private float m_LastSearched;
@@ -60,6 +58,10 @@ public class FieldOfView : MonoBehaviour {
     RaycastHit hit;
     RaycastHit hit2;
 
+    //Public properties
+    public Transform VisibleTarget => m_VisibleTargets[0];
+    public bool HasTargetInSight => m_VisibleTargets.Count > 0;
+
     void Start() {
         float heightFromGround = 1 - EyeHeight; // = 1 meter off the ground
         transform.Find("FOVVisualization").transform.position += Vector3.up * heightFromGround; // to raise the fov from the ground. don't want it in eye height, since then it covers many objects
@@ -85,12 +87,15 @@ public class FieldOfView : MonoBehaviour {
 
     void LateUpdate() {
         // if(!m_Combatant.IsDead()) {
-            if(m_HelperRenderer.isVisible) {
-                m_SightOrigin = transform.position + EyePosition;
-                DrawFieldOfView();
-                if(Time.time > m_LastSearched + m_SearchInterval)
-                    FindVisibleTarget();
-            }
+        if(Time.timeScale == 0)
+            return;
+        
+        if(m_HelperRenderer.isVisible) {
+            m_SightOrigin = transform.position + EyePosition;
+            DrawFieldOfView();
+            if(Time.time > m_LastSearched + m_SearchInterval)
+                FindVisibleTarget();
+        }
         // }
         // else {
         //     m_ViewMesh.Clear();
@@ -132,7 +137,7 @@ public class FieldOfView : MonoBehaviour {
     }
 
     private void DrawFieldOfView() { // draws the FoV mesh consisting of many triangles originating from the transform it's attached to
-        stepCount = Mathf.RoundToInt(m_ViewAngle * m_MeshResolution); // how many endpoints there are. if set to m_ViewAngle it means 1 point per view angle degree
+        stepCount = Mathf.RoundToInt(m_ViewAngle * MeshResolution); // how many endpoints there are. if set to m_ViewAngle it means 1 point per view angle degree
         stepAngleSize = m_ViewAngle / stepCount; // distance between two end points
         viewPoints.Clear();
         oldViewCast = new ViewCastInfo();
@@ -141,7 +146,7 @@ public class FieldOfView : MonoBehaviour {
             // Debug.DrawLine(transform.position, transform.position + DirFromAngle(angle, true) * m_ViewRadius, Color.red); // debug
             newViewCast = ViewCast(angle);
             if(i > 0) {
-                edgeDistanceThresholdExceeded = Mathf.Abs(oldViewCast.distance - newViewCast.distance) > m_EdgeDistanceTreshold;
+                edgeDistanceThresholdExceeded = Mathf.Abs(oldViewCast.distance - newViewCast.distance) > EdgeDistanceTreshold;
                 if(oldViewCast.hit != newViewCast.hit || (oldViewCast.hit && newViewCast.hit && edgeDistanceThresholdExceeded)) {
                     edge = FindEdge(oldViewCast, newViewCast);
                     if(edge.pointA != Vector3.zero) {
@@ -185,11 +190,11 @@ public class FieldOfView : MonoBehaviour {
         Vector3 minPoint = Vector3.zero;
         Vector3 maxPoint = Vector3.zero;
 
-        for(int i = 0; i < m_EdgeResolveIterations; i ++) {
+        for(int i = 0; i < EdgeResolveIterations; i ++) {
             float angle = (minAngle + maxAngle) / 2;
             ViewCastInfo newViewCast = ViewCast (angle);
 
-            bool edgeDistanceThresholdExceeded = Mathf.Abs(minViewCast.distance - newViewCast.distance) > m_EdgeDistanceTreshold;
+            bool edgeDistanceThresholdExceeded = Mathf.Abs(minViewCast.distance - newViewCast.distance) > EdgeDistanceTreshold;
             if(newViewCast.hit == minViewCast.hit && !edgeDistanceThresholdExceeded) {
                 minAngle = angle;
                 minPoint = newViewCast.point;

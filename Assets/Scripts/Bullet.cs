@@ -90,7 +90,7 @@ public class Bullet : MonoBehaviour {
                 RemoveBullet();
             }
         }
-        else if(enabled && Time.time > m_FiredTimestamp + MaximumBulletSurvivalTime) { // remove after timeout if no hit
+        else if(Time.time > m_FiredTimestamp + MaximumBulletSurvivalTime) { // remove after timeout if no hit
             RemoveBullet();
         }
         

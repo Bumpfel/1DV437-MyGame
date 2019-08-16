@@ -104,6 +104,8 @@ public class PlayerMovement : MonoBehaviour {
 
 
     void Update() {
+        // if(Time.timeScale == 0)
+        //     return;
         Look();
         // if(m_MovementControl == MovementControl.CharacterRelativeMovement)
             // CharacterRelativeMovement();

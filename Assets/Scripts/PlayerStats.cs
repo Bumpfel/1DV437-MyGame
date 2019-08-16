@@ -12,42 +12,33 @@ public class PlayerStats {
     private string m_PlayerName;
     private int m_PlayerDeaths;
 
-    public string PlayerName { get => m_PlayerName; set => m_PlayerName = value; }
-    public int PlayerDeaths { get => m_PlayerDeaths; set => m_PlayerDeaths = value; }
-    public int Kills { get => m_Kills; set => m_Kills = value; }
-    public float TimeTaken { get => m_TimeTaken; set => m_TimeTaken = value; }
-    public int LevelIndex { get => m_LevelIndex; set => m_LevelIndex = value; }
+    // Get-properties
+    public string PlayerName => m_PlayerName;
+    public int PlayerDeaths => m_PlayerDeaths;
+    public int Kills => m_Kills;
+    public float TimeTaken => m_TimeTaken;
+    public int LevelIndex => m_LevelIndex;
 
     public PlayerStats(string playerName, int levelIndex) {
-        PlayerName = playerName;
+        m_PlayerName = playerName;
         m_StartTime = Time.time;
-        LevelIndex = levelIndex;
+        m_LevelIndex = levelIndex;
     }
 
     public void SetLevelEnded() {
-        TimeTaken = Time.time - m_StartTime;
+       m_TimeTaken = Time.time - m_StartTime;
     }
 
     public void AddKill() {
-        Kills ++;
-        // Debug.Log("added kill: " + m_Kills);
-    }
-
-    public int GetKills() {
-        return Kills;
+        m_Kills ++;
     }
 
     public void AddPlayerDeath() {
-        PlayerDeaths ++;
+        m_PlayerDeaths ++;
     }
-
-    public int GetPlayerDeaths() {
-        return PlayerDeaths;
-    }
-
 
     public override string ToString() {
-        return PlayerName + " has " + Kills + " kills and " + PlayerDeaths + " deaths. " + (TimeTaken > 0 ? "Level " + + LevelIndex + "  was (completed) in " + TimeTaken + " seconds" : "");
+        return PlayerName + " has " + m_Kills + " kills and " + m_PlayerDeaths + " deaths. " + (m_TimeTaken > 0 ? "Level " + m_LevelIndex + "  was (completed) in " + m_TimeTaken + " seconds" : "");
     }
 
 

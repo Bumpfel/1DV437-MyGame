@@ -63,7 +63,8 @@ public class GameController : MonoBehaviour {
     }
 
     public void StartGame() {
-        SceneManager.LoadScene(2);
+        SceneManager.LoadScene(1);
+        Time.timeScale = 1;
     }
 
     public void RestartLevel() { //Respawn() {
@@ -84,6 +85,8 @@ public class GameController : MonoBehaviour {
     // }
 
     public void QuitGame() {
+        if(LevelIsLoaded())
+            LoadMainMenu();
         Application.Quit();
     }
 

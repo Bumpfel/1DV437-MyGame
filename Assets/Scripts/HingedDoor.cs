@@ -26,6 +26,8 @@ public class HingedDoor : MonoBehaviour {
     }
 
     void Update() {
+        if(Time.timeScale == 0)
+            return;
         if(m_IsInsideTrigger) {
             if(Input.GetButtonDown(Strings.Controls.Action.ToString())) {// && Time.time > m_OpenTimestamp + OpenDelay) {
                 OpenDoor(!m_IsOpen);

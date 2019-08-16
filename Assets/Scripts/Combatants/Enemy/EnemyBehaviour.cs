@@ -8,28 +8,33 @@ public class EnemyBehaviour : Combatant {
     private const float WakeUpDelayOnCollider = 1;
     private const float AlertedTime = 5;
     private const float ReactionTime = .2f;
-    private const float ReactionTurnDuration = .4f;
+    private const float ReactionTurnDuration = 1.5f;
+    private const float FollowTargetSpeed = .2f;
+    private const float MaxAngleToTargetBeforeShooting = 15;
     private GameObject m_AsleepIndicator;
-    private EnemyMovement m_EnemyMovement;
+    private EnemyPatrol m_EnemyMovement;
     private FieldOfView m_FOV;
     private Transform m_Target;
     private Quaternion m_StartRotation;
     private Attack m_Attack;
  
     private bool m_IsWakingUp = false;
-    private bool m_IsAlerted = false;
-    // private bool m_IsInvestigating;
+    public bool IsAlerted { get; private set; }
+
+    private bool m_IsTurning = false;
     private bool m_RecentlyDetectedPlayer = false;
     private float m_LastReaction;
-    private const float FollowTargetSpeed = 0.2f;
-    private const float MaxAngleDifferenceToTargetBeforeShooting = 15;
-    private float m_AngleDifferenceToTarget;
+    private float m_AngleToTarget;
+
+    private bool IsCloseEnoughToShoot => m_AngleToTarget < MaxAngleToTargetBeforeShooting;
+    private bool HasTargetInSight => m_FOV.HasTargetInSight;
+    private bool EnoughTimeHasGoneBySinceLastReaction => m_RecentlyDetectedPlayer && Time.time > m_LastReaction + AlertedTime;
 
     private new void Start() {
         base.Start();
         m_Attack = GetComponent<Attack>();
         m_FOV = GetComponent<FieldOfView>();
-        m_EnemyMovement = GetComponent<EnemyMovement>();
+        m_EnemyMovement = GetComponent<EnemyPatrol>();
 
         m_AsleepIndicator = m_CharacterGUI.transform.Find("Asleep").gameObject;
         if(m_IsAsleep) {
@@ -44,87 +49,62 @@ public class EnemyBehaviour : Combatant {
     }
 
     private void Update() {
+        if(Time.timeScale == 0)
+            return;
         ReactToVisibleTargets();
     }
 
     private void ReactToVisibleTargets() {
-        if(HasTargetInSight()) {
+        if(HasTargetInSight) {
             if(!m_RecentlyDetectedPlayer) {
-                m_Target = m_FOV.m_VisibleTargets[0];
-                m_IsAlerted = true;
-                print("spotted target. stopping all coroutines");
+                m_Target = m_FOV.VisibleTarget;
+                IsAlerted = true;
                 
                 m_EnemyMovement.Halt();
                 m_RecentlyDetectedPlayer = true;
-                // print(name + " detected " + m_Target.name); // debug
             }
             StopAllCoroutines();
             FollowTarget();
             m_LastReaction = Time.time;
 
-            if(CloseEnoughToShoot())
+            if(IsCloseEnoughToShoot)
                 m_Attack.Fire();
         }
-        else if(m_RecentlyDetectedPlayer && Time.time > m_LastReaction + AlertedTime) {
+        else if(EnoughTimeHasGoneBySinceLastReaction) {
             m_RecentlyDetectedPlayer = false;
-            m_IsAlerted = false;
-            print(name + "reacted to visible target. returning to patrol");
+            IsAlerted = false;
             m_EnemyMovement.ReturnToPatrol();
-            // StopAutomaticFire(); // just to stop firing animation
-            // print(name + " is returning to patrol"); // debug
         }
     }
 
-    // TurnTowardsTarget vars
-    Quaternion orgRotation;
+    // FollowTarget vars
     Quaternion targetRotation;
-
     private void FollowTarget() {
         targetRotation = Quaternion.LookRotation(m_Target.position - transform.position, Vector3.up);
-        m_AngleDifferenceToTarget = Mathf.Abs(targetRotation.eulerAngles.y - transform.rotation.eulerAngles.y);
+        m_AngleToTarget = Quaternion.Angle(transform.rotation, targetRotation);
 
         transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, FollowTargetSpeed);
     }
 
-    public IEnumerator TurnTowards(Vector3 point, float turnDuration) {
-        float timestamp = Time.time;
-        float timeTaken = 0;
-
-        point.y = 0;
-        Quaternion startRotation = transform.rotation;
-        Quaternion targetRotation = Quaternion.LookRotation(point - transform.position, Vector3.up);
-
-        // m_IsInvestigating = true;
-        while(timeTaken < turnDuration) {
-            timeTaken += Time.fixedDeltaTime;
-            yield return new WaitForFixedUpdate();
-            transform.rotation = Quaternion.Lerp(startRotation, targetRotation, timeTaken / turnDuration);
+    public override void TakeDamage(float amount, Vector3 dmgSource) {
+        base.TakeDamage(amount, dmgSource);
+        if(!m_IsWakingUp && !HasTargetInSight) {
+            if(m_IsAsleep)
+                StartCoroutine(WakeUp(WakeUpDelayOnTakingDmg, true, dmgSource));
+            else {
+                StopAllCoroutines();
+                StartCoroutine(ReactToTakingDamage(dmgSource));
+            }
         }
-        // transform.position = new Vector3(transform.position.x, 0, transform.position.z); //TODO nödlösning för att en gubbe verkar ibland ändra y-position och därmed ser fov fel ut
     }
-  
-    private void OnCollisionEnter(Collision collision) {
+
+    // wakes an enemy if hit by something
+    private void OnCollisionEnter(Collision collision) { 
         if(collision.collider.tag != "Ignored" && m_IsAsleep && !m_IsWakingUp) // && !IsDead()
             StartCoroutine(WakeUp(WakeUpDelayOnCollider, false, transform.forward));
     }
 
-    public override void TakeDamage(float amount, Vector3 dmgSource) {
-        if(!m_IsWakingUp) {  // && !IsDead()
-            // base.TakeDamage(amount, dmgSource);
-            if(!HasTargetInSight()) {
-                if(m_IsAsleep)
-                    StartCoroutine(WakeUp(WakeUpDelayOnTakingDmg, true, dmgSource));
-                else {
-                    StopAllCoroutines();
-                    StartCoroutine(ReactToTakingDamage(dmgSource));
-                }
-            }
-        }
-    }
-    // Coroutine m_ActiveCoroutine;
-
     private IEnumerator WakeUp(float delay, bool tookDmg, Vector3 dmgSource) {
-        print("WakeUp()");
         m_AsleepIndicator.SetActive(false);
         m_IsWakingUp = true;
         yield return new WaitForSeconds(delay);
@@ -134,27 +114,47 @@ public class EnemyBehaviour : Combatant {
         m_IsAsleep = false;
         m_IsWakingUp = false;
         if(tookDmg) {
-            StartCoroutine(ReactToTakingDamage(dmgSource));
+           StartCoroutine(ReactToTakingDamage(dmgSource));
         }
     }
 
     private IEnumerator ReactToTakingDamage(Vector3 dmgSource) {
-        print("ReactToTakingDamage(). ");
         m_LastReaction = Time.time;
-        if(!m_IsAlerted) {
-            m_IsAlerted = true;
+        if(!IsAlerted) {
+            IsAlerted = true;
             m_EnemyMovement.Halt();
             yield return new WaitForSeconds(ReactionTime);
         }
-        yield return TurnTowards(dmgSource, ReactionTurnDuration);
-        // if(!m_IsInvestigating)
-            // yield return FireBlindly(3);
-        // m_IsInvestigating = false;
+        yield return RoughlyTurnTowards(dmgSource, ReactionTurnDuration);
+        if(Time.time < m_LastReaction + ReactionTime) {
+            yield return new WaitForSeconds(ReactionTime);
+            yield return FireBlindly(2);
+        }
         yield return new WaitForSeconds(AlertedTime);
-        m_IsAlerted = false;
-        print(name + " reacted to dmg. returning to patrol");
+        IsAlerted = false;
         m_EnemyMovement.ReturnToPatrol();
+    }
+    
+    private IEnumerator RoughlyTurnTowards(Vector3 point, float fullTurnDuration) {
+        float timeTaken = 0;
+        Quaternion startRotation = transform.rotation;
 
+        point.y = 0; // normallizing y-position
+        float exactAngle = Vector3.Angle(transform.position, point);
+        Quaternion targetRotation = Quaternion.LookRotation(point - transform.position, Vector3.up);
+
+        // adding a random direction to avoid enemy being 100% precise when not seeing enemy. becomes more accurate when turned towards target
+        float randomAngle = Random.Range(-exactAngle / 4, exactAngle / 4);
+        targetRotation *= Quaternion.Euler(0, randomAngle, 0);
+        
+        float angle = Quaternion.Angle(startRotation, targetRotation);
+        float turnDuration = fullTurnDuration * angle / 360;
+
+        while(timeTaken < turnDuration) {
+            timeTaken += Time.fixedDeltaTime;
+            yield return new WaitForFixedUpdate();
+            transform.rotation = Quaternion.Lerp(startRotation, targetRotation, timeTaken / turnDuration);
+        }
     }
 
     private IEnumerator FireBlindly(int shots) {
@@ -167,23 +167,12 @@ public class EnemyBehaviour : Combatant {
     protected override void Die() {
         base.Die();
         transform.Find("FOVVisualization").gameObject.SetActive(false);
+        transform.Find("FOVHelper").gameObject.SetActive(false);
         m_GameController.m_PlayerStats.AddKill();
+        // StopAllCoroutines();
         
         foreach(MonoBehaviour component in GetComponents<MonoBehaviour>()) {
-            // component.enabled = false;
-            Destroy(component);
+            Destroy(component); // need to destroy since coroutines ain't stopping
         }
-    }
-    
-    public bool IsAlerted() {
-        return m_IsAlerted;
-    }
-
-    private bool CloseEnoughToShoot() {
-        return m_AngleDifferenceToTarget < MaxAngleDifferenceToTargetBeforeShooting;
-    }
-
-    private bool HasTargetInSight() {
-         return m_FOV && m_FOV.m_VisibleTargets.Count > 0;
     }
 }

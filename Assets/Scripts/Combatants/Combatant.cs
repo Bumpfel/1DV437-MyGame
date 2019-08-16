@@ -42,7 +42,6 @@ public abstract class Combatant : MonoBehaviour {
         m_AudioSource = GetComponent<AudioSource>();
     }
 
-
     public virtual void TakeDamage(float amount, Vector3 dmgSource) {
         float unmitigatedDmg = Mathf.Max(0, amount - m_Armour);
         float mitigatedDmg = amount - unmitigatedDmg;
@@ -61,7 +60,7 @@ public abstract class Combatant : MonoBehaviour {
     protected virtual void Die() {
         m_Animator.Play("Die");
         // float animLen = m_Animator.GetCurrentAnimatorClipInfo(0)[0].clip.length;
-        // Destroy(m_Animator, animLen);
+        Destroy(m_Animator, 1.5f);
 
         m_AudioSource.clip = m_DeathSound;
         m_AudioSource.Play();

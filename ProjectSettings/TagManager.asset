@@ -18,7 +18,6 @@ TagManager:
   - Metal
   - Wood
   - Concrete
-  - Nonblocking
   - Semiblocking
   layers:
   - Default
@@ -29,7 +28,7 @@ TagManager:
   - UI
   - 
   - 
-  - Combatants
+  - 
   - Obstacles
   - Players
   - Enemies

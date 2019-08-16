@@ -18,6 +18,8 @@ public class GameButton : MonoBehaviour {
     }
 
     private void Update() {
+        if(Time.timeScale == 0)
+            return;
         if(Input.GetButtonDown(Strings.Controls.Action.ToString()) && m_IsInsideTrigger) {
             m_AudioSource.Play();
             bool wasLocked = false;

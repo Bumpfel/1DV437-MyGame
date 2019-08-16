@@ -26,7 +26,7 @@ public class SlidingDoor : MonoBehaviour {
     private bool m_IsInsideTrigger = false; // used because can't have Input check in OnTriggerStay. it can call methods twice
     private float m_WasLastInsideTrigger;
 
-    void Start() {
+    private void Start() {
         m_GameController = FindObjectOfType<GameController>();
         m_AudioSource = GetComponent<AudioSource>();
 
@@ -37,12 +37,11 @@ public class SlidingDoor : MonoBehaviour {
             m_DoorBlades[i] = transform.GetChild(i);
         }
     }
-    
-    void OnEnable()  {
-        // print("door script enabled"); // TODO det var nåt jag tänkte på här...
-    }
 
-    void Update() {
+    private void Update() {
+        if(Time.timeScale == 0) 
+            return;
+
         if(m_IsInsideTrigger) {
             if(m_Automatic) {
                 if(!m_IsOpen)
@@ -82,12 +81,10 @@ public class SlidingDoor : MonoBehaviour {
         }
     }
 
-
     public void Unlock() {
         m_IsLocked = false;
         ChangeDoorColor();
     }
-
 
     public void OpenDoor(bool open) {
         if(m_IsLocked) {
@@ -103,10 +100,12 @@ public class SlidingDoor : MonoBehaviour {
                 m_DoorInMotion = false;
                 m_IsOpen = open;
             }
-            m_SavedVolume = m_GameController.GetSavedVolume(ExposedMixerGroup.SFXVolume);
-            
-            m_AudioClipPoint = transform.position + Vector3.up * Camera.main.transform.position.y * .9f;
-            AudioSource.PlayClipAtPoint(m_DoorOpenSound, m_AudioClipPoint, m_AudioSource.volume * m_SavedVolume);
+
+            m_AudioSource.clip = m_IsOpen ? m_DoorCloseSound : m_DoorOpenSound;
+            m_AudioSource.Play();
+            // m_SavedVolume = m_GameController.GetSavedVolume(ExposedMixerGroup.SFXVolume);
+            // m_AudioClipPoint = transform.position + Vector3.up * Camera.main.transform.position.y * .9f;
+            // AudioSource.PlayClipAtPoint(m_DoorOpenSound, m_AudioClipPoint, m_AudioSource.volume * m_SavedVolume);
             for(int i = 0; i < m_DoorBlades.Length; i ++) {
                 StartCoroutine(AnimateDoorBlade(m_DoorBlades[i], open));
             }
@@ -122,19 +121,23 @@ public class SlidingDoor : MonoBehaviour {
     private IEnumerator AnimateDoorBlade(Transform doorBlade, bool open) {
         m_DoorInMotion = true;
 
+        Vector3 doorBladeStartingPosition = doorBlade.position;
         Vector3 doorBladeTargetPosition = transform.position + (!open ? Vector3.zero : doorBlade.right * doorBlade.localScale.x * .9f);
 
+        if(name == "LockedWideSlidingDoor")
+            print("door opening...");
         float timeTaken = 0;
         while(timeTaken < m_OpenDuration) {
             timeTaken += Time.fixedDeltaTime;
-            doorBlade.position = Vector3.Lerp(doorBlade.position, doorBladeTargetPosition, timeTaken / m_OpenDuration);
+            doorBlade.position = Vector3.Lerp(doorBladeStartingPosition, doorBladeTargetPosition, timeTaken / m_OpenDuration);
             yield return new WaitForFixedUpdate();
         }
+        if(name == "LockedWideSlidingDoor")
+            print("door opened in " + timeTaken + " seconds");
 
         m_IsOpen = open;
         m_DoorInMotion = false;
     }
-
 
     private void PlaySound(AudioClip clip) {
         if(clip != null) {

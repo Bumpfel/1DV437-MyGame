@@ -60,7 +60,7 @@ public class Attack : MonoBehaviour {
             // for(int i = 0; i < 100; i ++) {
             //     m_EffectPool.Add();
             // }
-            m_Bullet = BulletFullImpact; 
+            m_Bullet = BulletFullImpact;
         }
     }
 
@@ -141,7 +141,7 @@ public class Attack : MonoBehaviour {
                 Vector3 origin = transform.position + Vector3.up * MeleeAttackOriginHeight + transform.forward * (-colliderRadius / 2);
                 if(!Physics.Raycast(origin, directionToTarget, MeleeRange, m_ObstacleMask)) {
                     float multiplier = 1;
-                    if(combatant.tag == "Enemy" && !combatant.GetComponent<EnemyBehaviour>().IsAlerted())
+                    if(combatant.tag == "Enemy" && !combatant.GetComponent<EnemyBehaviour>().IsAlerted)
                         multiplier = SurprisedMeleeDmgMultiplier;
  
                     combatant.TakeDamage(Random.Range(MeleeDamageMin, MeleeDamageMax) * multiplier, origin);

@@ -42,7 +42,7 @@ public class ScreenUI : MonoBehaviour {
         }
         else {
             TextMeshProUGUI newMessage = Instantiate(m_MessageTemplate);
-            newMessage.transform.parent = m_MessageTemplate.transform.parent;
+            newMessage.transform.SetParent(m_MessageTemplate.transform.parent);
             newMessage.transform.SetAsFirstSibling();
             settings = new Settings(MessageDuration, MessageFadeDuration, newMessage);
 

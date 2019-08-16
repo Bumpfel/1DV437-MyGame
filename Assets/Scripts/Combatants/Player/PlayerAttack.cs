@@ -20,6 +20,8 @@ public class PlayerAttack : Attack {
     }
 
     void Update() {
+        // if(Time.timeScale == 0)
+        //     return;
         CheckIfWantsToSwitchFiringMode();
         CheckIfWantsToFire();
         CheckIfWantsToMelee();

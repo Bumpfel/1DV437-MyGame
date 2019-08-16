@@ -14,7 +14,11 @@ public class CameraController : MonoBehaviour {
         m_Player = player;
     }
 
-    void FixedUpdate() {
+    void Update() {
+        if(Time.timeScale == 0)
+            return;
+        // CheckIfWantsToZoom();
+
         if(m_Player && m_FollowPlayer) {
             if(!Input.GetKey(KeyCode.LeftControl)) {
                 // Makes the camera follow the player with focus slighly in front of the player 
@@ -47,6 +51,17 @@ public class CameraController : MonoBehaviour {
                 }
                 
             }
+        }
+    }
+
+    private float cameraZoom;
+    private const float ZoomSpeed = 3;
+    private const float MinZoom = 40;
+    private const float MaxZoom = 80;
+    public void CheckIfWantsToZoom() {
+        if(Input.mouseScrollDelta.y != 0) {
+            cameraZoom = Mathf.Max(Mathf.Min(GetComponent<Camera>().fieldOfView - Input.mouseScrollDelta.y * ZoomSpeed, MaxZoom), MinZoom);
+            GetComponent<Camera>().fieldOfView = cameraZoom;
         }
     }
 

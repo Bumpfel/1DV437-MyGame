@@ -21,12 +21,12 @@ public class FieldOfViewEditor : Editor {
         Handles.DrawLine(fov.transform.position, fov.transform.position + viewAngleB * fov.m_ViewRadius);
 
         Handles.color = Color.red;
-        foreach(Transform visibleTargets in fov.m_VisibleTargets) {
-            // Handles.DrawLine(fov.transform.position, visibleTargets.position);
+        // foreach(Transform visibleTargets in fov.m_VisibleTargets) {
+        //     // Handles.DrawLine(fov.transform.position, visibleTargets.position);
 
-            // Handles.color = Color.green;
-            // Handles.DrawLine(fov.m_RayCastOrigin, fov.m_DebugDirToTarget);
-        }
+        //     // Handles.color = Color.green;
+        //     // Handles.DrawLine(fov.m_RayCastOrigin, fov.m_DebugDirToTarget);
+        // }
     }
 
 }

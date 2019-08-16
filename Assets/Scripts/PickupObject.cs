@@ -27,8 +27,8 @@ public class PickupObject : MonoBehaviour {
             PlayerBehaviour player = other.GetComponent<PlayerBehaviour>();
 
             if(m_Type == Type.Heal && player.GetHealth() < 100) {
-                float healedAmount = Mathf.Min(100 - player.GetHealth(), HealAmount);
-                ScreenUI.DisplayMessage("Healed for " + healedAmount);
+                float healedAmount = Mathf.Round(Mathf.Min(100 - player.GetHealth(), HealAmount));
+                ScreenUI.DisplayMessage("Healed for " + healedAmount + " points");
                 player.Heal(HealAmount);
                 PickUpObject();
             }
@@ -42,11 +42,11 @@ public class PickupObject : MonoBehaviour {
                 ScreenUI.DisplayMessage("Picked up " + ArmourAmount + " " + m_Type);
                 PickUpObject();
             }
-            else if(m_Type == Type.AutoFire) {
-                player.GetComponent<PlayerAttack>().m_AutomaticFire = true;
-                ScreenUI.DisplayMessage("Picked up Automatic Fire");
-                PickUpObject();
-            }
+            // else if(m_Type == Type.AutoFire) {
+            //     player.GetComponent<PlayerAttack>().m_AutomaticFire = true;
+            //     ScreenUI.DisplayMessage("Picked up Automatic Fire");
+            //     PickUpObject();
+            // }
         }
     }
 
