@@ -14,8 +14,7 @@ public class Attack : MonoBehaviour {
     private ParticleSystem m_MuzzleFlash;
     protected Animator m_Animator;
     protected Combatant m_Combatant;
-    private AudioSource m_GunAudioSource;
-    private AudioSource m_MeleeAudioSource;
+    private AudioSource m_AudioSource;
     private Transform m_BulletSpawn;
     private const float AudioPitchNormal = 1;
     private const float AudioPitchARP = .85f;
@@ -23,7 +22,7 @@ public class Attack : MonoBehaviour {
     private const float MeleeDamageMin = 90;
     private const float MeleeDamageMax = 90;
     private const float MeleeRange = 2;
-    private const float MeleeTime = .8f;
+    private const float MeleeTime = .6f;
     private const float MaxMeleeAngle = 90;
     private const float MeleeAttackOriginHeight = 1.5f;
     private const float SurprisedMeleeDmgMultiplier = 1.3f;
@@ -41,10 +40,10 @@ public class Attack : MonoBehaviour {
         m_BulletSpawn = transform.Find("BulletSpawn");
 
         AudioSource[] audios = GetComponents<AudioSource>(); // There are two different audio sources to make they sure an attack does not interrupt the sound of the other
-        m_GunAudioSource = audios[0];
-        m_GunAudioSource.clip = m_GunSound;
-        m_MeleeAudioSource = audios[1];
-        m_MeleeAudioSource.clip = m_MeleeAttackSound;
+        m_AudioSource = audios[0];
+        m_AudioSource.clip = m_GunSound;
+        // m_MeleeAudioSource = audios[1];
+        // m_MeleeAudioSource.clip = m_MeleeAttackSound;
 
         m_Combatant = GetComponent<Combatant>();
 
@@ -75,22 +74,15 @@ public class Attack : MonoBehaviour {
             bullet = Instantiate(m_Bullet, m_BulletSpawn.position, m_BulletSpawn.rotation * m_ShotAngleWithRecoil);
         }
         bullet.GetComponent<Bullet>().AddMomentum();
-       
-        // m_MuzzleFlash.gameObject.SetActive(true);
-        // m_MuzzleFlash.transform.position = m_BulletSpawn.position + transform.forward * 1.3f;
-        // m_MuzzleFlash.transform.rotation = m_BulletSpawn.rotation;
-        // m_MuzzleFlash.Play();
 
         if(m_Combatant.UseArmourPiercingRounds()) {
-            m_GunAudioSource.pitch = AudioPitchARP;
+            m_AudioSource.pitch = AudioPitchARP;
             bullet.GetComponent<Bullet>().SetArmorPiercing();
         }
         else
-            m_GunAudioSource.pitch = AudioPitchNormal;
-        m_GunAudioSource.PlayOneShot(m_GunAudioSource.clip);
+            m_AudioSource.pitch = AudioPitchNormal;
+        m_AudioSource.PlayOneShot(m_AudioSource.clip);
         // m_GunAudioSource.Play();
-
-        // AudioSource.PlayClipAtPoint(m_GunAudioSource.clip, Camera.main.transform.position - Vector3.up * 1f);
     }
 
     // recoil variables 
@@ -127,7 +119,8 @@ public class Attack : MonoBehaviour {
     protected void MeleeAttack() {
         if(Time.time > m_AttackTimestamp + MeleeTime) {
             m_AttackTimestamp = Time.time;
-            m_MeleeAudioSource.Play();
+            // m_MeleeAudioSource.Play();
+            m_AudioSource.PlayOneShot(m_MeleeAttackSound);
             m_Animator.Play("basic_Melee_Attack", 0, .15f);
 
             Collider[] colliders = Physics.OverlapSphere(transform.position + transform.forward * .7f, MeleeRange / 2, m_EnemyMask);

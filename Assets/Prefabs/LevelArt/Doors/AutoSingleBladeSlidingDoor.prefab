@@ -67,22 +67,27 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4911577798778700571, guid: 7c0a397205a4fa442a891a382447294b,
+    - target: {fileID: 7119338125360060900, guid: 7c0a397205a4fa442a891a382447294b,
         type: 3}
-      propertyPath: m_Center.x
-      value: 1.4
+      propertyPath: m_LocalScale.x
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4911577798778700572, guid: 7c0a397205a4fa442a891a382447294b,
         type: 3}
       propertyPath: m_Automatic
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 7119338125360060900, guid: 7c0a397205a4fa442a891a382447294b,
+    - target: {fileID: 4911577798778700572, guid: 7c0a397205a4fa442a891a382447294b,
         type: 3}
-      propertyPath: m_LocalScale.x
-      value: 3
+      propertyPath: m_OpenDuration
+      value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 1119792109617515999, guid: 7c0a397205a4fa442a891a382447294b,
+    - target: {fileID: 4911577798778700571, guid: 7c0a397205a4fa442a891a382447294b,
+        type: 3}
+      propertyPath: m_Center.x
+      value: 1.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7098145109336494021, guid: 7c0a397205a4fa442a891a382447294b,
         type: 3}
       propertyPath: m_Mesh
       value: 
@@ -92,7 +97,7 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: b34556d13a9181440a23544cef01c24c, type: 2}
-    - target: {fileID: 7098145109336494021, guid: 7c0a397205a4fa442a891a382447294b,
+    - target: {fileID: 1119792109617515999, guid: 7c0a397205a4fa442a891a382447294b,
         type: 3}
       propertyPath: m_Mesh
       value: 

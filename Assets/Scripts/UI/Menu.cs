@@ -10,6 +10,7 @@ public class Menu : MonoBehaviour {
     private GameController m_GameController;
     private GameObject m_MainMenu;
     private List<GameObject> m_Submenus = new List<GameObject>();
+    private GameObject m_LevelEndedMenu;
     private GameObject m_GameOverMenu;
     private GameObject m_Credits;
 
@@ -40,6 +41,8 @@ public class Menu : MonoBehaviour {
                 else
                     m_Submenus.Add(transform.GetChild(i).gameObject);
             }
+            else if(child.tag == "LevelEndedMenu")
+                m_LevelEndedMenu = child;
             else if(child.tag == "GameOverMenu")
                 m_GameOverMenu = child;
             else if(child.tag == "Credits")
@@ -52,6 +55,7 @@ public class Menu : MonoBehaviour {
             gameObject.SetActive(false);
             m_MainMenu.transform.Find("PlayButton").gameObject.SetActive(false);
             m_MainMenu.transform.Find("ResumeButton").gameObject.SetActive(true);
+            m_MainMenu.transform.Find("RestartButton").gameObject.SetActive(true);
         }
     }
 
@@ -75,13 +79,21 @@ public class Menu : MonoBehaviour {
         }
     }
 
+    public void ShowLevelEndedMenu() {
+        gameObject.SetActive(true);
+        m_LevelEndedMenu.gameObject.SetActive(true);
+        Cursor.visible = true;
+
+        // GameObject nextLevelButton = m_GameOverMenu.transform.Find("NextLevelButton").gameObject;
+        // StartCoroutine(FadeInButton(nextLevelButton, 1));
+    }
+
     public void ShowGameOverMenu() {
         gameObject.SetActive(true);
         m_GameOverMenu.gameObject.SetActive(true);
         Cursor.visible = true;
 
         GameObject restartButton = m_GameOverMenu.transform.Find("RespawnButton").gameObject;
-
         StartCoroutine(FadeInButton(restartButton, 1));
     }
 
@@ -122,7 +134,6 @@ public class Menu : MonoBehaviour {
 
     public void RespawnButton() {
         m_GameController.RestartLevel();
-        // m_GameController.Respawn();
     }
 
     public void RestartButton() {
@@ -131,6 +142,10 @@ public class Menu : MonoBehaviour {
 
     public void QuitButton() {
         m_GameController.QuitGame();
+    }
+
+    public void NextLevelButton() {
+        m_GameController.LoadNextLevel();
     }
 
 }

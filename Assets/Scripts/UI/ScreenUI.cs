@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
@@ -17,7 +18,6 @@ public class ScreenUI : MonoBehaviour {
     private static MonoBehaviour monobehaviour = null;
 
     void Start() {
-        ShowLevelText();
     }
 
     void OnEnable() {
@@ -28,10 +28,6 @@ public class ScreenUI : MonoBehaviour {
         m_MessageTemplate = transform.Find("Messages").Find("Message").GetComponent<TextMeshProUGUI>();
         m_MessageTemplate.gameObject.SetActive(false);
         m_MessageTemplate.SetText("");
-    }
-
-    public void ShowLevelText() {
-        DisplayMessage(SceneManager.GetActiveScene().name.ToString(), Field.BigText);
     }
 
     public static void DisplayMessage(string text, Field field = Field.Message) {

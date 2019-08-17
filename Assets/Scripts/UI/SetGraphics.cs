@@ -8,7 +8,7 @@ public class SetGraphics : MonoBehaviour {
 
     void Start() {
         m_GameController = FindObjectOfType<GameController>();
-        int simpleImpacts = PlayerPrefs.GetInt(Strings.Settings.BulletImpactEffects.ToString());
+        int simpleImpacts = PlayerPrefs.GetInt(Settings.BulletImpactEffects.ToString());
         Toggle toggle = gameObject.GetComponent<Toggle>();
         if(simpleImpacts == 1)
             toggle.isOn = true;
@@ -17,7 +17,7 @@ public class SetGraphics : MonoBehaviour {
     }
 
     public void SetSimpleImpactEffects(bool enabled) {
-        PlayerPrefs.SetInt(Strings.Settings.BulletImpactEffects.ToString(), enabled ? 1 : 0);
+        PlayerPrefs.SetInt(Settings.BulletImpactEffects.ToString(), enabled ? 1 : 0);
         PlayerPrefs.Save();
         m_GameController.SetImpactEffects(enabled ? 1 : 0);
     }

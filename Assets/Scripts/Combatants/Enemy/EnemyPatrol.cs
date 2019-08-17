@@ -28,12 +28,16 @@ public class EnemyPatrol : MonoBehaviour {
     }
 
     void OnEnable() {
-        AssemblyReloadEvents.afterAssemblyReload += OnAfterAssemblyReload;
+        #if UNITY_EDITOR
+            AssemblyReloadEvents.afterAssemblyReload += OnAfterAssemblyReload;
+        #endif
     }
 
     void OnDisable() {
-        StopAllCoroutines();
-        AssemblyReloadEvents.afterAssemblyReload -= OnAfterAssemblyReload;
+        #if UNITY_EDITOR
+            StopAllCoroutines();
+            AssemblyReloadEvents.afterAssemblyReload -= OnAfterAssemblyReload;
+        #endif
     }
 
     public void OnAfterAssemblyReload() {

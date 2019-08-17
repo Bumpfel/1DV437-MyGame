@@ -18,7 +18,7 @@ public class RotatingDoor : MonoBehaviour {
     }
 
     void OnTriggerStay(Collider other) {
-        if(Input.GetButtonDown(Strings.Controls.Action.ToString()) && Time.time > m_OpenTimestamp + m_OpenDelay) {
+        if(Input.GetButtonDown(Controls.Action.ToString()) && Time.time > m_OpenTimestamp + m_OpenDelay) {
             m_OpenTimestamp = Time.time;
             m_IsOpen = !m_IsOpen;
             // transform.Rotate(0, m_IsOpen ? m_RotationAngle : -m_RotationAngle, 0);

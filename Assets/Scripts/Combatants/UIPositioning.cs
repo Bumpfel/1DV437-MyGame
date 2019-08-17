@@ -1,5 +1,5 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class UIPositioning : MonoBehaviour {
 
@@ -7,9 +7,9 @@ public class UIPositioning : MonoBehaviour {
     private EnemyBehaviour m_EnemyAttack; 
     private GameObject m_AlertIndicator;
 
-    private Vector3 playerPosition;
-    private const float m_VerticalOffset = 2;
-
+    private Vector3 combatantPosition;
+    private const float m_VerticalOffset = 1.5f;
+    
     void Start() {
         m_RelativeRotation = transform.localRotation;
         m_EnemyAttack = GetComponentInParent<EnemyBehaviour>();
@@ -21,8 +21,8 @@ public class UIPositioning : MonoBehaviour {
         if(Time.timeScale == 0)
             return;
     
-        playerPosition = transform.parent.position;
-        transform.position = new Vector3(playerPosition.x, transform.position.y , playerPosition.z + m_VerticalOffset);
+        combatantPosition = transform.parent.position;
+        transform.position = new Vector3(combatantPosition.x, transform.position.y , combatantPosition.z + m_VerticalOffset);
         transform.rotation = m_RelativeRotation;
 
         if(m_AlertIndicator) {

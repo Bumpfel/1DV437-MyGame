@@ -52,7 +52,6 @@ public class PickupObject : MonoBehaviour {
 
 
     private void PickUpObject() {
-        // AudioSource.PlayClipAtPoint(m_AudioClip, transform.position, m_AudioClipVolume);
         m_AudioSource.Play();
 
         // disabling renderers and colliders on the object to not stop the audio clip

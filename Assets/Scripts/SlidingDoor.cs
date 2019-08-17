@@ -48,12 +48,12 @@ public class SlidingDoor : MonoBehaviour {
                     OpenDoor(true);
             }
             else {
-                if(Input.GetButtonDown(Strings.Controls.Action.ToString())) { // && Time.time > m_OpenTimestamp + OpenDelay) {
+                if(Input.GetButtonDown(Controls.Action.ToString())) { // && Time.time > m_OpenTimestamp + OpenDelay) {
                     OpenDoor(!m_IsOpen);
                 }
-                else if(Input.GetKeyDown(KeyCode.U)) { //TODO for testing
-                    Unlock();
-                }
+                // else if(Input.GetKeyDown(KeyCode.U)) { //TODO for testing
+                //     Unlock();
+                // }
             }
         }
         else {
@@ -103,9 +103,6 @@ public class SlidingDoor : MonoBehaviour {
 
             m_AudioSource.clip = m_IsOpen ? m_DoorCloseSound : m_DoorOpenSound;
             m_AudioSource.Play();
-            // m_SavedVolume = m_GameController.GetSavedVolume(ExposedMixerGroup.SFXVolume);
-            // m_AudioClipPoint = transform.position + Vector3.up * Camera.main.transform.position.y * .9f;
-            // AudioSource.PlayClipAtPoint(m_DoorOpenSound, m_AudioClipPoint, m_AudioSource.volume * m_SavedVolume);
             for(int i = 0; i < m_DoorBlades.Length; i ++) {
                 StartCoroutine(AnimateDoorBlade(m_DoorBlades[i], open));
             }
@@ -124,16 +121,12 @@ public class SlidingDoor : MonoBehaviour {
         Vector3 doorBladeStartingPosition = doorBlade.position;
         Vector3 doorBladeTargetPosition = transform.position + (!open ? Vector3.zero : doorBlade.right * doorBlade.localScale.x * .9f);
 
-        if(name == "LockedWideSlidingDoor")
-            print("door opening...");
         float timeTaken = 0;
         while(timeTaken < m_OpenDuration) {
             timeTaken += Time.fixedDeltaTime;
             doorBlade.position = Vector3.Lerp(doorBladeStartingPosition, doorBladeTargetPosition, timeTaken / m_OpenDuration);
             yield return new WaitForFixedUpdate();
         }
-        if(name == "LockedWideSlidingDoor")
-            print("door opened in " + timeTaken + " seconds");
 
         m_IsOpen = open;
         m_DoorInMotion = false;

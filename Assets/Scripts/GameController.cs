@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -22,6 +22,7 @@ public class GameController : MonoBehaviour {
     
     // private Light m_DayLight;
 
+
     void Start() {
         m_Menu = GetComponentInChildren<Menu>(true);
         if(LevelIsLoaded()) {
@@ -29,13 +30,19 @@ public class GameController : MonoBehaviour {
         }
     }
 
+    private void ShowLevelText() {
+        string levelText = SceneManager.GetActiveScene().name.ToString() + "\n" + Strings.GetLevelName(SceneManager.GetActiveScene().buildIndex);
+        ScreenUI.DisplayMessage(levelText, Field.BigText);
+    }
+
+
     private void Initialize() {
-        // print("GameController Initialize()");
         m_PlayerStats = new PlayerStats("Player", SceneManager.GetActiveScene().buildIndex);
         
         m_Menu.Initialize();
 
         GetComponentInChildren<ScreenUI>(true).gameObject.SetActive(true);
+        ShowLevelText();
 
         m_PlayerSpawn = GetComponentInChildren<Transform>().Find("PlayerSpawn");
         m_Player = Instantiate(PlayerModel, m_PlayerSpawn.position, m_PlayerSpawn.rotation, transform);
@@ -55,10 +62,6 @@ public class GameController : MonoBehaviour {
         if(Input.GetKeyDown(KeyCode.Escape)) {
             TogglePauseMenu();
         }
-        if(Input.GetKeyDown(KeyCode.F9)) { // debug
-            AudioSource.PlayClipAtPoint(m_LevelEndedAudio, Camera.main.transform.position - Vector3.up * 1, 1);
-            // EndLevel();
-        }
         // m_DayLight.intensity = Mathf.Min(Time.timeSinceLevelLoad / 240, 1);
     }
 
@@ -67,11 +70,12 @@ public class GameController : MonoBehaviour {
         Time.timeScale = 1;
     }
 
+
     public void RestartLevel() { //Respawn() {
         Destroy(m_Player);
-        Initialize();
         m_GameOver = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        Initialize();
         m_Paused = false;
         Time.timeScale = 1;
     }
@@ -79,10 +83,6 @@ public class GameController : MonoBehaviour {
     public void LoadMainMenu() {
         SceneManager.LoadScene(0);
     }
-
-    // public void RestartLevel() {
-    //     Respawn();
-    // }
 
     public void QuitGame() {
         if(LevelIsLoaded())
@@ -96,26 +96,17 @@ public class GameController : MonoBehaviour {
         m_Menu.ShowGameOverMenu();
     }
 
-    // public void DisplayMessage(string msg) {
-    //     m_ScreenUI.PutScreenMessage(Field.Message, msg);
-    // }
-
-
     public void EndLevel() {
         SetPlayerControls(false);
         m_GameOver = true;
         m_PlayerStats.SetLevelEnded();
         SaveSystem.SaveHighScoreData(m_PlayerStats);
 
-        int nrOfScenes = SceneManager.sceneCountInBuildSettings - 1; // exclude menu
+        int nrOfScenes = SceneManager.sceneCountInBuildSettings - 1; // excludes menu
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         if(currentSceneIndex < nrOfScenes) {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-
-            // AudioSource audioSource = GetComponent<AudioSource>();
-            // audioSource.Play();
+            m_Menu.ShowLevelEndedMenu();
             AudioSource.PlayClipAtPoint(m_LevelEndedAudio, Camera.main.transform.position, 1);
-            //TODO meny med knapp innan nästa bana laddas
         }
         else {
             m_Player.layer = 0; // makes enemies ignore the player
@@ -123,12 +114,15 @@ public class GameController : MonoBehaviour {
             AudioSource.PlayClipAtPoint(m_LevelEndedAudio, Camera.main.transform.position, 1);
 
             // TODO play cheerful music
-            // UI animation ? balloons and fireworks
         }
     }
 
+    public void LoadNextLevel() {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+    }
+
     public bool LevelIsLoaded() {
-        return SceneManager.GetActiveScene().buildIndex > 0;
+        return SceneManager.GetActiveScene().buildIndex > 0 || SceneManager.GetActiveScene().name == "Test";
     }
 
     // public bool IsGameOver() {
@@ -149,18 +143,13 @@ public class GameController : MonoBehaviour {
     public void TogglePauseMenu() {
         if(!m_GameOver && m_Menu.ToggleMenu()) {
             if(LevelIsLoaded()) {
-                // Cursor.visible = !Cursor.visible;
                 m_Paused = !m_Paused;
+                Cursor.visible = m_Paused;
                 SetPlayerControls(!m_Paused);
                 Time.timeScale = m_Paused ? 0 : 1;
             }
+            // debugSavePlayerData();
         }
-
-        if(!m_Paused) {
-            // print("hiding cursor");
-            Cursor.visible = false; // TODO not working if you press esc to hide menu
-        }
-        // debugSavePlayerData();
     }
 
     public void SetPlayerControls(bool state) {
@@ -180,8 +169,7 @@ public class GameController : MonoBehaviour {
 
 
     public int GetSavedImpactEffects() {
-        return PlayerPrefs.GetInt(Strings.Settings.BulletImpactEffects.ToString());
+        return PlayerPrefs.GetInt(Settings.BulletImpactEffects.ToString());
     }
 
 }
-public enum ExposedMixerGroup { MasterVolume, SFXVolume, MusicVolume };

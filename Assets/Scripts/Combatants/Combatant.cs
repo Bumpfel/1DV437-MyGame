@@ -20,6 +20,8 @@ public abstract class Combatant : MonoBehaviour {
     private Animator m_Animator;
     private const float m_ArmourResistanceMultiplier = 2;
 
+    protected bool IsDead => m_Health <= 0;
+
     protected void Start() {
         m_GameController = FindObjectOfType<GameController>();
         m_Animator = GetComponent<Animator>();
@@ -46,12 +48,12 @@ public abstract class Combatant : MonoBehaviour {
         float unmitigatedDmg = Mathf.Max(0, amount - m_Armour);
         float mitigatedDmg = amount - unmitigatedDmg;
         float incomingDamage = unmitigatedDmg + mitigatedDmg / m_ArmourResistanceMultiplier;
-        m_Armour = Mathf.Max(0, m_Armour - incomingDamage);
+        m_Armour = Mathf.Max(m_Armour - incomingDamage, 0);
 
         m_Health = Mathf.Max(m_Health - incomingDamage, 0);
         UpdateHealthBar();
 
-        if(IsDead()) {
+        if(IsDead) {
             Die();
             return;
         }
@@ -71,10 +73,6 @@ public abstract class Combatant : MonoBehaviour {
 
     public float GetHealth() {
         return m_Health;
-    }
-
-    private bool IsDead() {
-        return m_Health <= 0;
     }
 
     protected void UpdateHealthBar() {

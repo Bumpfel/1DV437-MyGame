@@ -32,15 +32,15 @@ public class HighScore : MonoBehaviour {
         Transform dataRow = Array.Find<Transform>(GetComponentsInChildren<Transform>(true), obj => obj.name == "Data");
 
         foreach(PlayerStats playerStats in m_StatsList) {
-            List<object> stat = new List<object>();
-            stat.Add(playerStats.LevelIndex);
+            List<object> scoreRow = new List<object>();
+            scoreRow.Add(Strings.GetLevelName(playerStats.LevelIndex));
             // stat.Add(playerStats.PlayerName);
-            stat.Add(playerStats.Kills);
-            stat.Add(playerStats.PlayerDeaths);
+            scoreRow.Add(playerStats.Kills);
+            scoreRow.Add(playerStats.PlayerDeaths);
 
             float seconds = Mathf.Round(playerStats.TimeTaken % 60);
             string formattedTime = (int) (playerStats.TimeTaken / 60) + ":" + (seconds < 10f ? "0" : "") + seconds;
-            stat.Add(formattedTime);
+            scoreRow.Add(formattedTime);
             
             Transform row = Instantiate(dataRow, dataRow.parent);
             row.gameObject.SetActive(true);
@@ -49,7 +49,7 @@ public class HighScore : MonoBehaviour {
             TextMeshProUGUI[] dataCells = row.GetComponentsInChildren<TextMeshProUGUI>();
             for(int i = 0; i < dataCells.Length; i ++) {
                 row.gameObject.name = "Row " + playerStats.LevelIndex;
-                dataCells[i].SetText("" + stat[i]);
+                dataCells[i].SetText("" + scoreRow[i]);
             }
         }
         dataRow.gameObject.SetActive(false);

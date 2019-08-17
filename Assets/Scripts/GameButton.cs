@@ -7,20 +7,20 @@ public class GameButton : MonoBehaviour {
     public string m_AreaName = "";
 
     private const float CameraSpeed = 40;
-    // private GameController m_GameController;
     private AudioSource m_AudioSource;
     private bool m_IsInsideTrigger = false;
     private GameObject m_Triggerer;
 
+    public bool IsAssigned => m_AffectedDoors != null;
+    
     private void Start() {
-        // m_GameController = FindObjectOfType<GameController>();
         m_AudioSource = GetComponent<AudioSource>();
     }
 
     private void Update() {
         if(Time.timeScale == 0)
             return;
-        if(Input.GetButtonDown(Strings.Controls.Action.ToString()) && m_IsInsideTrigger) {
+        if(Input.GetButtonDown(Controls.Action.ToString()) && m_IsInsideTrigger) {
             m_AudioSource.Play();
             bool wasLocked = false;
             foreach(SlidingDoor door in m_AffectedDoors) {
@@ -74,26 +74,4 @@ public class GameButton : MonoBehaviour {
             m_IsInsideTrigger = false;
         }
     }
-
-    public bool IsAssigned() {
-        return m_AffectedDoors != null;
-    }
-}
-
-[CustomEditor (typeof(GameButton))]
-public class AffectedDoors : Editor {
-
-    void OnSceneGUI() {
-        GameButton button = (GameButton) target;
-    
-        if(button.IsAssigned()) {
-            Handles.color = Color.grey;
-            foreach(SlidingDoor door in button.m_AffectedDoors) {
-                if(door != null)
-                    Handles.DrawLine(button.transform.position, door.transform.position);
-            }
-        }
-
-    }
-
 }

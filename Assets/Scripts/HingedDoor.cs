@@ -29,7 +29,7 @@ public class HingedDoor : MonoBehaviour {
         if(Time.timeScale == 0)
             return;
         if(m_IsInsideTrigger) {
-            if(Input.GetButtonDown(Strings.Controls.Action.ToString())) {// && Time.time > m_OpenTimestamp + OpenDelay) {
+            if(Input.GetButtonDown(Controls.Action.ToString())) {// && Time.time > m_OpenTimestamp + OpenDelay) {
                 OpenDoor(!m_IsOpen);
             }
             else if(Input.GetKeyDown(KeyCode.U)) { //TODO for testing

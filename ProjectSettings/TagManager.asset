@@ -19,6 +19,7 @@ TagManager:
   - Wood
   - Concrete
   - Semiblocking
+  - LevelEndedMenu
   layers:
   - Default
   - TransparentFX

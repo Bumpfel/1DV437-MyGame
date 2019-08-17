@@ -6,35 +6,34 @@ public class EnemyBehaviour : Combatant {
 
     private const float WakeUpDelayOnTakingDmg = .4f;
     private const float WakeUpDelayOnCollider = 1;
-    private const float AlertedTime = 5;
+    private const float AlertedTime = 7;
     private const float ReactionTime = .2f;
     private const float ReactionTurnDuration = 1.5f;
+    private const float SlowReactionTurnDuration = ReactionTurnDuration * 3;
     private const float FollowTargetSpeed = .2f;
     private const float MaxAngleToTargetBeforeShooting = 15;
     private GameObject m_AsleepIndicator;
-    private EnemyPatrol m_EnemyMovement;
+    private EnemyPatrol m_EnemyPatrol;
     private FieldOfView m_FOV;
     private Transform m_Target;
     private Quaternion m_StartRotation;
     private Attack m_Attack;
  
+    public bool IsAlerted { get; private set; } // an enemy becomes alerted if the player has been spotted recently or if the enemy took dmg
     private bool m_IsWakingUp = false;
-    public bool IsAlerted { get; private set; }
-
-    private bool m_IsTurning = false;
     private bool m_RecentlyDetectedPlayer = false;
     private float m_LastReaction;
     private float m_AngleToTarget;
 
     private bool IsCloseEnoughToShoot => m_AngleToTarget < MaxAngleToTargetBeforeShooting;
     private bool HasTargetInSight => m_FOV.HasTargetInSight;
-    private bool EnoughTimeHasGoneBySinceLastReaction => m_RecentlyDetectedPlayer && Time.time > m_LastReaction + AlertedTime;
+    private bool AlertedTimedOut => Time.time > m_LastReaction + AlertedTime;
 
     private new void Start() {
         base.Start();
         m_Attack = GetComponent<Attack>();
         m_FOV = GetComponent<FieldOfView>();
-        m_EnemyMovement = GetComponent<EnemyPatrol>();
+        m_EnemyPatrol = GetComponent<EnemyPatrol>();
 
         m_AsleepIndicator = m_CharacterGUI.transform.Find("Asleep").gameObject;
         if(m_IsAsleep) {
@@ -60,7 +59,7 @@ public class EnemyBehaviour : Combatant {
                 m_Target = m_FOV.VisibleTarget;
                 IsAlerted = true;
                 
-                m_EnemyMovement.Halt();
+                m_EnemyPatrol.Halt();
                 m_RecentlyDetectedPlayer = true;
             }
             StopAllCoroutines();
@@ -70,10 +69,10 @@ public class EnemyBehaviour : Combatant {
             if(IsCloseEnoughToShoot)
                 m_Attack.Fire();
         }
-        else if(EnoughTimeHasGoneBySinceLastReaction) {
+        else if(m_RecentlyDetectedPlayer && AlertedTimedOut) {
             m_RecentlyDetectedPlayer = false;
             IsAlerted = false;
-            m_EnemyMovement.ReturnToPatrol();
+            m_EnemyPatrol.ReturnToPatrol();
         }
     }
 
@@ -88,23 +87,29 @@ public class EnemyBehaviour : Combatant {
 
     public override void TakeDamage(float amount, Vector3 dmgSource) {
         base.TakeDamage(amount, dmgSource);
-        if(!m_IsWakingUp && !HasTargetInSight) {
+        if(!m_IsWakingUp && !HasTargetInSight && !IsDead) {
             if(m_IsAsleep)
                 StartCoroutine(WakeUp(WakeUpDelayOnTakingDmg, true, dmgSource));
             else {
                 StopAllCoroutines();
-                StartCoroutine(ReactToTakingDamage(dmgSource));
+                StartCoroutine(ReactToHit(dmgSource, true));
             }
         }
     }
 
-    // wakes an enemy if hit by something
+    // wakes an enemy if bumped by something (like the player or an object). if awake, turns slowly towards the source if not alerted, otherwise quickly 
     private void OnCollisionEnter(Collision collision) { 
-        if(collision.collider.tag != "Ignored" && m_IsAsleep && !m_IsWakingUp) // && !IsDead()
-            StartCoroutine(WakeUp(WakeUpDelayOnCollider, false, transform.forward));
+        if(collision.collider.tag != "Ignored" && !m_IsWakingUp) {
+            if(m_IsAsleep)
+                StartCoroutine(WakeUp(WakeUpDelayOnCollider, false, collision.collider.transform.position));
+            else {
+                StopAllCoroutines();
+                StartCoroutine(ReactToHit(collision.collider.transform.position, IsAlerted));
+            }
+        }
     }
 
-    private IEnumerator WakeUp(float delay, bool tookDmg, Vector3 dmgSource) {
+    private IEnumerator WakeUp(float delay, bool tookDmg, Vector3 hitSource) {
         m_AsleepIndicator.SetActive(false);
         m_IsWakingUp = true;
         yield return new WaitForSeconds(delay);
@@ -113,26 +118,31 @@ public class EnemyBehaviour : Combatant {
         }
         m_IsAsleep = false;
         m_IsWakingUp = false;
-        if(tookDmg) {
-           StartCoroutine(ReactToTakingDamage(dmgSource));
-        }
+        
+        // turns towards dmg source if took dmg
+        if(tookDmg)
+            StartCoroutine(ReactToHit(hitSource, true));
     }
 
-    private IEnumerator ReactToTakingDamage(Vector3 dmgSource) {
+   private IEnumerator ReactToHit(Vector3 hitSource, bool tookDmg) {
         m_LastReaction = Time.time;
         if(!IsAlerted) {
-            IsAlerted = true;
-            m_EnemyMovement.Halt();
+            if(tookDmg)
+                IsAlerted = true;
+            m_EnemyPatrol.Halt();
             yield return new WaitForSeconds(ReactionTime);
         }
-        yield return RoughlyTurnTowards(dmgSource, ReactionTurnDuration);
-        if(Time.time < m_LastReaction + ReactionTime) {
+        yield return RoughlyTurnTowards(hitSource, tookDmg ? ReactionTurnDuration : SlowReactionTurnDuration);
+        
+        // blindly fire against source if alerted
+        if(IsAlerted && Time.time < m_LastReaction + ReactionTime) { 
             yield return new WaitForSeconds(ReactionTime);
             yield return FireBlindly(2);
         }
+
         yield return new WaitForSeconds(AlertedTime);
         IsAlerted = false;
-        m_EnemyMovement.ReturnToPatrol();
+        m_EnemyPatrol.ReturnToPatrol();
     }
     
     private IEnumerator RoughlyTurnTowards(Vector3 point, float fullTurnDuration) {
@@ -143,7 +153,7 @@ public class EnemyBehaviour : Combatant {
         float exactAngle = Vector3.Angle(transform.position, point);
         Quaternion targetRotation = Quaternion.LookRotation(point - transform.position, Vector3.up);
 
-        // adding a random direction to avoid enemy being 100% precise when not seeing enemy. becomes more accurate when turned towards target
+        // adding a random angle to avoid enemy being 100% precise when not seeing the player. becomes more accurate the smaller the angle is between the hit source and its own rotation
         float randomAngle = Random.Range(-exactAngle / 4, exactAngle / 4);
         targetRotation *= Quaternion.Euler(0, randomAngle, 0);
         

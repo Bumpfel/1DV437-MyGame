@@ -59,18 +59,17 @@ public class PlayerMovement : MonoBehaviour {
     private Vector3 movementInput;
 
     private float animationSpeedPercent;
-    
+      
+    public bool IsRunning => Input.GetButton(m_SprintKey) && (Input.GetAxisRaw(m_VerticalAxis) != 0 || Input.GetAxisRaw(m_HorizontalAxis) != 0);
 
-    void Start() {
+    private void Start() {
         m_ViewCamera = Camera.main;
 
         m_Animator = GetComponent<Animator>();
 
-        m_VerticalAxis = Strings.Controls.Vertical.ToString();
-        m_HorizontalAxis = Strings.Controls.Horizontal.ToString();
-        m_SprintKey = Strings.Controls.Sprint.ToString();
-
-        Cursor.visible = false;
+        m_VerticalAxis = Controls.Vertical.ToString();
+        m_HorizontalAxis = Controls.Horizontal.ToString();
+        m_SprintKey = Controls.Sprint.ToString();
 
         m_Combatant = GetComponent<Combatant>();
 
@@ -89,7 +88,7 @@ public class PlayerMovement : MonoBehaviour {
         // }
     }
 
-    void FixedUpdate() {
+    private void FixedUpdate() {
         // SmoothCameraRelativeMovement();
         CameraRelativeMovementActualSpeed();
 
@@ -102,8 +101,7 @@ public class PlayerMovement : MonoBehaviour {
         }
     }
 
-
-    void Update() {
+    private void Update() {
         // if(Time.timeScale == 0)
         //     return;
         Look();
@@ -120,10 +118,10 @@ public class PlayerMovement : MonoBehaviour {
     
         moveSpeed = m_WalkSpeed;
         movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
-        targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
+        targetSpeed = (IsRunning ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
         // m_CurrentSpeed = Mathf.SmoothDamp(m_CurrentSpeed, targetSpeed, ref m_SpeedSmoothVelocity, SpeedSmoothTime);
         
-        m_Animator.SetFloat(Strings.AnimatorSettings.speedPercent.ToString(), actualSpeed, SpeedSmoothTime, Time.fixedDeltaTime);
+        m_Animator.SetFloat(AnimatorSettings.speedPercent.ToString(), actualSpeed, SpeedSmoothTime, Time.fixedDeltaTime);
 
         if(Input.GetButton(m_SprintKey)) {
             moveSpeed *= m_RunSpeedModifier;
@@ -137,11 +135,11 @@ public class PlayerMovement : MonoBehaviour {
    private void SmoothCameraRelativeMovement() { // has smooth animations
         moveSpeed = m_WalkSpeed;
         movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
-        targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
+        targetSpeed = (IsRunning ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
         m_CurrentSpeed = Mathf.SmoothDamp(m_CurrentSpeed, targetSpeed, ref m_SpeedSmoothVelocity, SpeedSmoothTime);
     
-        animationSpeedPercent = (IsRunning() ? 1 : 0.5f) * movementInput.magnitude;
-        m_Animator.SetFloat(Strings.AnimatorSettings.speedPercent.ToString(), animationSpeedPercent, SpeedSmoothTime, Time.fixedDeltaTime);
+        animationSpeedPercent = (IsRunning ? 1 : 0.5f) * movementInput.magnitude;
+        m_Animator.SetFloat(AnimatorSettings.speedPercent.ToString(), animationSpeedPercent, SpeedSmoothTime, Time.fixedDeltaTime);
 
         if(Input.GetButton(m_SprintKey)) {
             moveSpeed *= m_RunSpeedModifier;
@@ -154,12 +152,12 @@ public class PlayerMovement : MonoBehaviour {
        private void SmoothCharacterRelativeMovement() {
         moveSpeed = m_WalkSpeed;
         movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
-        targetSpeed = (IsRunning() ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
+        targetSpeed = (IsRunning ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
         m_CurrentSpeed = Mathf.SmoothDamp(Input.GetAxisRaw(m_VerticalAxis), targetSpeed, ref m_SpeedSmoothVelocity, SpeedSmoothTime);
         //----
 
-        float animationSpeedPercent = (IsRunning() ? 1 : 0.5f) * movementInput.magnitude;
-        m_Animator.SetFloat(Strings.AnimatorSettings.speedPercent.ToString(), animationSpeedPercent, SpeedSmoothTime, Time.fixedDeltaTime);
+        float animationSpeedPercent = (IsRunning ? 1 : 0.5f) * movementInput.magnitude;
+        m_Animator.SetFloat(AnimatorSettings.speedPercent.ToString(), animationSpeedPercent, SpeedSmoothTime, Time.fixedDeltaTime);
 
 
         transform.Translate(transform.forward * m_CurrentSpeed * Time.fixedDeltaTime);
@@ -184,12 +182,6 @@ public class PlayerMovement : MonoBehaviour {
         //placing reticle on top (5 units up), compensating for aim reticle size, so the bullet is fire at the center of the reticle
         m_AimReticle.transform.position = mousePosRelativeToCamera + Vector3.up * 5 + transform.right * .23f;//.25f; // .23 for perspective, .25 for ortographic 
     }
-
-
-    public bool IsRunning() {
-        return Input.GetButton(m_SprintKey) && (Input.GetAxisRaw(m_VerticalAxis) != 0 || Input.GetAxisRaw(m_HorizontalAxis) != 0);
-    }
-
 
 
 

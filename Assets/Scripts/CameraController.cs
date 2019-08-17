@@ -4,11 +4,27 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour {
     private Transform m_Player;
-    public float m_UnitsInFrontOfPlayer = 3;
+    public float m_UnitsInFrontOfPlayer = 4;
     private float m_MaxDistanceFromCamera = 12; // when holding ctrl
 
     private float m_FollowSpeed = .1f;
     public bool m_FollowPlayer = true;
+    private string m_FreeLookKey;
+
+    private Vector3 mousePos;
+    private Vector3 inputVector;
+    private Vector3 maxVector;
+    private Vector3 targetPosition;
+    
+    private Vector3 m_CameraHeightPosition;
+    private Vector3 inFrontOfPlayer;
+    private float mousePosDistance;
+    private float maxVectorDistance;
+
+    private void Start() {
+        m_FreeLookKey = Controls.FreeLook.ToString();
+        m_CameraHeightPosition = Vector3.up * transform.position.y;
+    }
 
     public void SetPlayer(Transform player) {
         m_Player = player;
@@ -20,39 +36,35 @@ public class CameraController : MonoBehaviour {
         // CheckIfWantsToZoom();
 
         if(m_Player && m_FollowPlayer) {
-            if(!Input.GetKey(KeyCode.LeftControl)) {
-                // Makes the camera follow the player with focus slighly in front of the player 
-                Vector3 inFrontOfPlayer = m_Player.forward * m_UnitsInFrontOfPlayer;
-                
-                
-                //standard
-                // transform.position = new Vector3(m_Player.position.x + inFrontOfPlayer.x, transform.position.y, m_Player.position.z + inFrontOfPlayer.z);
-                
-
-                //smooth
-                Vector3 to = new Vector3(m_Player.position.x + inFrontOfPlayer.x, transform.position.y, m_Player.position.z + inFrontOfPlayer.z);
-                transform.position = Vector3.Lerp(transform.position, to, m_FollowSpeed);
-
-
-                // transform.position = m_Player.position + Vector3.up * transform.position.y;
-            }
-            else {
-            // if(Input.GetKey(KeyCode.LeftControl)) {
-                Vector3 mousePos = GetComponent<Camera>().ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.position.y));
-                Vector3 maxVector = m_Player.position + m_Player.forward * m_MaxDistanceFromCamera;
-                float mousePosDistance = Vector3.Distance(m_Player.position, mousePos);
-                float maxVectorDistance = Vector3.Distance(m_Player.position, maxVector);
+            if(Input.GetButton(m_FreeLookKey)) {
+                inputVector.Set(Input.mousePosition.x, Input.mousePosition.y, transform.position.y);
+                mousePos = GetComponent<Camera>().ScreenToWorldPoint(inputVector);
+                maxVector = m_Player.position + m_Player.forward * m_MaxDistanceFromCamera;
+                mousePosDistance = Vector3.Distance(m_Player.position, mousePos);
+                maxVectorDistance = Vector3.Distance(m_Player.position, maxVector);
 
                 if(mousePosDistance > maxVectorDistance) {
-                    transform.position = maxVector + Vector3.up * transform.position.y;
+                    targetPosition = maxVector + m_CameraHeightPosition;
                 }
                 else {
-                    transform.position = mousePos + Vector3.up * transform.position.y;
+                    targetPosition = mousePos + m_CameraHeightPosition;
                 }
-                
             }
+            else {
+                // Makes the camera follow the player with focus slighly in front of the player 
+                inFrontOfPlayer = m_Player.forward * m_UnitsInFrontOfPlayer;
+                targetPosition.Set(m_Player.position.x + inFrontOfPlayer.x, transform.position.y, m_Player.position.z + inFrontOfPlayer.z);
+            }
+            transform.position = Vector3.Lerp(transform.position, targetPosition, m_FollowSpeed);
         }
     }
+
+
+
+
+
+
+    // not used
 
     private float cameraZoom;
     private const float ZoomSpeed = 3;
@@ -64,6 +76,7 @@ public class CameraController : MonoBehaviour {
             GetComponent<Camera>().fieldOfView = cameraZoom;
         }
     }
+
 
     public IEnumerator MoveCamera(Camera camera, Vector3 to, float cameraSpeed) {
         Vector3 from = camera.transform.position;

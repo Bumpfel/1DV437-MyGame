@@ -10,7 +10,7 @@ PrefabInstance:
     - target: {fileID: 2911355685913983148, guid: a182501d208825e4090a7582b45fa3a6,
         type: 3}
       propertyPath: m_Name
-      value: AutomaticExtraWideSlidingDoor
+      value: AutoExtraWideDoor
       objectReference: {fileID: 0}
     - target: {fileID: 2911355685913983151, guid: a182501d208825e4090a7582b45fa3a6,
         type: 3}
@@ -72,7 +72,17 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 1174498128022840460, guid: a182501d208825e4090a7582b45fa3a6,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 1067342326780441712, guid: a182501d208825e4090a7582b45fa3a6,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 903416936453692545, guid: a182501d208825e4090a7582b45fa3a6,
         type: 3}
       propertyPath: m_Mesh
       value: 
@@ -87,6 +97,16 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 1045577422992990801, guid: a182501d208825e4090a7582b45fa3a6,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3537599724258924417, guid: a182501d208825e4090a7582b45fa3a6,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.5
+      objectReference: {fileID: 0}
     - target: {fileID: 2911355685913983145, guid: a182501d208825e4090a7582b45fa3a6,
         type: 3}
       propertyPath: m_Automatic
@@ -95,9 +115,20 @@ PrefabInstance:
     - target: {fileID: 2911355685913983145, guid: a182501d208825e4090a7582b45fa3a6,
         type: 3}
       propertyPath: m_OpenDuration
-      value: 1
+      value: 0.7
       objectReference: {fileID: 0}
+    - target: {fileID: 6020024303794074549, guid: a182501d208825e4090a7582b45fa3a6,
+        type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: -4684691473584809253, guid: 3f427d33d3f5bd545872efaf228b9ecd,
+        type: 2}
     - target: {fileID: 5605931462091107712, guid: a182501d208825e4090a7582b45fa3a6,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: b34556d13a9181440a23544cef01c24c, type: 2}
+    - target: {fileID: 7094712841924796185, guid: a182501d208825e4090a7582b45fa3a6,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -107,17 +138,6 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 4c3acd04f1f8d03469e4fc31e32d3502, type: 2}
-    - target: {fileID: 6020024303794074549, guid: a182501d208825e4090a7582b45fa3a6,
-        type: 3}
-      propertyPath: OutputAudioMixerGroup
-      value: 
-      objectReference: {fileID: -4684691473584809253, guid: 3f427d33d3f5bd545872efaf228b9ecd,
-        type: 2}
-    - target: {fileID: 1045577422992990801, guid: a182501d208825e4090a7582b45fa3a6,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 2.5
-      objectReference: {fileID: 0}
     - target: {fileID: 5151167293108434128, guid: a182501d208825e4090a7582b45fa3a6,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -127,26 +147,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 3537599724258924417, guid: a182501d208825e4090a7582b45fa3a6,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 2.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1174498128022840460, guid: a182501d208825e4090a7582b45fa3a6,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7094712841924796185, guid: a182501d208825e4090a7582b45fa3a6,
-        type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: b34556d13a9181440a23544cef01c24c, type: 2}
-    - target: {fileID: 903416936453692545, guid: a182501d208825e4090a7582b45fa3a6,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a182501d208825e4090a7582b45fa3a6, type: 3}

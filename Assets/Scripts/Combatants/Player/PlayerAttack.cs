@@ -12,9 +12,9 @@ public class PlayerAttack : Attack {
  
     new void Start() {
         base.Start();
-        m_FireButton = Strings.Controls.Fire1.ToString();
-        m_FireButton2 = Strings.Controls.Fire2.ToString();
-        m_FiringModeSwitchButton = Strings.Controls.SwitchFiringMode.ToString();
+        m_FireButton = Controls.Fire1.ToString();
+        m_FireButton2 = Controls.Fire2.ToString();
+        m_FiringModeSwitchButton = Controls.SwitchFiringMode.ToString();
 
         m_PlayerMovement = GetComponent<PlayerMovement>();
     }
@@ -28,7 +28,7 @@ public class PlayerAttack : Attack {
     }
 
     private void CheckIfWantsToFire() {
-        if(Input.GetButton(m_FireButton) && !m_PlayerMovement.IsRunning()) {
+        if(Input.GetButton(m_FireButton) && !m_PlayerMovement.IsRunning) {
             if(m_AutomaticFire && Input.GetButton(m_FireButton))
                 Fire();
             else if(!m_AutomaticFire && Input.GetButtonDown(m_FireButton))
