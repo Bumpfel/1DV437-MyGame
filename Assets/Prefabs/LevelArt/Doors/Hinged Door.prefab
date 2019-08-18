@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 413670998140025678}
-  - component: {fileID: 4624623291372065954}
   m_Layer: 0
   m_Name: Hinged Door
   m_TagString: Ignored
@@ -32,19 +31,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &4624623291372065954
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2665144933512772035}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 0
-  serializedVersion: 2
-  m_Size: {x: 3.5, y: 3, z: 3}
-  m_Center: {x: 0, y: 1.5, z: -4.37}
 --- !u!1 &6993629347161687037
 GameObject:
   m_ObjectHideFlags: 0
@@ -114,6 +100,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -390,7 +377,7 @@ HingeJoint:
   m_Anchor: {x: 0, y: 3, z: 0}
   m_Axis: {x: 0, y: 1, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 9.250001, y: 3, z: 0.0000009536743}
+  m_ConnectedAnchor: {x: -22, y: 3, z: -14.23}
   m_UseSpring: 1
   m_Spring:
     spring: 1500

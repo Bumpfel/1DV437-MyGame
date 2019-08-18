@@ -6,6 +6,7 @@ public class EnemyPatrol : MonoBehaviour {
 
     public float m_PatrolDistance = 0;
     public float m_PatrolEndWaitTime = 3; // time the enemy waits before turning upon reaching patrol end/start position
+    public Transform m_Model;
     
     private const float TurnEndWaitTime = .5f; // time the enemy waits before walking after making a patrol turn
     private const float PatrolTurnDuration = 1;
@@ -18,13 +19,13 @@ public class EnemyPatrol : MonoBehaviour {
 
     void Start() {
         StartingPosition = transform.position;
-        m_StartingRotation = transform.rotation;
+        m_StartingRotation = m_Model.rotation;
 
         m_Animator = GetComponent<Animator>();
 
         StartCoroutine(Patrol());
 
-        EndPosition = transform.position + transform.forward * m_PatrolDistance;
+        EndPosition = transform.position + m_Model.forward * m_PatrolDistance;
     }
 
     void OnEnable() {
@@ -83,7 +84,7 @@ public class EnemyPatrol : MonoBehaviour {
     }
 
     private void Walk() {
-        transform.position = transform.position + transform.forward * MovementSpeed * Time.fixedDeltaTime;
+        transform.position += m_Model.forward * MovementSpeed * Time.fixedDeltaTime;
     }
     
     public void Halt() {
@@ -106,12 +107,12 @@ public class EnemyPatrol : MonoBehaviour {
         
         float timestamp = Time.time;
         float timeTaken = 0;
-        Quaternion startRotation = transform.rotation;
+        Quaternion startRotation = m_Model.rotation;
 
         while(timeTaken < turnDuration) {
             timeTaken += Time.fixedDeltaTime;
             yield return new WaitForFixedUpdate();
-            transform.rotation = Quaternion.Lerp(startRotation, targetRotation, timeTaken / turnDuration);
+            m_Model.rotation = Quaternion.Lerp(startRotation, targetRotation, timeTaken / turnDuration);
         }
         // transform.position = new Vector3(transform.position.x, 0, transform.position.z); //TODO nödlösning för att en gubbe verkar ibland ändra y-position och därmed ser fov fel ut
         m_Animator.Play("Idle_GunMiddle");

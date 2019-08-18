@@ -8,10 +8,11 @@ public abstract class Combatant : MonoBehaviour {
     public AudioClip m_DeathSound;
     public float m_Armour = 0;
     public int m_ArmourPiercingRounds = 0;
+    public GameObject m_CharacterGUI;
+    private float GUIVerticalOffset = 1.5f;
 
     protected float m_Health = 100;
     protected GameController m_GameController;
-    protected GameObject m_CharacterGUI;
     protected GameObject m_ArmourBuffUI;
     protected GameObject m_APRoundsBuffUI;
 
@@ -26,7 +27,8 @@ public abstract class Combatant : MonoBehaviour {
         m_GameController = FindObjectOfType<GameController>();
         m_Animator = GetComponent<Animator>();
 
-        m_CharacterGUI = transform.Find("CharacterGUI").gameObject;
+        m_CharacterGUI.transform.position += Vector3.forward * GUIVerticalOffset;
+        m_CharacterGUI.transform.rotation = transform.parent.localRotation * Quaternion.Euler(90, 0, 0);
         m_HealthBar = m_CharacterGUI.GetComponentInChildren<Slider>();
 
         GameObject buffBar = m_CharacterGUI.transform.Find("BuffBar").gameObject;
@@ -69,6 +71,11 @@ public abstract class Combatant : MonoBehaviour {
 
         m_CharacterGUI.gameObject.SetActive(false);
         GetComponent<CapsuleCollider>().enabled = false;
+
+        foreach(MonoBehaviour script in GetComponents<MonoBehaviour>()) {
+            // script.enabled = false;
+            Destroy(script);
+        }
     }
 
     public float GetHealth() {

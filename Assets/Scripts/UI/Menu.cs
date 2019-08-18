@@ -79,32 +79,29 @@ public class Menu : MonoBehaviour {
         }
     }
 
-    public void ShowLevelEndedMenu() {
-        gameObject.SetActive(true);
-        m_LevelEndedMenu.gameObject.SetActive(true);
-        Cursor.visible = true;
-
-        // GameObject nextLevelButton = m_GameOverMenu.transform.Find("NextLevelButton").gameObject;
-        // StartCoroutine(FadeInButton(nextLevelButton, 1));
-    }
-
-    public void ShowGameOverMenu() {
-        gameObject.SetActive(true);
-        m_GameOverMenu.gameObject.SetActive(true);
-        Cursor.visible = true;
+    public void ShowGameOverMenu(PlayerStats playerStats) {
+        DoCommonGameOverTasks(m_GameOverMenu, playerStats, false);
 
         GameObject restartButton = m_GameOverMenu.transform.Find("RespawnButton").gameObject;
         StartCoroutine(FadeInButton(restartButton, 1));
     }
-
-    public void ShowCredits() {
-        gameObject.SetActive(true);
-        m_Credits.SetActive(true);
-        Cursor.visible = true;
-
+    public void ShowLevelEndedMenu(PlayerStats playerStats, bool wasHighScore) {
+        DoCommonGameOverTasks(m_LevelEndedMenu, playerStats, wasHighScore);
+    }
+    public void ShowCredits(PlayerStats playerStats, bool wasHighScore) {
+        DoCommonGameOverTasks(m_Credits, playerStats, wasHighScore);
+        
         GameObject mainMenuButton = m_Credits.transform.Find("MainMenuButton").gameObject;
         mainMenuButton.GetComponent<Button>().onClick.AddListener(() => m_GameController.LoadMainMenu());
         StartCoroutine(FadeInButton(mainMenuButton, 2));
+    }
+
+    private void DoCommonGameOverTasks(GameObject obj, PlayerStats playerStats, bool wasHighScore) {
+        gameObject.SetActive(true);
+        obj.SetActive(true);
+        Cursor.visible = true;
+        TextMeshProUGUI text = obj.transform.Find("Stats").GetComponent<TextMeshProUGUI>();
+        text.SetText((wasHighScore ? "You set a new high score!\n" : "") + playerStats.ToString());
     }
 
 

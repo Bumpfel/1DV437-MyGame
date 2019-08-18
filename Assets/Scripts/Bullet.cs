@@ -67,7 +67,7 @@ public class Bullet : MonoBehaviour {
         // cast a ray forwards from its previous position with a distance equal to the distance the bullet has travelled since previous check, and see if there is a collision
         if(Physics.Raycast(m_PrevPosition, transform.forward, out m_Hitinfo, Vector3.Distance(m_PrevPosition, transform.position)) && m_Hitinfo.collider != GetComponent<Collider>()) {
             if(m_Hitinfo.collider.tag == "Player" || m_Hitinfo.collider.tag == "Enemy") { // hit a combatant
-                Combatant target = m_Hitinfo.collider.gameObject.GetComponentInParent<Combatant>();
+                Combatant target = m_Hitinfo.collider.GetComponent<Combatant>();
                 target.TakeDamage(Random.Range(BulletDmgMin, BulletDmgMax) * m_DmgMultiplier, m_Origin);
                 ShowImpactEffects();
                 RemoveBullet();

@@ -62,6 +62,7 @@ MonoBehaviour:
   m_IsLocked: 0
   m_IsExitDoor: 0
   m_Automatic: 0
+  m_IsOpen: 0
   m_OpenDuration: 1
   m_UnlockedDoorMaterial: {fileID: 2100000, guid: c155f8550b5355f4b8bdab89fb3156a6,
     type: 2}
@@ -79,7 +80,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: -4684691473584809253, guid: 3f427d33d3f5bd545872efaf228b9ecd,
     type: 2}
-  m_audioClip: {fileID: 8300000, guid: aaf001eb6769743c989f61cc718a427f, type: 3}
+  m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -87,7 +88,7 @@ AudioSource:
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 61
+  Priority: 100
   DopplerLevel: 1
   MinDistance: 1
   MaxDistance: 40
@@ -100,53 +101,53 @@ AudioSource:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0.025
-      value: 1
-      inSlope: -40.015934
-      outSlope: -40.015934
+      time: 0.12430267
+      value: 0.997509
+      inSlope: -12.084581
+      outSlope: -12.084581
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.5152785
     - serializedVersion: 3
-      time: 0.05
-      value: 0.5
-      inSlope: -10.0039835
-      outSlope: -10.0039835
+      time: 0.1743805
+      value: 0.47818756
+      inSlope: -5.149576
+      outSlope: -5.149576
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
-      outWeight: 0
+      inWeight: 0.8922755
+      outWeight: 0.5310637
     - serializedVersion: 3
-      time: 0.1
-      value: 0.25
-      inSlope: -2.5009959
-      outSlope: -2.5009959
+      time: 0.2541031
+      value: 0.22407532
+      inSlope: -1.6554109
+      outSlope: -1.6554109
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
-      outWeight: 0
+      inWeight: 1
+      outWeight: 0.9912584
     - serializedVersion: 3
-      time: 0.20225067
-      value: 0.10848999
-      inSlope: -0.62524897
-      outSlope: -0.62524897
+      time: 0.36005935
+      value: 0.1039505
+      inSlope: -0.7517825
+      outSlope: -0.7517825
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
-      outWeight: 0
+      inWeight: 1
+      outWeight: 0.9357737
     - serializedVersion: 3
-      time: 0.4022583
-      value: 0.04598999
-      inSlope: -0.15631224
-      outSlope: -0.15631224
+      time: 0.5013336
+      value: 0.055122375
+      inSlope: -0.1720571
+      outSlope: -0.1720571
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
-      outWeight: 0
+      inWeight: 0.9394743
+      outWeight: 0.5356991
     - serializedVersion: 3
       time: 0.8022583
-      value: 0.01473999
+      value: 0.023872375
       inSlope: -0.03907806
       outSlope: -0.03907806
       tangentMode: 0
@@ -155,7 +156,7 @@ AudioSource:
       outWeight: 0
     - serializedVersion: 3
       time: 1
-      value: 0.005194092
+      value: 0.014326476
       inSlope: -0.02500997
       outSlope: -0.02500997
       tangentMode: 0
@@ -277,6 +278,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0

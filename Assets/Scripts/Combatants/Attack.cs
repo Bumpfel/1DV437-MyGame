@@ -5,17 +5,15 @@ public class Attack : MonoBehaviour {
     
     public GameObject BulletFullImpact;
     public GameObject BulletSimpleImpact;
-    private GameObject m_Bullet;
     public AudioClip m_GunSound;
     public AudioClip m_MeleeAttackSound;
-    public GameObject MuzzleFlashPrefab;
-    public float m_FireRate = .2f; // for automatic firing mode
+    public float m_FireRate = .2f;
 
-    private ParticleSystem m_MuzzleFlash;
+    public Transform m_BulletSpawn;
+    private GameObject m_Bullet;
     protected Animator m_Animator;
     protected Combatant m_Combatant;
     private AudioSource m_AudioSource;
-    private Transform m_BulletSpawn;
     private const float AudioPitchNormal = 1;
     private const float AudioPitchARP = .85f;
     protected float m_AttackTimestamp;
@@ -26,24 +24,17 @@ public class Attack : MonoBehaviour {
     private const float MaxMeleeAngle = 90;
     private const float MeleeAttackOriginHeight = 1.5f;
     private const float SurprisedMeleeDmgMultiplier = 1.3f;
-    private bool m_PlayingMeleeAnimation = false;
     private LayerMask m_EnemyMask;
     private LayerMask m_ObstacleMask;
     private bool m_UsePreInstantiatedBullets = false; // whether to use bullets from a pre-instantiated pool, or to instantiate new ones for every shot 
 
     protected void Start() {
-        // m_MuzzleFlash = Instantiate(MuzzleFlashPrefab.GetComponent<ParticleSystem>());
-        // m_MuzzleFlash.gameObject.SetActive(false);
-
         m_Animator = GetComponent<Animator>();
         m_Animator.Play("Idle_GunMiddle");
-        m_BulletSpawn = transform.Find("BulletSpawn");
 
         AudioSource[] audios = GetComponents<AudioSource>(); // There are two different audio sources to make they sure an attack does not interrupt the sound of the other
         m_AudioSource = audios[0];
         m_AudioSource.clip = m_GunSound;
-        // m_MeleeAudioSource = audios[1];
-        // m_MeleeAudioSource.clip = m_MeleeAttackSound;
 
         m_Combatant = GetComponent<Combatant>();
 
@@ -82,7 +73,6 @@ public class Attack : MonoBehaviour {
         else
             m_AudioSource.pitch = AudioPitchNormal;
         m_AudioSource.PlayOneShot(m_AudioSource.clip);
-        // m_GunAudioSource.Play();
     }
 
     // recoil variables 
@@ -112,18 +102,13 @@ public class Attack : MonoBehaviour {
          }
     }
     
-    protected void StopAutomaticFire() {
-        // m_Animator.Play("Idle_Shoot");
-    }
-
     protected void MeleeAttack() {
         if(Time.time > m_AttackTimestamp + MeleeTime) {
             m_AttackTimestamp = Time.time;
-            // m_MeleeAudioSource.Play();
             m_AudioSource.PlayOneShot(m_MeleeAttackSound);
             m_Animator.Play("basic_Melee_Attack", 0, .15f);
 
-            Collider[] colliders = Physics.OverlapSphere(transform.position + transform.forward * .7f, MeleeRange / 2, m_EnemyMask);
+            Collider[] colliders = Physics.OverlapSphere(transform.position + m_BulletSpawn.forward * .7f, MeleeRange / 2, m_EnemyMask);
             if(colliders.Length > 0) {
                 Combatant combatant = colliders[0].gameObject.GetComponent<Combatant>();
                 Vector3 directionToTarget = (combatant.transform.position - transform.position).normalized;
@@ -131,7 +116,7 @@ public class Attack : MonoBehaviour {
 
                 // checking if there are obstacles in the way. Starting cast from the back of the player collider since starting from center causes problems if too close to the target.
                 float colliderRadius = transform.GetComponent<CapsuleCollider>().radius;
-                Vector3 origin = transform.position + Vector3.up * MeleeAttackOriginHeight + transform.forward * (-colliderRadius / 2);
+                Vector3 origin = transform.position + Vector3.up * MeleeAttackOriginHeight + m_BulletSpawn.forward * (-colliderRadius / 2);
                 if(!Physics.Raycast(origin, directionToTarget, MeleeRange, m_ObstacleMask)) {
                     float multiplier = 1;
                     if(combatant.tag == "Enemy" && !combatant.GetComponent<EnemyBehaviour>().IsAlerted)

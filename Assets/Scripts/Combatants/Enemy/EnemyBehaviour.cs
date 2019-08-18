@@ -2,8 +2,14 @@ using System.Collections;
 using UnityEngine;
 
 public class EnemyBehaviour : Combatant {
+    public GameObject m_FOVVisualization;
+    public GameObject m_FOVHelper;
+    public Transform m_Model; // the part of the enemy that should rotate (to avoid rotating the character gui)
+    public GameObject m_AlertedIndicator;
+    public GameObject m_AsleepIndicator;
     public bool m_IsAsleep = false;
-
+    
+    private int ShotsToFireWhenShootingBlindly = 3;
     private const float WakeUpDelayOnTakingDmg = .4f;
     private const float WakeUpDelayOnCollider = 1;
     private const float AlertedTime = 7;
@@ -12,14 +18,21 @@ public class EnemyBehaviour : Combatant {
     private const float SlowReactionTurnDuration = ReactionTurnDuration * 3;
     private const float FollowTargetSpeed = .2f;
     private const float MaxAngleToTargetBeforeShooting = 15;
-    private GameObject m_AsleepIndicator;
     private EnemyPatrol m_EnemyPatrol;
     private FieldOfView m_FOV;
     private Transform m_Target;
     private Quaternion m_StartRotation;
     private Attack m_Attack;
  
-    public bool IsAlerted { get; private set; } // an enemy becomes alerted if the player has been spotted recently or if the enemy took dmg
+    // an enemy becomes alerted if the player has been spotted recently or if the enemy took dmg
+    private bool m_IsAlerted = false;
+    public bool IsAlerted {
+        get => m_IsAlerted;
+        private set {
+            m_IsAlerted = value;
+            SetAlertStatus(value);
+        }
+    }
     private bool m_IsWakingUp = false;
     private bool m_RecentlyDetectedPlayer = false;
     private float m_LastReaction;
@@ -35,7 +48,7 @@ public class EnemyBehaviour : Combatant {
         m_FOV = GetComponent<FieldOfView>();
         m_EnemyPatrol = GetComponent<EnemyPatrol>();
 
-        m_AsleepIndicator = m_CharacterGUI.transform.Find("Asleep").gameObject;
+        SetAlertStatus(false);
         if(m_IsAsleep) {
             m_AsleepIndicator.SetActive(true);
             foreach(MonoBehaviour script in GetComponents<MonoBehaviour>()) {
@@ -44,7 +57,7 @@ public class EnemyBehaviour : Combatant {
                 }
             }
         }
-        m_StartRotation = transform.rotation;
+        m_StartRotation = m_Model.rotation;
     }
 
     private void Update() {
@@ -77,12 +90,12 @@ public class EnemyBehaviour : Combatant {
     }
 
     // FollowTarget vars
-    Quaternion targetRotation;
+    private Quaternion targetRotation;
     private void FollowTarget() {
-        targetRotation = Quaternion.LookRotation(m_Target.position - transform.position, Vector3.up);
-        m_AngleToTarget = Quaternion.Angle(transform.rotation, targetRotation);
+        targetRotation = Quaternion.LookRotation(m_Target.position - m_Model.position, Vector3.up);
+        m_AngleToTarget = Quaternion.Angle(m_Model.rotation, targetRotation);
 
-        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, FollowTargetSpeed);
+        m_Model.rotation = Quaternion.Lerp(m_Model.rotation, targetRotation, FollowTargetSpeed);
     }
 
     public override void TakeDamage(float amount, Vector3 dmgSource) {
@@ -99,7 +112,7 @@ public class EnemyBehaviour : Combatant {
 
     // wakes an enemy if bumped by something (like the player or an object). if awake, turns slowly towards the source if not alerted, otherwise quickly 
     private void OnCollisionEnter(Collision collision) { 
-        if(collision.collider.tag != "Ignored" && !m_IsWakingUp) {
+        if(collision.collider.tag != "Ignored" && collision.collider.tag != "Door" && !m_IsWakingUp) {
             if(m_IsAsleep)
                 StartCoroutine(WakeUp(WakeUpDelayOnCollider, false, collision.collider.transform.position));
             else {
@@ -137,7 +150,7 @@ public class EnemyBehaviour : Combatant {
         // blindly fire against source if alerted
         if(IsAlerted && Time.time < m_LastReaction + ReactionTime) { 
             yield return new WaitForSeconds(ReactionTime);
-            yield return FireBlindly(2);
+            yield return FireBlindly(ShotsToFireWhenShootingBlindly);
         }
 
         yield return new WaitForSeconds(AlertedTime);
@@ -147,10 +160,10 @@ public class EnemyBehaviour : Combatant {
     
     private IEnumerator RoughlyTurnTowards(Vector3 point, float fullTurnDuration) {
         float timeTaken = 0;
-        Quaternion startRotation = transform.rotation;
+        Quaternion startRotation = m_Model.rotation;
 
         point.y = 0; // normallizing y-position
-        float exactAngle = Vector3.Angle(transform.position, point);
+        float exactAngle = Vector3.Angle(m_Model.position, point);
         Quaternion targetRotation = Quaternion.LookRotation(point - transform.position, Vector3.up);
 
         // adding a random angle to avoid enemy being 100% precise when not seeing the player. becomes more accurate the smaller the angle is between the hit source and its own rotation
@@ -163,7 +176,7 @@ public class EnemyBehaviour : Combatant {
         while(timeTaken < turnDuration) {
             timeTaken += Time.fixedDeltaTime;
             yield return new WaitForFixedUpdate();
-            transform.rotation = Quaternion.Lerp(startRotation, targetRotation, timeTaken / turnDuration);
+            m_Model.rotation = Quaternion.Lerp(startRotation, targetRotation, timeTaken / turnDuration);
         }
     }
 
@@ -175,14 +188,14 @@ public class EnemyBehaviour : Combatant {
     }
 
     protected override void Die() {
-        base.Die();
-        transform.Find("FOVVisualization").gameObject.SetActive(false);
-        transform.Find("FOVHelper").gameObject.SetActive(false);
+        m_FOVVisualization.SetActive(false);
+        m_FOVHelper.SetActive(false);
         m_GameController.m_PlayerStats.AddKill();
+        base.Die();
         // StopAllCoroutines();
-        
-        foreach(MonoBehaviour component in GetComponents<MonoBehaviour>()) {
-            Destroy(component); // need to destroy since coroutines ain't stopping
-        }
+    }
+
+    private void SetAlertStatus(bool enabled) {
+        m_AlertedIndicator.SetActive(enabled);
     }
 }

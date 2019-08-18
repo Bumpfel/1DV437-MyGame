@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class SlidingDoor : MonoBehaviour {
 
-    // public bool switchAdjustmentSide = false;
     public bool m_IsLocked = false;
     public bool m_IsExitDoor = false;
     public bool m_Automatic = false;
+    public bool m_IsOpen = false;
     public float m_OpenDuration = 1;
     public Material m_UnlockedDoorMaterial;
     public AudioClip m_DoorOpenSound;
@@ -17,7 +17,6 @@ public class SlidingDoor : MonoBehaviour {
 
     private float m_SavedVolume;
     private const float AutomaticCloseDelay = .3f;
-    private bool m_IsOpen = false;
     private bool m_DoorInMotion;
     private Transform[] m_DoorBlades;
     private AudioSource m_AudioSource;
@@ -30,11 +29,15 @@ public class SlidingDoor : MonoBehaviour {
         m_GameController = FindObjectOfType<GameController>();
         m_AudioSource = GetComponent<AudioSource>();
 
-        transform.position += transform.forward * -.01f; //(switchAdjustmentSide ? .01f : -.01f);
+        transform.position += transform.forward * -.01f;
 
         m_DoorBlades = new Transform[transform.childCount];
         for(int i = 0; i < transform.childCount; i ++) {
             m_DoorBlades[i] = transform.GetChild(i);
+        }
+
+        if(m_IsOpen) {
+            OpenDoor(true);
         }
     }
 
@@ -48,12 +51,9 @@ public class SlidingDoor : MonoBehaviour {
                     OpenDoor(true);
             }
             else {
-                if(Input.GetButtonDown(Controls.Action.ToString())) { // && Time.time > m_OpenTimestamp + OpenDelay) {
+                if(Input.GetButtonDown(Controls.Action.ToString())) {
                     OpenDoor(!m_IsOpen);
                 }
-                // else if(Input.GetKeyDown(KeyCode.U)) { //TODO for testing
-                //     Unlock();
-                // }
             }
         }
         else {

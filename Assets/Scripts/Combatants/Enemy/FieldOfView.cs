@@ -10,7 +10,10 @@ public class FieldOfView : MonoBehaviour {
 
     [Range(0, 360)]
     public float m_ViewAngle = 120;
+    public Transform m_FOVVisualization;
+    public Transform m_FOVHelper;
 
+    private Transform m_Model;
     private LayerMask m_PlayerMask;
     private LayerMask m_ObstacleMask;
     private LayerMask m_EnemyMask;
@@ -19,7 +22,7 @@ public class FieldOfView : MonoBehaviour {
     private List<Transform> m_VisibleTargets = new List<Transform>();
 
     private const float MeshResolution = 1f;
-    private const int EdgeResolveIterations = 5; 
+    private const int EdgeResolveIterations = 5;
     private const float EdgeDistanceTreshold = .8f;
 
     private Mesh m_ViewMesh;
@@ -55,27 +58,29 @@ public class FieldOfView : MonoBehaviour {
     private List<int> trianglesList = new List<int>();
 
     // vars for viewcastinfo
-    Vector3 dir;
-    RaycastHit hit;
+    private Vector3 dir;
+    private RaycastHit hit;
 
     //Public properties
     public Transform VisibleTarget => m_VisibleTargets[0];
     public bool HasTargetInSight => m_VisibleTargets.Count > 0;
 
     private void Start() {
+        m_Model = m_FOVVisualization.parent;
+
         float FOVHeightFromGround = 1 - EyeHeight;
-        transform.Find("FOVVisualization").transform.position += Vector3.up * FOVHeightFromGround; // to raise the fov from the ground. don't want it in eye height, since then it covers many objects
+        m_FOVVisualization.position += Vector3.up * FOVHeightFromGround; // to raise the fov from the ground. don't want it in eye height, since then it covers many objects
 
         m_PlayerMask = LayerMask.GetMask("Players");
         m_ObstacleMask = LayerMask.GetMask("Obstacles");
         m_EnemyMask = LayerMask.GetMask("Enemies");
 
-        MeshFilter viewMeshFilter = transform.Find("FOVVisualization").GetComponent<MeshFilter>();
+        MeshFilter viewMeshFilter =m_FOVVisualization.GetComponent<MeshFilter>();
         m_ViewMesh = new Mesh();
         m_ViewMesh.name = "View Mesh";
         viewMeshFilter.mesh = m_ViewMesh;
 
-        MeshFilter FOVHelper = transform.Find("FOVHelper").GetComponent<MeshFilter>();
+        MeshFilter FOVHelper = m_FOVHelper.GetComponent<MeshFilter>();
         m_HelperRenderer = FOVHelper.GetComponent<MeshRenderer>();
         Mesh helpMesh = new Mesh();
         helpMesh.name = "Help Mesh";
@@ -88,10 +93,6 @@ public class FieldOfView : MonoBehaviour {
         m_CombinedMask = LayerMask.GetMask("Enemies", "Obstacles"); // must not set mask before the help mesh is drawn
         stepCount = Mathf.RoundToInt(m_ViewAngle * MeshResolution);
         stepAngleSize = m_ViewAngle / stepCount;
-
-        // Transform FOVHelper = transform.Find("FOVHelper");
-        // float increasedRange = 1.1f;
-        // FOVHelper.localScale += new Vector3((m_ViewRadius - FOVHelper.localScale.x) * increasedRange, 0, (m_ViewRadius - FOVHelper.localScale.z) * increasedRange);
     }
 
     private void LateUpdate() {
@@ -110,15 +111,15 @@ public class FieldOfView : MonoBehaviour {
         m_VisibleTargets.Clear();
         m_LastSearched = Time.time;
         
-        // Finds all colliders in a sphere with the center at the transform (enemy combatant)
-        targetsInViewRadius = Physics.OverlapSphere(transform.position, m_ViewRadius, m_PlayerMask);
+        // Finds all colliders in a sphere with the center at the model transform (enemy combatant)
+        targetsInViewRadius = Physics.OverlapSphere(m_Model.position, m_ViewRadius, m_PlayerMask);
         foreach(Collider targetInView in targetsInViewRadius) {
             target = targetInView.transform;
-            dirToTarget = (target.position - transform.position).normalized;
+            dirToTarget = (target.position - m_Model.position).normalized;
 
             // ...check if the collider is in front of the enemy combatant within a specified view angle
-            if(Vector3.Angle(transform.forward, dirToTarget) < m_ViewAngle / 2) {
-                distToTarget = Vector3.Distance(transform.position, target.position);
+            if(Vector3.Angle(m_Model.forward, dirToTarget) < m_ViewAngle / 2) {
+                distToTarget = Vector3.Distance(m_Model.position, target.position);
                 
                 // Check if sight is obstructed by obstacles or other enemies
                 if(!Physics.Raycast(m_SightOrigin, dirToTarget, out hitinfo, distToTarget, m_CombinedMask)) {
@@ -128,13 +129,13 @@ public class FieldOfView : MonoBehaviour {
         }
     }
 
-    private void DrawFieldOfView(Mesh mesh) { // draws the FoV mesh consisting of many triangles originating from the transform it's attached to
-        m_SightOrigin = transform.position + EyePosition;
+    private void DrawFieldOfView(Mesh mesh) { // draws the FoV mesh consisting of many triangles originating from the model transform it's attached to
+        m_SightOrigin = m_Model.position + EyePosition;
         viewPoints.Clear();
         oldViewCast = new ViewCastInfo();
         for(int i = 0; i <= stepCount; i ++) {
-            angle = transform.eulerAngles.y - m_ViewAngle / 2 + stepAngleSize * i;
-            // Debug.DrawLine(transform.position, transform.position + DirFromAngle(angle, true) * m_ViewRadius, Color.red); // debug
+            angle = m_Model.eulerAngles.y - m_ViewAngle / 2 + stepAngleSize * i;
+            // Debug.DrawLine(m_Model.position, m_Model.position + DirFromAngle(angle, true) * m_ViewRadius, Color.red); // debug
             newViewCast = ViewCast(angle);
             if(i > 0) {
                 edgeDistanceThresholdExceeded = Mathf.Abs(oldViewCast.distance - newViewCast.distance) > EdgeDistanceTreshold;
@@ -160,7 +161,7 @@ public class FieldOfView : MonoBehaviour {
         verticesList.Add(Vector3.zero + EyePosition);
 
         for(int i = 0; i < vertexCount - 1; i ++) {
-            verticesList.Add(transform.InverseTransformPoint(viewPoints[i]));
+            verticesList.Add(m_Model.InverseTransformPoint(viewPoints[i]));
             
             if(i < vertexCount - 2) {
                 trianglesList.Add(0);

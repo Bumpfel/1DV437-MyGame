@@ -1,46 +1,55 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [Serializable]
 public class PlayerStats {
 
-    // (TODO find out how to exlude fields when saving. don't need startTime for instance)
-    private int m_LevelIndex;
+    public int LevelIndex { get; private set; }
+    public float TimeTaken { get; private set; }
+    public int Kills { get; private set; }
+    public int TotalEnemies { get; set; }
+    public int PlayerDeaths { get; private set; }
+    public string PlayerName { get; private set; }
     private float m_StartTime;
-    private float m_TimeTaken;
-    private int m_Kills;
-    private string m_PlayerName;
-    private int m_PlayerDeaths;
-
-    // Get-properties
-    public string PlayerName => m_PlayerName;
-    public int PlayerDeaths => m_PlayerDeaths;
-    public int Kills => m_Kills;
-    public float TimeTaken => m_TimeTaken;
-    public int LevelIndex => m_LevelIndex;
 
     public PlayerStats(string playerName, int levelIndex) {
-        m_PlayerName = playerName;
+        PlayerName = playerName;
         m_StartTime = Time.time;
-        m_LevelIndex = levelIndex;
+        LevelIndex = levelIndex;
     }
 
     public void SetLevelEnded() {
-       m_TimeTaken = Time.time - m_StartTime;
+        TimeTaken = Time.time - m_StartTime;
+        TotalEnemies = GetTotalEnemiesInActiveScene();
     }
 
     public void AddKill() {
-        m_Kills ++;
+        Kills ++;
     }
 
     public void AddPlayerDeath() {
-        m_PlayerDeaths ++;
+        PlayerDeaths ++;
     }
 
     public override string ToString() {
-        return PlayerName + " has " + m_Kills + " kills and " + m_PlayerDeaths + " deaths. " + (m_TimeTaken > 0 ? "Level " + m_LevelIndex + "  was (completed) in " + m_TimeTaken + " seconds" : "");
+        // return "Your time was " + GetFormattedTimeTaken() + " minutes. You got " + Kills + " of " + TotalEnemies + " possible kills and had " + PlayerDeaths + " deaths";
+        return "Your time was " + GetFormattedTimeTaken() + " minutes. You got " + Kills + " of " + TotalEnemies + " possible kills";// and had " + PlayerDeaths + " deaths";
     }
 
+    public string GetFormattedTimeTaken() {
+        float seconds = Mathf.Round(TimeTaken % 60);
+        return (int) (TimeTaken / 60) + ":" + (seconds < 10f ? "0" : "") + seconds;
+    }
+
+    private int GetTotalEnemiesInActiveScene() {        
+        foreach(GameObject obj in SceneManager.GetActiveScene().GetRootGameObjects()) {
+            if(obj.name == "Enemies") {
+                return obj.transform.childCount;
+            }
+        }
+        return 0;
+    }
 
 
 }

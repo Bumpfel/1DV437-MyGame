@@ -27,10 +27,10 @@ public class CameraController : MonoBehaviour {
     }
 
     public void SetPlayer(Transform player) {
-        m_Player = player;
+        m_Player = player.Find("Model");
     }
 
-    void Update() {
+    void LateUpdate() {
         if(Time.timeScale == 0)
             return;
         // CheckIfWantsToZoom();

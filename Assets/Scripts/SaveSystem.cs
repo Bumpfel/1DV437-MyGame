@@ -1,24 +1,24 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
+// ref https://www.youtube.com/watch?v=XOjd_qU2Ido
 public static class SaveSystem {
-    private static string savePath = Application.persistentDataPath + "/HighScoreData.sav";
+    private static readonly string HighScoreSavePath = Application.persistentDataPath + "/HighScoreData.sav";
+    private static readonly string PlayerTempDataSavePath = Application.persistentDataPath + "/TempPlayerData.sav";
     private static BinaryFormatter formatter = new BinaryFormatter();
     
-    public static void SaveHighScoreData(PlayerStats playerStats) {
-        List<PlayerStats> existingHighScore = LoadHighScoreData();
-        if(existingHighScore != null) {
-            foreach(PlayerStats score in existingHighScore) {
-                // Debug.Log(score.TimeTaken);
-            }
-        }
+    ///<summary>
+    // Returns true if arg was inserted as a new higscore, false otherwise
+    ///</summary>
+    public static bool SaveIfNewHighScore(PlayerStats playerStats) {
+        List<PlayerStats> existingHighScore = SaveSystem.GetHighScoreData();
 
         PlayerStats currentBest = null;
         if(existingHighScore != null && existingHighScore.Count > 0) {
             currentBest = existingHighScore.Find(stat => stat.LevelIndex == playerStats.LevelIndex);
-            // Debug.Log("Current best " + currentBest.TimeTaken);
         }
 
         if(currentBest == null || playerStats.TimeTaken < currentBest.TimeTaken) {
@@ -30,37 +30,43 @@ public static class SaveSystem {
             newHighScore.Remove(currentBest);
             newHighScore.Add(playerStats);
 
-            SavePlayerData(newHighScore);
-            // Debug.LogWarning("new record found. saving");
+            SaveData(HighScoreSavePath, newHighScore);
+            return true;
         }
-        else {
-            // Debug.Log("old record is better");
-        }
+        return false;
     }
 
-    private static void SavePlayerData(List<PlayerStats> playerStats) {
+    public static List<PlayerStats> GetHighScoreData() {
+        return (List<PlayerStats>) LoadData(HighScoreSavePath);
+    }
+
+    public static void SaveTempPlayerData(PlayerStats playerStats) {
+        SaveData(PlayerTempDataSavePath, playerStats);
+    }
+
+    public static PlayerStats GetTempPlayerData() {
+        return (PlayerStats) LoadData(PlayerTempDataSavePath);
+    }
+
+
+
+    private static void SaveData(string savePath, object data) {
         FileStream stream;
-        // if(!File.Exists(savePath)) {
-            stream = new FileStream(savePath, FileMode.Create, FileAccess.Write);
-        // }
-        // else {
-        //     stream = new FileStream(savePath, FileMode.Append);
-        // }
-        formatter.Serialize(stream, playerStats);
+        stream = new FileStream(savePath, FileMode.Create, FileAccess.Write);
+
+        formatter.Serialize(stream, data);
         stream.Close();
     }
 
-    public static List<PlayerStats> LoadHighScoreData() {
-        if(File.Exists(savePath)) {
-            FileStream stream = new FileStream(savePath, FileMode.Open, FileAccess.Read);
+    private static object LoadData(string filepath) {
+        if(File.Exists(filepath)) {
+            FileStream stream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
 
-            List<PlayerStats> playerStatsList = (List<PlayerStats>) formatter.Deserialize(stream);
+            object data = formatter.Deserialize(stream);
             stream.Close();
-            return playerStatsList;
+            return data;
         }
-        else {
-            Debug.LogError("Save file not found");
-            return null;
-        }
+        return null;
     }
+
 }

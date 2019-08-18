@@ -11,26 +11,17 @@ public class PlayerMovement : MonoBehaviour {
     
     public MovementControl m_MovementControl = MovementControl.CameraRelativeMovement;
     public float m_WalkSpeed = 5;
-    // public float m_StrafeSpeed = 4;
-    // public int m_RotationSpeed = 200;
     public float m_RunSpeedModifier = 1.8f;
 
     private float m_CollisionCheckRadius;
-
+    public Transform m_PlayerModel;
     private Vector3 m_MoveTo;
     private float m_MovementDistance;
     private Camera m_ViewCamera;
     public Canvas m_AimReticle;
-    // private Rigidbody m_Body;
     private Animator m_Animator;
     private Combatant m_Combatant;
     private LayerMask m_ObstacleMask;
-
-    private bool m_IsRunning = false;
-    private bool m_IsWalking = false;
-    private bool m_IsStrafingLeft = false;
-    private bool m_IsStrafingRight = false;
-    private float m_TurnTimestamp;
 
     private string m_VerticalAxis;
     private string m_LookAxisX;
@@ -38,16 +29,10 @@ public class PlayerMovement : MonoBehaviour {
     private string m_HorizontalAxis;
     private string m_SprintKey;
     
-
-    [HideInInspector]
-    // public bool m_ControlsEnabled = true;
     private const float SpeedSmoothTime = .1f;
     private float m_SpeedSmoothVelocity;
     private float m_CurrentSpeed;
-
     private readonly Vector3 CollisionCheckPoint = Vector3.up * 1.5f;
-    private float m_TargetAngle;
-    private Quaternion m_TargetRotation;
 
 
     // method vars
@@ -78,8 +63,6 @@ public class PlayerMovement : MonoBehaviour {
 
         prevPosition = transform.position;
 
-        // print(m_AimReticle.GetComponentInChildren<Image>().transform.localScale);
-
         // if(m_MovementControl == MovementControl.CharacterRelativeMovement) {
         //     m_AllowMovement = AllowCharacterRelativeMovement;
         // }
@@ -96,14 +79,14 @@ public class PlayerMovement : MonoBehaviour {
             Collider[] colliders = Physics.OverlapSphere(transform.position + CollisionCheckPoint, m_CollisionCheckRadius, m_ObstacleMask);
             // Collider[] collidedWithWeapon = Physics.OverlapBox(transform.position + transform.forward * .9f + transform.right * .25f, new Vector3(.25f / 2, .4f / 2, 1.4f / 2), transform.rotation, m_ObstacleMask);
             if(colliders.Length == 0 || colliders[0].isTrigger) {// && collidedWithWeapon.Length == 0)
-                transform.position = transform.position + m_MoveTo * Time.fixedDeltaTime;
+                transform.position += m_MoveTo * Time.fixedDeltaTime;
             }
         }
     }
 
     private void Update() {
-        // if(Time.timeScale == 0)
-        //     return;
+        if(Time.timeScale == 0)
+            return;
         Look();
         // if(m_MovementControl == MovementControl.CharacterRelativeMovement)
             // CharacterRelativeMovement();
@@ -171,104 +154,10 @@ public class PlayerMovement : MonoBehaviour {
         Vector3 mousePosInWorld = new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y);
         Vector3 mousePosRelativeToCamera = m_ViewCamera.ScreenToWorldPoint(mousePosInWorld);
         
-        // Quaternion orgRotation = transform.rotation;
-        // transform.LookAt(mousePosRelativeToCamera + Vector3.up * transform.position.y);
-        // m_TargetRotation = transform.rotation;
-        // transform.rotation = orgRotation;
-        // m_TargetAngle = Mathf.Abs(m_TargetRotation.eulerAngles.y - transform.rotation.eulerAngles.y);
-
-        transform.LookAt(mousePosRelativeToCamera + Vector3.up * transform.position.y);
+        m_PlayerModel.LookAt(mousePosRelativeToCamera + Vector3.up * transform.position.y);
         
-        //placing reticle on top (5 units up), compensating for aim reticle size, so the bullet is fire at the center of the reticle
-        m_AimReticle.transform.position = mousePosRelativeToCamera + Vector3.up * 5 + transform.right * .23f;//.25f; // .23 for perspective, .25 for ortographic 
+        //placing reticle on top (5 units up), compensating for aim reticle size, so the bullet is fired at the center of the reticle
+        m_AimReticle.transform.position = mousePosRelativeToCamera /* + Vector3.up * 5 */ + transform.right * .23f; // .23 for perspective, .25 for ortographic 
     }
 
-
-
-
-
-
-
-
-
-    // private void CharacterRelativeMovement() {
-    //     float movementInput = Input.GetAxisRaw(m_VerticalAxis);
-
-    //     Vector3 forwardMovement = transform.forward * movementInput * m_WalkSpeed;
-    //     if(Input.GetAxisRaw(m_SprintKey) > 0)
-    //         forwardMovement *= m_RunModifier;
-
-
-    //     if(movementInput != 0) {           
-    //         if(Input.GetAxisRaw(m_SprintKey) > 0) {
-    //             if(!m_IsRunning && movementInput > 0) {
-    //                 m_Animator.Play("Run_Guard");
-    //                 m_IsRunning = true;
-    //             }
-    //         }
-    //         else {
-    //             forwardMovement = transform.forward * movementInput * m_WalkSpeed;
-
-    //             if(!m_IsWalking) {
-    //                 m_Animator.Play("WalkForward_Shoot");
-    //                 m_IsWalking = true;
-    //             }
-    //         }                
-    //     }
-    //     else if(m_IsRunning || m_IsWalking) {
-    //         m_Animator.Play("Idle_Shoot");
-    //         m_IsRunning = false;            
-    //         m_IsWalking = false;
-    //     }
-
-
-    //     //strafe
-    //     float strafe = Input.GetAxisRaw(m_HorizontalAxis);
-
-    //     Vector3 strafeMovement = transform.right * strafe * m_StrafeSpeed;
-    //     if(strafe != 0) {
-    //         // m_Body.MovePosition(m_Body.position + strafeMovement);
-
-    //         if(strafe < 0 && !m_IsStrafingLeft) {
-    //             m_Animator.Play("WalkLeft_Shoot");
-    //             m_IsStrafingLeft = true;
-    //         }
-    //         else if(strafe > 0 && !m_IsStrafingRight) {
-    //             m_Animator.Play("WalkRight_Shoot");
-    //             m_IsStrafingRight = true;
-    //         }
-    //     }
-    //     else if(m_IsStrafingLeft || m_IsStrafingRight) {
-    //         m_Animator.Play("Idle_Shoot");
-    //         m_IsStrafingLeft = false;
-    //         m_IsStrafingRight = false;
-    //     }
-    //     m_MoveTo = forwardMovement + strafeMovement;
-    // }
-
-
-
-    //unused right now
-    // private void KBTurn() {
-    //     float turn = Input.GetAxisRaw(m_TurnAxis);
-
-    //     if(turn != 0) {
-    //         Quaternion turnRotation = Quaternion.Euler(0, turn * m_RotationSpeed * Time.deltaTime, 0);
-    //         m_Body.MoveRotation(m_Body.rotation * turnRotation);
-    //     }
-    // }
-
 }
-
-
-// [CustomEditor (typeof(PlayerMovement))]
-// public class CollisionEditor : Editor {
-
-//     private PlayerMovement player;
-//     private float ColliderRadius = .2f;
-//     void OnSceneGUI() {
-//         player = (PlayerMovement) target;
-//         Handles.color = Color.yellow;
-//         Handles.DrawWireArc(player.transform.position, Vector3.up, Vector3.forward, 360, ColliderRadius);
-//     }
-// }
