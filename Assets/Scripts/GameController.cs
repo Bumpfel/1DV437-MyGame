@@ -48,9 +48,6 @@ public class GameController : MonoBehaviour {
         if(Input.GetKeyDown(KeyCode.Escape)) {
             TogglePauseMenu();
         }
-        if(Input.GetKeyDown(KeyCode.F9)) {
-            EndLevel();
-        }
     }
 
     public void StartGame() {
@@ -125,17 +122,6 @@ public class GameController : MonoBehaviour {
         return SceneManager.GetActiveScene().buildIndex > 0 || SceneManager.GetActiveScene().name == "Test";
     }
     
-    // private void debugSavePlayerData() { // TODO debug
-    //     if(m_Paused) {
-    //         print("------------------------------");
-    //         // List<PlayerStats> stats = SaveSystem.LoadHighScoreData();
-    //         m_PlayerStats.SetLevelEnded();
-    //         // print("this game stats: " + m_PlayerStats);
-    //         SaveSystem.SaveHighScoreData(m_PlayerStats);
-    //         // print(stats.ToString());
-    //     }
-    // }
-
     public void TogglePauseMenu() {
         if(!m_GameOver && m_Menu.ToggleMenu()) {
             if(LevelIsLoaded()) {
@@ -143,7 +129,6 @@ public class GameController : MonoBehaviour {
                 Cursor.visible = m_Paused;
                 Time.timeScale = m_Paused ? 0 : 1;
             }
-            // debugSavePlayerData();
         }
     }
 

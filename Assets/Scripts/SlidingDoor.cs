@@ -88,7 +88,7 @@ public class SlidingDoor : MonoBehaviour {
 
     public void OpenDoor(bool open) {
         if(m_IsLocked) {
-            ScreenUI.DisplayMessage("This door is locked");
+            ScreenUI.DisplayMessage(Strings.GetMessage(Message.DoorLocked));
             PlaySound(m_DoorLockedSound);
         }
         else {

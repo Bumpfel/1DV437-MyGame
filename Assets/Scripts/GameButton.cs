@@ -31,7 +31,8 @@ public class GameButton : MonoBehaviour {
             }
             if(wasLocked) {
                 // StartCoroutine(ShowUnlockedDoors());
-                ScreenUI.DisplayMessage(m_AreaName + (m_AffectedDoors.Length > 1 ? " doors" : " door") + " unlocked");
+                string msg = m_AreaName + (m_AffectedDoors.Length > 1 ? Strings.GetMessage(Message.DoorsUnlocked) : Strings.GetMessage(Message.DoorUnlocked));
+                ScreenUI.DisplayMessage(msg);
             }
         }
     }

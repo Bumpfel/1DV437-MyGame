@@ -62,18 +62,10 @@ public class PlayerMovement : MonoBehaviour {
         m_CollisionCheckRadius = GetComponent<CapsuleCollider>().radius * .8f;
 
         prevPosition = transform.position;
-
-        // if(m_MovementControl == MovementControl.CharacterRelativeMovement) {
-        //     m_AllowMovement = AllowCharacterRelativeMovement;
-        // }
-        // else {
-        //     m_AllowMovement = AllowCameraRelativeMovement;
-        // }
     }
 
     private void FixedUpdate() {
-        // SmoothCameraRelativeMovement();
-        CameraRelativeMovementActualSpeed();
+        CameraRelativeMovement();
 
         if(!transform.position.Equals(m_MoveTo)) {
             Collider[] colliders = Physics.OverlapSphere(transform.position + CollisionCheckPoint, m_CollisionCheckRadius, m_ObstacleMask);
@@ -88,21 +80,15 @@ public class PlayerMovement : MonoBehaviour {
         if(Time.timeScale == 0)
             return;
         Look();
-        // if(m_MovementControl == MovementControl.CharacterRelativeMovement)
-            // CharacterRelativeMovement();
-        // else
-            // SmoothCameraRelativeMovement();
-            // SmoothCharacterRelativeMovement();
-            // CameraRelativeMovement();
+
     }
 
-   private void CameraRelativeMovementActualSpeed() { // animates the character according to actual movement speed
+   private void CameraRelativeMovement() { // animates the character according to actual movement speed
         actualSpeed = Vector3.Distance(prevPosition, transform.position) * SpeedMultiplier;
     
         moveSpeed = m_WalkSpeed;
         movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
         targetSpeed = (IsRunning ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
-        // m_CurrentSpeed = Mathf.SmoothDamp(m_CurrentSpeed, targetSpeed, ref m_SpeedSmoothVelocity, SpeedSmoothTime);
         
         m_Animator.SetFloat(AnimatorSettings.speedPercent.ToString(), actualSpeed, SpeedSmoothTime, Time.fixedDeltaTime);
 
@@ -114,30 +100,11 @@ public class PlayerMovement : MonoBehaviour {
         prevPosition = transform.position;
     }
 
-
-   private void SmoothCameraRelativeMovement() { // has smooth animations
-        moveSpeed = m_WalkSpeed;
-        movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
-        targetSpeed = (IsRunning ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
-        m_CurrentSpeed = Mathf.SmoothDamp(m_CurrentSpeed, targetSpeed, ref m_SpeedSmoothVelocity, SpeedSmoothTime);
-    
-        animationSpeedPercent = (IsRunning ? 1 : 0.5f) * movementInput.magnitude;
-        m_Animator.SetFloat(AnimatorSettings.speedPercent.ToString(), animationSpeedPercent, SpeedSmoothTime, Time.fixedDeltaTime);
-
-        if(Input.GetButton(m_SprintKey)) {
-            moveSpeed *= m_RunSpeedModifier;
-        }
-
-        transform.Translate(transform.forward * m_CurrentSpeed * Time.fixedDeltaTime);
-		// m_MoveTo = movementInput * moveSpeed;
-    }
-
-       private void SmoothCharacterRelativeMovement() {
+    private void SmoothCharacterRelativeMovement() {
         moveSpeed = m_WalkSpeed;
         movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
         targetSpeed = (IsRunning ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
         m_CurrentSpeed = Mathf.SmoothDamp(Input.GetAxisRaw(m_VerticalAxis), targetSpeed, ref m_SpeedSmoothVelocity, SpeedSmoothTime);
-        //----
 
         float animationSpeedPercent = (IsRunning ? 1 : 0.5f) * movementInput.magnitude;
         m_Animator.SetFloat(AnimatorSettings.speedPercent.ToString(), animationSpeedPercent, SpeedSmoothTime, Time.fixedDeltaTime);
@@ -156,8 +123,8 @@ public class PlayerMovement : MonoBehaviour {
         
         m_PlayerModel.LookAt(mousePosRelativeToCamera + Vector3.up * transform.position.y);
         
-        //placing reticle on top (5 units up), compensating for aim reticle size, so the bullet is fired at the center of the reticle
-        m_AimReticle.transform.position = mousePosRelativeToCamera /* + Vector3.up * 5 */ + transform.right * .23f; // .23 for perspective, .25 for ortographic 
+        //placing reticle on top, compensating for aim reticle size, so the bullet is fired at the center of the reticle
+        m_AimReticle.transform.position = mousePosRelativeToCamera  + transform.right * .23f; // .23 for perspective, .25 for ortographic 
     }
 
 }

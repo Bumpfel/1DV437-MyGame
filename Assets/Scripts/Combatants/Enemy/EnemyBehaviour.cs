@@ -89,7 +89,6 @@ public class EnemyBehaviour : Combatant {
         }
     }
 
-    // FollowTarget vars
     private Quaternion targetRotation;
     private void FollowTarget() {
         targetRotation = Quaternion.LookRotation(m_Target.position - m_Model.position, Vector3.up);

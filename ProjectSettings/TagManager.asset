@@ -20,6 +20,7 @@ TagManager:
   - Concrete
   - Semiblocking
   - LevelEndedMenu
+  - Door
   layers:
   - Default
   - TransparentFX

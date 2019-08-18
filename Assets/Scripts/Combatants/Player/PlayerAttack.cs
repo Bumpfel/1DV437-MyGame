@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEditor;
 
 public class PlayerAttack : Attack {
     public bool m_AutomaticFire = true;
@@ -45,24 +44,9 @@ public class PlayerAttack : Attack {
     private void CheckIfWantsToSwitchFiringMode() {
         if(Input.GetButtonDown(m_FiringModeSwitchButton)) {
             m_AutomaticFire = !m_AutomaticFire;
-            ScreenUI.DisplayMessage("Switched to " + (m_AutomaticFire ? "automatic" : "single") + " firing mode");
+            string msg = m_AutomaticFire ? Strings.GetMessage(Message.SwitchedToAutoFire) : Strings.GetMessage(Message.SwitchedToSingleFire);
+            ScreenUI.DisplayMessage(msg);
         }
     }
 
 }
-
-// [CustomEditor (typeof(PlayerAttack))]
-// public class PlayerAttackEditor : Editor {
-//     private float MeleeRange = 2;
-//     private PlayerAttack attacker;
-
-//     void OnSceneGUI() {
-//         attacker = (PlayerAttack) target;
-
-//         Handles.color = Color.magenta;
-//         // Handles.DrawWireArc(attacker.transform.position + attacker.transform.forward * .7f, Vector3.up, Vector3.forward, 360, MeleeRange / 2);
-//         // Handles.DrawLine(attacker.transform.position, attacker.targetPosition);
-//     }
-
-
-// }
