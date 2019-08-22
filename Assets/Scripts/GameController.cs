@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -25,7 +26,7 @@ public class GameController : MonoBehaviour {
         m_Menu = GetComponentInChildren<Menu>(true);
         if(LevelIsLoaded()) {
             m_PlayerStats = new PlayerStats("Player", SceneManager.GetActiveScene().buildIndex);
-                   
+            
             m_Menu.Initialize();
 
             GetComponentInChildren<ScreenUI>(true).gameObject.SetActive(true);
@@ -48,19 +49,34 @@ public class GameController : MonoBehaviour {
         if(Input.GetKeyDown(KeyCode.Escape)) {
             TogglePauseMenu();
         }
+        if(Input.GetKeyDown(KeyCode.F9)) {
+            EndLevel();
+        }
     }
 
-    public void StartGame() {
-        LoadNextLevel();
+    public void StartNewGame() {
+        LoadLevel(1);
+    }
+
+    public void LoadNextLevel() {
+        LoadLevel(SceneManager.GetActiveScene().buildIndex + 1);
+    }
+
+
+    public void LoadLevel(int index) {
+        if(index < 0 || index > SceneManager.sceneCountInBuildSettings)
+            throw new ArgumentException("Error loading level - level does not exist");
+        
+        SceneManager.LoadScene(index);
+        Time.timeScale = 1;
+        Cursor.visible = false;
     }
 
 
     public void RestartLevel() {
         m_GameOver = false;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        Cursor.visible = false;
+        LoadLevel(SceneManager.GetActiveScene().buildIndex);
         m_Paused = false;
-        Time.timeScale = 1;
     }
 
     public void LoadMainMenu() {
@@ -68,29 +84,26 @@ public class GameController : MonoBehaviour {
     }
 
     public void QuitGame() {
-        if(LevelIsLoaded())
-            LoadMainMenu();
-        else
             Application.Quit();
     }
 
     public void SetGameOver() {
         m_GameOver = true;
-        EnablePlayerControls(false);
-        m_PlayerStats.SetLevelEnded();
+        DisablePlayerControlsActive();
+        m_PlayerStats.SetLevelEnded(false);
         m_Menu.ShowGameOverMenu(m_PlayerStats);
     }
 
     public void EndLevel() {
-        m_Player.layer = 0; // makes enemies ignore the player
+        m_Player.GetComponent<CapsuleCollider>().enabled = false;
+        // m_Player.layer = 0; // makes enemies ignore the player
         m_GameOver = true;
-        EnablePlayerControls(false);
-        m_PlayerStats.SetLevelEnded();
+        DisablePlayerControlsActive();
+        m_PlayerStats.SetLevelEnded(true);
 
         bool isHighScore = SaveSystem.SaveIfNewHighScore(m_PlayerStats);
 
         AudioSource audio = GetComponent<AudioSource>();
-        // audio.loop = false;
         audio.volume /= 2;
 
         int nrOfScenes = SceneManager.sceneCountInBuildSettings - 1; // excludes menu
@@ -107,15 +120,10 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    private void EnablePlayerControls(bool enabled) {
-        m_Player.GetComponent<PlayerMovement>().enabled = enabled;
-        m_Player.GetComponent<Attack>().enabled = enabled;
-    }
-
-    public void LoadNextLevel() {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-        Time.timeScale = 1;
-        Cursor.visible = false;
+    private void DisablePlayerControlsActive() {
+        m_Player.GetComponent<PlayerMovement>().enabled = false;
+        m_Player.GetComponent<Attack>().enabled = false;
+        Camera.main.GetComponent<CameraController>().enabled = false;
     }
 
     public bool LevelIsLoaded() {
@@ -126,10 +134,14 @@ public class GameController : MonoBehaviour {
         if(!m_GameOver && m_Menu.ToggleMenu()) {
             if(LevelIsLoaded()) {
                 m_Paused = !m_Paused;
+                Cursor.lockState = CursorLockMode.Confined;
                 Cursor.visible = m_Paused;
                 Time.timeScale = m_Paused ? 0 : 1;
             }
         }
+        else
+            Cursor.lockState = CursorLockMode.None;
+
     }
 
     public float GetSavedVolume(ExposedMixerGroup mixerGroup) {

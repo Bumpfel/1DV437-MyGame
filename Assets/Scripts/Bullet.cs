@@ -9,25 +9,31 @@ public class Bullet : MonoBehaviour {
     public GameObject WoodImpactEffect;
     public GameObject NonBlockingImpactEffect;
     public GameObject BodyImpactEffect;
-    private GameObject m_UsedImpactEffect;
-    
-    private ParticleSystem m_Impact;
+      private GameObject m_UsedImpactEffect;
+    public AudioClip m_TestImpactSound;
+
     private const float BulletVelocityMultiplier = 4000;
     private const float MaximumBulletSurvivalTime = 3;
-    private const float BulletDmgMin = 23;
-    private const float BulletDmgMax = 27;
+    private const float BulletDmgMin = 24.5f;
+    private const float BulletDmgMax = 26;
     private const float ArmourPiercingMultiplier = 2;
     private float m_DmgMultiplier = 1;
+    private AudioSource m_AudioSource;
+    private ParticleSystem m_Impact;
     private RaycastHit m_Hitinfo;
     private Rigidbody m_Body;
-    private float m_CalculatedHitTimeStamp;
     private Vector3 m_Origin;
     private Quaternion m_OriginalRotation;
     private Vector3 m_PrevPosition;
     private Collider m_IgnoreCollider;
+    private float m_CalculatedHitTimeStamp;
     private float m_FiredTimestamp;
 
     private bool m_UsePreInstantiatedEffects = false;
+
+    private void Start() {
+        m_AudioSource = GetComponent<AudioSource>();
+    }
 
     public void SetStartingPoint(Vector3 startPoint, Quaternion spawnRotation) {
         transform.position = startPoint;
@@ -131,7 +137,10 @@ public class Bullet : MonoBehaviour {
                 }
                 else {
                     m_Impact = Instantiate(m_UsedImpactEffect.GetComponent<ParticleSystem>(), m_Hitinfo.point, Quaternion.LookRotation(m_Hitinfo.normal));
-
+                    // if(Random.Range(0, 10) == 0) {
+                    //     m_AudioSource.clip = m_TestImpactSound;
+                    //     AudioSource.PlayClipAtPoint(m_TestImpactSound, m_Hitinfo.point);
+                    // }
                     // attach bullet hole to collider so it follows the collider transform. does not work well with cfx_spawnsystem
                     Transform bulletHole = m_Impact.transform.Find("Bullet Hole");
                     if(bulletHole != null) {

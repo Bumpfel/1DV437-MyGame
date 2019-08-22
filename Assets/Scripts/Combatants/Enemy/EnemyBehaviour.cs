@@ -35,12 +35,12 @@ public class EnemyBehaviour : Combatant {
     }
     private bool m_IsWakingUp = false;
     private bool m_RecentlyDetectedPlayer = false;
-    private float m_LastReaction;
+    private float m_LastReactionTime;
     private float m_AngleToTarget;
 
     private bool IsCloseEnoughToShoot => m_AngleToTarget < MaxAngleToTargetBeforeShooting;
     private bool HasTargetInSight => m_FOV.HasTargetInSight;
-    private bool AlertedTimedOut => Time.time > m_LastReaction + AlertedTime;
+    private bool AlertedTimedOut => Time.time > m_LastReactionTime + AlertedTime;
 
     private new void Start() {
         base.Start();
@@ -75,9 +75,10 @@ public class EnemyBehaviour : Combatant {
                 m_EnemyPatrol.Halt();
                 m_RecentlyDetectedPlayer = true;
             }
+
+            m_LastReactionTime = Time.time;
             StopAllCoroutines();
             FollowTarget();
-            m_LastReaction = Time.time;
 
             if(IsCloseEnoughToShoot)
                 m_Attack.Fire();
@@ -137,17 +138,17 @@ public class EnemyBehaviour : Combatant {
     }
 
    private IEnumerator ReactToHit(Vector3 hitSource, bool tookDmg) {
-        m_LastReaction = Time.time;
+        m_LastReactionTime = Time.time;
         if(!IsAlerted) {
             if(tookDmg)
                 IsAlerted = true;
             m_EnemyPatrol.Halt();
             yield return new WaitForSeconds(ReactionTime);
         }
-        yield return RoughlyTurnTowards(hitSource, tookDmg ? ReactionTurnDuration : SlowReactionTurnDuration);
+        yield return TurnTowardsGeneralDirection(hitSource, tookDmg ? ReactionTurnDuration : SlowReactionTurnDuration);
         
         // blindly fire against source if alerted
-        if(IsAlerted && Time.time < m_LastReaction + ReactionTime) { 
+        if(IsAlerted && Time.time < m_LastReactionTime + ReactionTime) { 
             yield return new WaitForSeconds(ReactionTime);
             yield return FireBlindly(ShotsToFireWhenShootingBlindly);
         }
@@ -157,7 +158,7 @@ public class EnemyBehaviour : Combatant {
         m_EnemyPatrol.ReturnToPatrol();
     }
     
-    private IEnumerator RoughlyTurnTowards(Vector3 point, float fullTurnDuration) {
+    private IEnumerator TurnTowardsGeneralDirection(Vector3 point, float fullTurnDuration) {
         float timeTaken = 0;
         Quaternion startRotation = m_Model.rotation;
 

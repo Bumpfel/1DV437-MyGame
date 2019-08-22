@@ -5,10 +5,11 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 // ref https://www.youtube.com/watch?v=XOjd_qU2Ido
-public static class SaveSystem {
+public class SaveSystem {
     private static readonly string HighScoreSavePath = Application.persistentDataPath + "/HighScoreData.sav";
     private static readonly string PlayerTempDataSavePath = Application.persistentDataPath + "/TempPlayerData.sav";
     private static BinaryFormatter formatter = new BinaryFormatter();
+    public static PlayerStats OldHighScore { get; private set; }
     
     ///<summary>
     // Returns true if arg was inserted as a new higscore, false otherwise
@@ -27,6 +28,7 @@ public static class SaveSystem {
                 newHighScore = new List<PlayerStats>();
             else
                 newHighScore = new List<PlayerStats>(existingHighScore);
+            OldHighScore = currentBest;
             newHighScore.Remove(currentBest);
             newHighScore.Add(playerStats);
 
