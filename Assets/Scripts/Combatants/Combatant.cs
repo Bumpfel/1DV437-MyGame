@@ -6,11 +6,12 @@ using TMPro;
 
 public abstract class Combatant : MonoBehaviour {
     public AudioClip m_DeathSound;
+    public GameObject m_CharacterGUI;
+    public AudioSource m_TakeDamageAudio;
     public float m_Armour = 0;
     public int m_ArmourPiercingRounds = 0;
-    public GameObject m_CharacterGUI;
-    private float GUIVerticalOffset = 1.5f;
 
+    private const float GUIVerticalOffset = 1.5f;
     protected float m_Health = 100;
     protected GameController m_GameController;
     protected GameObject m_ArmourBuffUI;
@@ -59,6 +60,8 @@ public abstract class Combatant : MonoBehaviour {
             Die();
             return;
         }
+        // else
+            // m_TakeDamageAudio.Play();
     }
 
     protected virtual void Die() {

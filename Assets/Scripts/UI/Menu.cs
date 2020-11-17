@@ -1,8 +1,8 @@
+using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using TMPro;
 
 public class Menu : MonoBehaviour {
@@ -15,7 +15,6 @@ public class Menu : MonoBehaviour {
     private GameObject m_Credits;
 
     void Start() {
-        // print("Menu Start()");
         m_GameController = GetComponentInParent<GameController>();
         if(!m_GameController.LevelIsLoaded()) {
             Initialize();
@@ -31,7 +30,7 @@ public class Menu : MonoBehaviour {
         for(int i = 0; i < transform.childCount; i ++) {
             child = transform.GetChild(i).gameObject;
             
-            if(child.tag != "Background" && m_GameController.LevelIsLoaded()) {
+            if(child.tag != "Background") {
                 child.SetActive(false);
             }
             if(child.tag == "PauseMenu") {
@@ -47,7 +46,6 @@ public class Menu : MonoBehaviour {
                 m_GameOverMenu = child;
             else if(child.tag == "Credits")
                 m_Credits = child;
-
         }
 
         // Hides menu and switches out play button for a resume button if game is started
@@ -56,6 +54,12 @@ public class Menu : MonoBehaviour {
             m_MainMenu.transform.Find("PlayButton").gameObject.SetActive(false);
             m_MainMenu.transform.Find("ResumeButton").gameObject.SetActive(true);
             m_MainMenu.transform.Find("RestartButton").gameObject.SetActive(true);
+            m_MainMenu.transform.Find("QuitGameButton").gameObject.SetActive(false);
+            m_MainMenu.transform.Find("QuitToMainMenuButton").gameObject.SetActive(true);
+        }
+        else { // on start menu
+            gameObject.SetActive(true);
+            m_MainMenu.SetActive(true);
         }
     }
 
@@ -101,7 +105,16 @@ public class Menu : MonoBehaviour {
         obj.SetActive(true);
         Cursor.visible = true;
         TextMeshProUGUI text = obj.transform.Find("Stats").GetComponent<TextMeshProUGUI>();
-        text.SetText((wasHighScore ? "You set a new high score!\n" : "") + playerStats.ToString());
+
+        StringBuilder msg = new StringBuilder(playerStats.ToString());
+        if(playerStats.FinishedLevel) {
+            if(wasHighScore) {
+                msg.Insert(0, "You set a new high score!\n");
+                if(SaveSystem.OldHighScore != null)
+                    msg.Append("\n\nThe old high score was " + SaveSystem.OldHighScore.GetFormattedTimeTaken() + " minutes");
+            }
+        }
+        text.SetText(msg.ToString());
     }
 
 
@@ -121,8 +134,8 @@ public class Menu : MonoBehaviour {
         button.interactable = true;
     }
 
-    public void PlayButton() {
-        m_GameController.StartGame();
+    public void StartLevel(int index) {
+        m_GameController.LoadLevel(index);
     }
 
     public void ResumeButton() {
@@ -137,8 +150,12 @@ public class Menu : MonoBehaviour {
         m_GameController.RestartLevel();
     }
 
-    public void QuitButton() {
+    public void QuitGameButton() {
         m_GameController.QuitGame();
+    }
+
+    public void QuitToMainMenuButton() {
+        m_GameController.LoadMainMenu();
     }
 
     public void NextLevelButton() {

@@ -12,6 +12,11 @@ GameObject:
   - component: {fileID: 7675970268847029043}
   - component: {fileID: 7675970268845672587}
   - component: {fileID: 7728324524786815698}
+  - component: {fileID: 5092854390560014204}
+  - component: {fileID: 1273286045170023490}
+  - component: {fileID: 4105465186490913393}
+  - component: {fileID: 7258017804274400682}
+  - component: {fileID: 532536896168164690}
   m_Layer: 9
   m_Name: Forklift
   m_TagString: Metal
@@ -66,6 +71,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -87,8 +93,73 @@ MeshCollider:
   m_GameObject: {fileID: 7675970268848134723}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Convex: 1
   m_CookingOptions: 14
   m_Mesh: {fileID: 4300000, guid: 5c636ad013889f74593ac396fce71eb6, type: 3}
+--- !u!65 &5092854390560014204
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7675970268848134723}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 11.76, y: 12, z: 9.58}
+  m_Center: {x: 0, y: 5.95, z: 3.3}
+--- !u!65 &1273286045170023490
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7675970268848134723}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 9.2, y: 1.51, z: 13.53}
+  m_Center: {x: 0, y: 0.74, z: -7.75}
+--- !u!65 &4105465186490913393
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7675970268848134723}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 6.46, y: 1.39, z: 4.24}
+  m_Center: {x: 0, y: 2.2, z: 10.17}
+--- !u!65 &7258017804274400682
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7675970268848134723}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 4.24, y: 1.7, z: 3.48}
+  m_Center: {x: 0, y: 15.06, z: 5.85}
+--- !u!65 &532536896168164690
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7675970268848134723}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.84, y: 3, z: 0.76}
+  m_Center: {x: 0, y: 13.4, z: 4.39}

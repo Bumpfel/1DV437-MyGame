@@ -1,55 +1,46 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEditor;
 
 public class PlayerMovement : MonoBehaviour {
-    
-    public enum MovementControl { CameraRelativeMovement, CharacterRelativeMovement };
-    
-    public MovementControl m_MovementControl = MovementControl.CameraRelativeMovement;
-    public float m_WalkSpeed = 5;
-    public float m_RunSpeedModifier = 1.8f;
-
-    private float m_CollisionCheckRadius;
     public Transform m_PlayerModel;
-    private Vector3 m_MoveTo;
-    private float m_MovementDistance;
-    private Camera m_ViewCamera;
     public Canvas m_AimReticle;
+    
+    private enum MovementControl { CameraRelativeMovement, CharacterRelativeMovement };
+    private MovementControl m_MovementControl = MovementControl.CameraRelativeMovement;
+    private Vector3 m_MoveTo;
     private Animator m_Animator;
     private Combatant m_Combatant;
     private LayerMask m_ObstacleMask;
 
+    private readonly Vector3 CollisionCheckPoint = Vector3.up * 1.5f;
+    private const float SpeedSmoothTime = .1f;
+    private const float WalkSpeed = 5;
+    private const float RunSpeed = WalkSpeed * 1.8f;
+    private float m_CollisionCheckRadius;
     private string m_VerticalAxis;
     private string m_LookAxisX;
     private string m_LookAxisY;
     private string m_HorizontalAxis;
     private string m_SprintKey;
     
-    private const float SpeedSmoothTime = .1f;
-    private float m_SpeedSmoothVelocity;
-    private float m_CurrentSpeed;
-    private readonly Vector3 CollisionCheckPoint = Vector3.up * 1.5f;
 
-
-    // method vars
-    private float actualSpeed;
+    // Movement method vars
+    private float animationSpeed;
     private Vector3 prevPosition;
-    private float SpeedMultiplier = 5.5f;
-    private float moveSpeed;
+    private float currentMoveSpeed;
     private float targetSpeed;
     private Vector3 movementInput;
 
-    private float animationSpeedPercent;
+
+    // Look vars
+    private Vector3 mousePosRelativeToCamera;
+    private Vector3 mousePosInWorld;
+    private const float ScreenClampPercentage = .98f;
+
       
     public bool IsRunning => Input.GetButton(m_SprintKey) && (Input.GetAxisRaw(m_VerticalAxis) != 0 || Input.GetAxisRaw(m_HorizontalAxis) != 0);
 
     private void Start() {
-        m_ViewCamera = Camera.main;
-
         m_Animator = GetComponent<Animator>();
 
         m_VerticalAxis = Controls.Vertical.ToString();
@@ -62,16 +53,24 @@ public class PlayerMovement : MonoBehaviour {
         m_CollisionCheckRadius = GetComponent<CapsuleCollider>().radius * .8f;
 
         prevPosition = transform.position;
+
+        Enum.TryParse(PlayerPrefs.GetString(Settings.MovemenControl.ToString(), MovementControl.CameraRelativeMovement.ToString()), out m_MovementControl);
     }
 
     private void FixedUpdate() {
-        CameraRelativeMovement();
 
+        //calculates movement based on input
+        if(m_MovementControl == MovementControl.CharacterRelativeMovement)
+            CharacterRelativeMovement();
+        else
+            CameraRelativeMovement();
+        
+        // confirms or rejects movement
         if(!transform.position.Equals(m_MoveTo)) {
             Collider[] colliders = Physics.OverlapSphere(transform.position + CollisionCheckPoint, m_CollisionCheckRadius, m_ObstacleMask);
             // Collider[] collidedWithWeapon = Physics.OverlapBox(transform.position + transform.forward * .9f + transform.right * .25f, new Vector3(.25f / 2, .4f / 2, 1.4f / 2), transform.rotation, m_ObstacleMask);
             if(colliders.Length == 0 || colliders[0].isTrigger) {// && collidedWithWeapon.Length == 0)
-                transform.position += m_MoveTo * Time.fixedDeltaTime;
+                transform.Translate(m_MoveTo * Time.fixedDeltaTime);
             }
         }
     }
@@ -81,50 +80,56 @@ public class PlayerMovement : MonoBehaviour {
             return;
         Look();
 
+        if(Input.GetKeyDown(KeyCode.M)) {
+            m_MovementControl = (m_MovementControl == MovementControl.CameraRelativeMovement) ? MovementControl.CharacterRelativeMovement : MovementControl.CameraRelativeMovement;
+            ScreenUI.DisplayMessage("Switched to " + m_MovementControl.ToString());
+            PlayerPrefs.SetString(Settings.MovemenControl.ToString(), m_MovementControl.ToString());
+            PlayerPrefs.Save();
+        }
+
     }
 
-   private void CameraRelativeMovement() { // animates the character according to actual movement speed
-        actualSpeed = Vector3.Distance(prevPosition, transform.position) * SpeedMultiplier;
-    
-        moveSpeed = m_WalkSpeed;
-        movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
-        targetSpeed = (IsRunning ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
+   private void CameraRelativeMovement() {
+        animationSpeed = m_MoveTo.magnitude / RunSpeed;
         
-        m_Animator.SetFloat(AnimatorSettings.speedPercent.ToString(), actualSpeed, SpeedSmoothTime, Time.fixedDeltaTime);
+        currentMoveSpeed = WalkSpeed;
+        movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
+        targetSpeed = (IsRunning ? RunSpeed : WalkSpeed) * movementInput.magnitude;
+        
+        m_Animator.SetFloat(AnimatorSettings.speedPercent.ToString(), animationSpeed, SpeedSmoothTime, Time.fixedDeltaTime);
 
         if(Input.GetButton(m_SprintKey)) {
-            moveSpeed *= m_RunSpeedModifier;
+            currentMoveSpeed = RunSpeed;
         }
-		m_MoveTo = movementInput * moveSpeed;
+		m_MoveTo = movementInput * currentMoveSpeed;
 
         prevPosition = transform.position;
     }
 
-    private void SmoothCharacterRelativeMovement() {
-        moveSpeed = m_WalkSpeed;
-        movementInput = new Vector3(Input.GetAxisRaw(m_HorizontalAxis), 0, Input.GetAxisRaw(m_VerticalAxis)).normalized;
-        targetSpeed = (IsRunning ? m_WalkSpeed * m_RunSpeedModifier : m_WalkSpeed) * movementInput.magnitude;
-        m_CurrentSpeed = Mathf.SmoothDamp(Input.GetAxisRaw(m_VerticalAxis), targetSpeed, ref m_SpeedSmoothVelocity, SpeedSmoothTime);
+    private void CharacterRelativeMovement() {
+        animationSpeed = m_MoveTo.magnitude / RunSpeed;
 
-        float animationSpeedPercent = (IsRunning ? 1 : 0.5f) * movementInput.magnitude;
-        m_Animator.SetFloat(AnimatorSettings.speedPercent.ToString(), animationSpeedPercent, SpeedSmoothTime, Time.fixedDeltaTime);
+        currentMoveSpeed = WalkSpeed;
+        targetSpeed = (IsRunning ? RunSpeed : WalkSpeed) * Input.GetAxisRaw(m_VerticalAxis);
 
+        m_Animator.SetFloat(AnimatorSettings.speedPercent.ToString(), animationSpeed, SpeedSmoothTime, Time.fixedDeltaTime);
 
-        transform.Translate(transform.forward * m_CurrentSpeed * Time.fixedDeltaTime);
-        // if(Input.GetButton(m_SprintKey)) {
-        //     moveSpeed *= m_RunModifier;
-        // }
-		// m_MoveTo = movementInput * moveSpeed;
+        if(Input.GetButton(m_SprintKey)) {
+            currentMoveSpeed = RunSpeed;
+        }
+		m_MoveTo = m_PlayerModel.forward * Input.GetAxisRaw(m_VerticalAxis) * currentMoveSpeed + m_PlayerModel.right * Input.GetAxis(m_HorizontalAxis) * currentMoveSpeed;
+        m_MoveTo = Vector3.ClampMagnitude(m_MoveTo, RunSpeed); // stops overspeeding when running diagonally
+        prevPosition = transform.position;
     }
 
     private void Look() {
-        Vector3 mousePosInWorld = new Vector3(Input.mousePosition.x, Input.mousePosition.y, m_ViewCamera.transform.position.y);
-        Vector3 mousePosRelativeToCamera = m_ViewCamera.ScreenToWorldPoint(mousePosInWorld);
-        
+        mousePosInWorld.Set(Mathf.Clamp(Input.mousePosition.x, Screen.width * (1 - ScreenClampPercentage), Screen.width * ScreenClampPercentage), Mathf.Clamp(Input.mousePosition.y, Screen.height * (1 - ScreenClampPercentage), Screen.height * ScreenClampPercentage), Camera.main.transform.position.y);
+        mousePosRelativeToCamera = Camera.main.ScreenToWorldPoint(mousePosInWorld);
+
         m_PlayerModel.LookAt(mousePosRelativeToCamera + Vector3.up * transform.position.y);
-        
+
         //placing reticle on top, compensating for aim reticle size, so the bullet is fired at the center of the reticle
-        m_AimReticle.transform.position = mousePosRelativeToCamera  + transform.right * .23f; // .23 for perspective, .25 for ortographic 
+        m_AimReticle.transform.position = mousePosRelativeToCamera + m_PlayerModel.right * .23f; // .23 for perspective, .25 for ortographic
     }
 
 }

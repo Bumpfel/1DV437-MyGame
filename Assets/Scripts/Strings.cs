@@ -29,9 +29,9 @@ public static class Strings {
     }
 }
 
-public enum Settings { BulletImpactEffects, MasterVolume, SFXVolume, MusicVolume }
+public enum Settings { BulletImpactEffects, CameraControl, MovemenControl, MasterVolume, SFXVolume, MusicVolume }
 
-public enum Controls { Fire1, Fire2, Vertical, Horizontal, Sprint, Action, SwitchFiringMode, FreeLook }
+public enum Controls { Fire1, Fire2, Vertical, Horizontal, Sprint, Action, SwitchFiringMode, CameraSpecial }
 
 public enum AnimatorSettings { speedPercent }
 
