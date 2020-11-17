@@ -6,7 +6,7 @@ A top-down shooter game made in unity.
 # Documents
 [Assignment instructions](documentation/Project-Specification.pdf)
 
-[Game Description](documentation/1DV437-Assignment_1-Game-Description.pdf)
+[Initial Game Description](documentation/1DV437-Assignment_1-Game-Description.pdf)
 
 [Technical Report](documentation/1DV437-Assignment_3-Technical-Details-Report.pdf)
 
@@ -14,4 +14,6 @@ A top-down shooter game made in unity.
 Unity, computer w. keyboard & mouse
 
 # How to run
-Open in [unity](https://unity.com/) and compile to operating system of choice.
+For windows 64 bit, you can download the compiled game from https://github.com/Bumpfel/1DV437-TopDownShooter-Compiled
+
+For other OS's, open in [unity](https://unity.com/) and compile to operating system of choice.
